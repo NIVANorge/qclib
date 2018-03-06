@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+from  pyFerry.Platforms import Common 
+from pyFerry.QC import QCTests
+
+class FerryboxQC(Common.PlatformQC):
+    
+    # values for threshold should be checked and changed 
+    
+    QC_TESTS = {
+    # 'TEMPERATURE': ['SPIKE_TEST' , QCTests.argo_spike_test, {'threshold': 4}],
+    # 'SALINITY': ['SPIKE_TEST' , QCTests.argo_spike_test, {'threshold':2 }],
+    }
+     
+    def QC(self, meta, data):
+        flags = self.applyQC(meta, data)       
+        return flags
+    
+    def cmems(self,flags):       
+        codes, overall_flags = self.CMEMScodes(flags)
+        return codes,overall_flags
+    
