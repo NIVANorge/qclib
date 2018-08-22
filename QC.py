@@ -35,7 +35,8 @@ class QCTests(object):
             a data structure or aggregation.
       opts: options specific to the test, for example threshold values
         
-    Return value from tests is an array of np.int8 where 1 is PASSED, -1 is FAILED and 0 is not tested.
+    Return value from tests is an array of np.int8
+    where 1 is PASSED, -1 is FAILED and 0 is not tested.
     """
 
     COEF_SPIKE = (math.log(120)/5)*math.sqrt(2)

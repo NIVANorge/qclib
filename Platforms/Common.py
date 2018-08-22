@@ -114,10 +114,10 @@ class PlatformQC(QCTests):
     def CMEMScodes(cls, flags):
         """
         Convert the given flags to the standards CMEMS flag codes
-        
-        Argument flags is expected to be in the same format as the result from method `applyQC`.
-        
-        Return value is a dict where signal names har mapped to the array of CMEMS QC codes.
+        Argument flags is expected to be in the same format 
+        as the result from method `applyQC`.        
+        Return value is a dict where signal names 
+        has mapped to the array of CMEMS QC codes.
         """
         codes = {}
         overall_flags = {}
