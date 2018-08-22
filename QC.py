@@ -14,7 +14,7 @@ import datetime
 import numpy as np
 import matplotlib as mpl
  
-from pyTools.Conversions import date_to_day1950
+from .Conversions import date_to_day1950
 
 from pyFerry.Globals import Areas
 # from .Globals import Areas raised an error 

@@ -6,8 +6,6 @@ Created on 2. feb. 2018
 
 from  pyFerry.Platforms import Common 
 
-
-
 class TestQC(Common.PlatformQC):
     
     QC_TESTS = {}

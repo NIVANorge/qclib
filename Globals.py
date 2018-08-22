@@ -9,7 +9,7 @@ Provides package access to Global variables
 (C) 14. jan. 2016 Pierre Jaccard
 """
 
-from pyTools.Error import Error
+from .Error import Error
 
 FolderMetaFile = 'meta.ini' 
 FolderLogFile  = 'syslog.log'

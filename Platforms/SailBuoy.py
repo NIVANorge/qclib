@@ -5,9 +5,7 @@ from  pyFerry.Platforms import Common
 from pyFerry.QC import QCTests
 
 class SailBuoyQC(Common.PlatformQC):
-    
-    # values for threshold should be checked and changed 
-    
+        
     QC_TESTS = {}
      
     def QC(self, meta, data):

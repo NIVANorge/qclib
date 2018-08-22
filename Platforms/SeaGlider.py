@@ -6,8 +6,6 @@ from pyFerry.QC import QCTests
 
 class SeaGliderQC(Common.PlatformQC):
     
-    # values for threshold should be checked and changed 
-    
     QC_TESTS = {}
      
     def QC(self, meta, data):
