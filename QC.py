@@ -5,6 +5,9 @@ pyFerry.QC
 ==========
 
 Quality control tests to be applied on data. 
+Tests are implemented according to the document  
+Quality Control of Biogeochemical Measurements
+http://archimer.ifremer.fr/doc/00251/36232/34792.pdf  
 
 Created on 6. feb. 2018
 '''
@@ -14,25 +17,23 @@ import datetime
 import numpy as np
 import matplotlib as mpl
  
-from .Conversions import date_to_day1950
+from pyFerry.Conversions import date_to_day1950
 
-from pyFerry.Globals import Areas
+from pyFerry.Globals import Areas,Flu_Ranges
 # from .Globals import Areas raised an error 
 
 
 class QCTests(object):
     """
     Specific tests are defined here. Add whatever new tests. 
-    The standard calling synthax for these tests is::
-    
+    The standard calling syntax for these tests is :    
       obj.specific_qc_test_function(meta, data, **opts)
     
-    where
-        
-      meta: a dict including any meta information required to perform the test, for example position 
-              and time (see specific tests below)
-      data: normally, this is the data of the parameter to be tested. However. some tests require 
-            a data structure or aggregation.
+    where        
+      meta: a dict including any meta information required to perform the test,
+            for example position and time (see specific tests below)
+      data: normally, this is the data of the parameter to be tested. 
+            However. some tests require a data structure or aggregation.
       opts: options specific to the test, for example threshold values
         
     Return value from tests is an array of np.int8
@@ -44,7 +45,7 @@ class QCTests(object):
     @classmethod
     def frozen_test(cls, meta, data, **opts): #self,
         """
-        Consecutive data with exactly the same value are mflagged as bad.
+        Consecutive data with exactly the same value are flagged as bad.
         """
         good = np.ones(len(data), dtype=np.int8) #typo)? 
         mask = (np.diff(data[:]) == 0.0)
@@ -55,42 +56,42 @@ class QCTests(object):
     @classmethod
     def range_test(clf, meta, data, **opts):
         """
-        Check that data is within a specified range.
+        4.4 Global Range Tests 
+        4.5 Local Range Tests 
         
-        Accepts time range and geographic range. The later is based on minimum and maximum latitudes and longitudes
-        values. An later improvement could be to accept a geographic box.  
+        Checks that data is within a specified range.Accepts time range 
+        and geographic range. The latter is based on minimum and maximum 
+        latitudes and longitudes values. An later improvement could be
+        to accept a geographic box.  
         
-        Options:
-         
+        Options:         
         * min    : minimum value (inclusive)
         * max    : maximum value (inclusive)
-        * day_min: minimum date for which the test applies, can be `py:class:datetime.date` or a decimal date
+        * day_min: minimum date for which the test applies,
+                   can be `py:class:datetime.date` or a decimal date
                    relative to 1950-01-01
         * day_max: maximum date for which the test applies (same format as `day_min`) 
         * lat_min: minimum latitude for which the test applies
         * lat_max: maximum latitude for which the test applies
         * lon_min: minimum longitude for which the test applies
         * lon_max: maximum longitude for which the test applies
-        * area   : dictionary of polygon edges, with keys 'lat' and 'lon'. These should be listed in CW order.
-        
-        Meta:
-        
+        * area   : dictionary of polygon edges, with keys 'lat' and 'lon'. 
+                   These should be listed in CW order       
+        Meta:        
         * time: corresponding array of time (relative to 1950-01-01)
         * lat : corresponding array of latitudes
         * lon : corresponding array of longitudes           
         """
+        import time 
+        import pandas as pd
         good = np.zeros(len(data), dtype=np.int8)
         mask = np.ones(len(data), dtype=np.bool)
-        #
-        if ('day_min' in opts) and ('time' in meta):
-            if isinstance(opts['day_min'], datetime.date):
-                opts['day_min'] = date_to_day1950(opts['day_min'])
-            mask &= (meta['time'] >= opts['day_min'])
-        if ('day_max' in opts) and ('time' in meta):
-            if isinstance(opts['day_max'], datetime.date):
-                opts['day_max'] = date_to_day1950(opts['day_max'])
-            mask &= (meta['time'] <= opts['day_max'])
-        #
+
+        if 'months' in opts and ('time' in meta): 
+            meta_months = pd.Series([
+            time.strptime(n,'%Y-%m-%dT%H:%M:%S').tm_mon for n in meta['time']])
+            mask &= meta_months.isin(opts['months'])
+        '''
         if ('lat_min' in opts) and ('lat' in meta):
             mask &= (meta['lat'] >= opts['lat_min'])
         if ('lat_max' in opts) and ('lat' in meta):
@@ -100,7 +101,8 @@ class QCTests(object):
             mask &= (meta['lon'] >= opts['lon_min'])
         if ('lon_max' in opts) and ('lon' in meta):
             mask &= (meta['lon'] <= opts['lon_max'])
-        #
+        '''
+                   
         if ('area' in opts):
             lon = opts['area']['lon']
             lat = opts['area']['lat']
@@ -129,8 +131,7 @@ class QCTests(object):
     @classmethod
     def aic_spike_test(clf, meta, data, **opts):
         """
-        Execute spike test using an estimate of Aikake Information Criterion.
-        
+        Executes spike test using an estimate of Aikake Information Criterion.      
         This methods requires the last 4 points prior to the first point to test.
         """
         good = np.zeros(len(data), dtype=np.int8)
@@ -224,18 +225,17 @@ class QCTests(object):
     @classmethod               
     def frozen_profile_test(clf, meta, data, **opts):
         """
-        Test for frozen profiles.
-        
-        In this case, data is a tuple with (depth, data) where depth and data are vectors of the same length. Note
-        that this tests flags the whole profile.
+        Test for frozen profiles.In this case,
+        data is a tuple with (depth, data) 
+        where depth and data are vectors of the same length. 
+        ! This test flags the whole profile.
         
         Options:
-          mean_delta: max value for the mean profile difference
-          min_delta : max value for the minimum profile difference
-          max_delta : max value for the maximum profile difference
-          
+            mean_delta: max value for the mean profile difference
+            min_delta : max value for the minimum profile difference
+            max_delta : max value for the maximum profile difference          
         Meta:
-          previous_profile: similar data tuple for the previous profile
+            previous_profile: similar data tuple for the previous profile
         """
         good = np.zeros(data.shape[0], dtype=np.int8)
         if 'previous_profile' in meta:
@@ -265,13 +265,13 @@ class QCTests(object):
     @classmethod    
     def trigger_test(clf, meta, data, **opts):
         """
-        Test data against a trigger value. 
-        
-        The return value here is not a quality flag, but whether data is below (-1), equal (0) or 
-        above (1) trigger value. The flag itself has to be implemented by the calling function.
-        
+        Tests data against a trigger value.  
+        Return value here is not a quality flag,
+        but the information whether the data is
+        below (-1), equal (0) or above (1) trigger value. 
+        The flag itself has to be implemented by the calling function.  
         Options:
-          treshold: threshold value
+            threshold: threshold value
         """
         good = np.zeros(len(data), dtype=np.int8)
         mask = (data < opts['threshold'])
@@ -336,9 +336,17 @@ class QCTests(object):
         good[~mask] = -1
         return(good)
     
-       
+   
 COMMON_TESTS = {
-
+    
+    '''
+    In the document 
+    http://archimer.ifremer.fr/doc/00251/36232/
+    the ranges are defined for different depths and seasons
+    For now the ranges defined here are the same
+    throughout the year and at any depth    
+    '''
+    
     '*': [ 
         ('FROZEN_VALUE', QCTests.frozen_test, {}), 
         ],
@@ -354,5 +362,22 @@ COMMON_TESTS = {
         #('NWSHELF_RANGE', QCTests.range_test, { 'min':  0.0, 'max': 37.0, 'area': Areas.NorthWestShelf }),
         #('ARCTIC_RANGE' , QCTests.range_test, { 'min':  2.0, 'max': 40.0, 'area': Areas.Arctic         }),
         ],
+    'FLUORESCENCE': [
+        ('GLOBAL_RANGE', QCTests.range_test,Flu_Ranges.Global),
+        
+        ('ARCTIC_RANGE_1', QCTests.range_test, Flu_Ranges.Arctic_1),
+        ('ARCTIC_RANGE_2', QCTests.range_test, Flu_Ranges.Arctic_2),        
+        ('ARCTIC_RANGE_3', QCTests.range_test, Flu_Ranges.Arctic_2),       
+             
+        ('NORTH_SEA_RANGE_1', QCTests.range_test, Flu_Ranges.NorthSea_1),
+        ('NORTH_SEA_RANGE_2', QCTests.range_test, Flu_Ranges.NorthSea_2),
+        ('NORTH_SEA_RANGE_3', QCTests.range_test, Flu_Ranges.NorthSea_3),    
+             
+        ('_1', QCTests.range_test, Flu_Ranges.NorthSea_1),
+        ('NORTH_SEA_RANGE_2', QCTests.range_test, Flu_Ranges.NorthSea_2),
+        ('NORTH_SEA_RANGE_3', QCTests.range_test, Flu_Ranges.NorthSea_3),          
+        
+                    
+        ], 
     }
         

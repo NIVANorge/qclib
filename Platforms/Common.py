@@ -75,6 +75,7 @@ class PlatformQC(QCTests):
             }
             
         """
+        
         flags  = {}
         # Concatenate lists of QC_TESTS 
         qclist = {}        
@@ -102,6 +103,7 @@ class PlatformQC(QCTests):
                 qcl += qclist[param_t]
             # Apply each QC
             for qcdef in qcl:
+                
                 flag_d = qcdef[1](meta, signal_d, **qcdef[2])
                 flag_k = qcdef[0].upper()
                 flags[signal_k][flag_k] = flag_d.tolist()
@@ -189,9 +191,8 @@ class PlatformQC(QCTests):
         return(s)
     
 
-#
+
 # Testing here
-# 
 if __name__ == '__main__':
     
     # Testing JSON flags conversion
