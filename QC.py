@@ -19,7 +19,8 @@ import matplotlib as mpl
  
 from pyFerry.Conversions import date_to_day1950
 
-from pyFerry.Globals import Areas,Flu_Ranges
+from pyFerry.Globals import Areas
+from pyFerry.Globals import Local_Threshold_Ranges,Global_Threshold_Ranges
 # from .Globals import Areas raised an error 
 
 
@@ -363,21 +364,8 @@ COMMON_TESTS = {
         #('ARCTIC_RANGE' , QCTests.range_test, { 'min':  2.0, 'max': 40.0, 'area': Areas.Arctic         }),
         ],
     'FLUORESCENCE': [
-        ('GLOBAL_RANGE', QCTests.range_test,Flu_Ranges.Global),
-        
-        ('ARCTIC_RANGE_1', QCTests.range_test, Flu_Ranges.Arctic_1),
-        ('ARCTIC_RANGE_2', QCTests.range_test, Flu_Ranges.Arctic_2),        
-        ('ARCTIC_RANGE_3', QCTests.range_test, Flu_Ranges.Arctic_2),       
-             
-        ('NORTH_SEA_RANGE_1', QCTests.range_test, Flu_Ranges.NorthSea_1),
-        ('NORTH_SEA_RANGE_2', QCTests.range_test, Flu_Ranges.NorthSea_2),
-        ('NORTH_SEA_RANGE_3', QCTests.range_test, Flu_Ranges.NorthSea_3),    
-             
-        ('_1', QCTests.range_test, Flu_Ranges.NorthSea_1),
-        ('NORTH_SEA_RANGE_2', QCTests.range_test, Flu_Ranges.NorthSea_2),
-        ('NORTH_SEA_RANGE_3', QCTests.range_test, Flu_Ranges.NorthSea_3),          
-        
-                    
+        ('GLOBAL_RANGE', QCTests.range_test, Global_Threshold_Ranges.Fluorescence), 
+        ('LOCAL_RANGE', QCTests.range_test,Local_Threshold_Ranges.Fluorescence),                      
         ], 
     }
         

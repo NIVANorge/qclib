@@ -119,29 +119,31 @@ class Areas:
         'lon': (19.88, 23.21, 23.21, 19.88)
         }   
 
-class Flu_Ranges: 
-    Global =   {'min': -0.1, 'max': 80.0 }  
-    #Global.update({'month_min':1,'month_max':2})
-    Arctic_1 = {'min': -0.1, 'max': 2.0,  'area': Areas.Arctic ,'months': [1,2,10,11,12] }
-    Arctic_2 = {'min': -0.1, 'max': 12.0, 'area': Areas.Arctic ,'months': [3,4] }  
-    Arctic_2 = {'min': -0.1, 'max': 6.0,  'area': Areas.Arctic ,'months': [5,6,7,8,9] }  
-           
-    NorthSea_1 = {'min': -0.1, 'max': 14.0, 'area': Areas.NorthSea,'months': [1,2,3,4,5,6] }
-    NorthSea_2 = {'min': -0.1, 'max': 8.0,  'area': Areas.NorthSea,'months': [7,8] }    
-    NorthSea_3 = {'min': -0.1, 'max': 12.0, 'area': Areas.NorthSea, 'months': [9,10,11,12] } 
+
+class Global_Threshold_Ranges: 
+    Fluorescence = {'min': -0.1, 'max': 80.0 }
+
+class Local_Threshold_Ranges: 
+
+    Fluorescence =[ 
+                  {'min': -0.1, 'max': 2.0,  'area': Areas.Arctic ,'months': [1,2,10,11,12]},
+                  {'min': -0.1, 'max': 12.0, 'area': Areas.Arctic ,'months': [3,4] },  
+                  {'min': -0.1, 'max': 6.0,  'area': Areas.Arctic ,'months': [5,6,7,8,9]},
+                  
+                  {'min': -0.1, 'max': 14.0, 'area': Areas.NorthSea,'months': [1,2,3,4,5,6]},
+                  {'min': -0.1, 'max': 8.0,  'area': Areas.NorthSea,'months': [7,8]},    
+                  {'min': -0.1, 'max': 12.0, 'area': Areas.NorthSea,'months': [9,10,11,12]},
+                  
+                  {'min': -0.1, 'max': 14.0, 'area': Areas.NorthWestShelf, 
+                   'months': [1,2,3,4,5,6,7,8,9,10,11,12] }]
+     
     # Took the values from GLOBAL not global from the doc    
-    NW_Shelf_1 = {'min': -0.1, 'max': 14.0, 'area': Areas.NorthWestShelf, 'months': [_] }
-    NW_Shelf_2 = {'min': -0.1, 'max': 8.0,  'area': Areas.NorthWestShelf, 'months': [_] }    
-    NW_Shelf_3 = {'min': -0.1, 'max': 12.0, 'area': Areas.NorthWestShelf, 'months': [_] }      
+    #NW_Shelf_1 = {'min': -0.1, 'max': 14.0, 'area': Areas.NorthWestShelf, 'months': [_] }
+    #NW_Shelf_2 = {'min': -0.1, 'max': 8.0,  'area': Areas.NorthWestShelf, 'months': [_] }    
+    #NW_Shelf_3 = {'min': -0.1, 'max': 12.0, 'area': Areas.NorthWestShelf, 'months': [_] }      
     
-'''
-North Sea 1 6 0 200 -0,1 14
-North Sea 7 8 0 200 -0,1 8
-North Sea 9 12 0 200 -0,1 12
 
-North Sea 1 12 200 10000 -0,1 0,5
 
-'''
     
 if False:
     

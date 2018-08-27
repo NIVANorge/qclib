@@ -100,7 +100,14 @@ class PlatformQC(QCTests):
             if '*' in qclist:
                 qcl += qclist['*']
             if param_t in qclist:
-                qcl += qclist[param_t]
+                #print (param_t)
+                if len(qclist[param_t]) > 1 :
+                    name = qclist[param_t][1][0]
+                    test = qclist[param_t][1][1]
+                    arr =[[name,test,x] for x in qclist[param_t][1][2]]        
+                    qcl += map(lambda x: x,arr)
+                else:        
+                    qcl += qclist[param_t]
             # Apply each QC
             for qcdef in qcl:
                 
