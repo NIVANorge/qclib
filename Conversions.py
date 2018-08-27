@@ -5,7 +5,7 @@ import numpy as np
 DAY1950 = datetime.datetime(1950,1,1)
 
 def timedelta_to_seconds(x):
-    y = x.days*86400.0 + x.seconds + x.microseconds/1.0E6
+    y = x.days*86400.0 + x.seconds + x.microseconds/1.e6
     return(y)
 
 
@@ -16,7 +16,7 @@ def datetime_to_day1950(x):
         return(dd)
     else:
         dt = x - DAY1950
-        dd = dt.days + (dt.seconds+dt.microseconds/1.0E6)/86400.0
+        dd = dt.days + (dt.seconds+dt.microseconds/1.e6)/86400.0
     return(dd)
 
 def day1950_to_datetime(x):
@@ -30,13 +30,14 @@ def day1950_to_datetime(x):
     return(day)
     
 def date_to_day1950(x):
+    
     if isinstance(x, np.ndarray):
         func = np.vectorize(date_to_day1950)
         dd   = func(x)
         return(dd)
     else:
         dt = x - DAY1950.date()
-        dd = dt.days + (dt.seconds+dt.microseconds/1.0E6)/86400.0
+        dd = dt.days + (dt.seconds+dt.microseconds/1.e6)/86400.0
     return(dd)
 
 def day1950_to_date(x):

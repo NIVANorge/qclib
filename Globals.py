@@ -8,7 +8,7 @@ Provides package access to Global variables
 
 (C) 14. jan. 2016 Pierre Jaccard
 """
-
+import datetime 
 from .Error import Error
 
 FolderMetaFile = 'meta.ini' 
@@ -71,8 +71,9 @@ class SQLTransformations:
     def sql2pos(cls, sql):
         pos = sql/cls.SCALE
         return(pos)
-    
+       
 class Areas:
+
     Baltic = {
         'lat': (53.5, 62.0, 66.0, 66.0, 53.5), 
         'lon': (10.0, 10.0, 20.0, 30.0, 30.0)
@@ -81,6 +82,10 @@ class Areas:
         'lat': ( 48,  68, 68, 48),
         'lon': (-30, -30, 15, 15) 
         }
+    NorthSea = {
+        'lat': (51, 60.0, 60., 51.), 
+        'lon': (-3., -3., 10, 10)
+        }         
     Arctic = {
         'lat': (  67,   89,  89,  67), 
         'lon': (-180, -180, 180, 180)
@@ -112,9 +117,31 @@ class Areas:
     NorthernBalticProper = {
         'lat': (58.36, 58.36, 59.62, 59.62),
         'lon': (19.88, 23.21, 23.21, 19.88)
-        }
+        }   
+
+class Flu_Ranges: 
+    Global =   {'min': -0.1, 'max': 80.0 }  
+    #Global.update({'month_min':1,'month_max':2})
+    Arctic_1 = {'min': -0.1, 'max': 2.0,  'area': Areas.Arctic ,'months': [1,2,10,11,12] }
+    Arctic_2 = {'min': -0.1, 'max': 12.0, 'area': Areas.Arctic ,'months': [3,4] }  
+    Arctic_2 = {'min': -0.1, 'max': 6.0,  'area': Areas.Arctic ,'months': [5,6,7,8,9] }  
+           
+    NorthSea_1 = {'min': -0.1, 'max': 14.0, 'area': Areas.NorthSea,'months': [1,2,3,4,5,6] }
+    NorthSea_2 = {'min': -0.1, 'max': 8.0,  'area': Areas.NorthSea,'months': [7,8] }    
+    NorthSea_3 = {'min': -0.1, 'max': 12.0, 'area': Areas.NorthSea, 'months': [9,10,11,12] } 
+    # Took the values from GLOBAL not global from the doc    
+    NW_Shelf_1 = {'min': -0.1, 'max': 14.0, 'area': Areas.NorthWestShelf, 'months': [_] }
+    NW_Shelf_2 = {'min': -0.1, 'max': 8.0,  'area': Areas.NorthWestShelf, 'months': [_] }    
+    NW_Shelf_3 = {'min': -0.1, 'max': 12.0, 'area': Areas.NorthWestShelf, 'months': [_] }      
     
-    
+'''
+North Sea 1 6 0 200 -0,1 14
+North Sea 7 8 0 200 -0,1 8
+North Sea 9 12 0 200 -0,1 12
+
+North Sea 1 12 200 10000 -0,1 0,5
+
+'''
     
 if False:
     
