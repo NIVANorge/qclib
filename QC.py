@@ -343,29 +343,30 @@ COMMON_TESTS = {
     '''
     In the document 
     http://archimer.ifremer.fr/doc/00251/36232/
-    the ranges are defined for different depths and seasons
-    For now the ranges defined here are the same
-    throughout the year and at any depth    
+    the ranges are defined for different depths 
+    For now the ranges defined here only for the surface
     '''
     
     '*': [ 
         ('FROZEN_VALUE', QCTests.frozen_test, {}), 
         ],
     'TEMPERATURE': [ 
-        ('GLOBAL_RANGE' , QCTests.range_test, { 'min': -2.5, 'max': 40.0 }),
-        #('MEDSEA_RANGE' , QCTests.range_test, { 'min': 10.0, 'max': 40.0, 'area': Areas.MedSea         }),
-        #('NWSHELF_RANGE', QCTests.range_test, { 'min': -2.0, 'max': 24.0, 'area': Areas.NorthWestShelf }),
-        #('ARCTIC_RANGE' , QCTests.range_test, { 'min': -1.9, 'max': 25.0, 'area': Areas.Arctic         }),
+        ('GLOBAL_RANGE' , QCTests.range_test, Global_Threshold_Ranges.Temperature),
+
         ],
     'SALINITY': [
-        ('GLOBAL_RANGE', QCTests.range_test , { 'min':  2.0, 'max': 41.0 }),
-        #('MEDSEA_RANGE' , QCTests.range_test, { 'min':  2.0, 'max': 40.0, 'area': Areas.MedSea         }),
-        #('NWSHELF_RANGE', QCTests.range_test, { 'min':  0.0, 'max': 37.0, 'area': Areas.NorthWestShelf }),
-        #('ARCTIC_RANGE' , QCTests.range_test, { 'min':  2.0, 'max': 40.0, 'area': Areas.Arctic         }),
+        ('GLOBAL_RANGE', QCTests.range_test, Global_Threshold_Ranges.Salinity),
+
         ],
     'FLUORESCENCE': [
         ('GLOBAL_RANGE', QCTests.range_test, Global_Threshold_Ranges.Fluorescence), 
-        ('LOCAL_RANGE', QCTests.range_test,Local_Threshold_Ranges.Fluorescence),                      
+        ('LOCAL_RANGE', QCTests.range_test, Local_Threshold_Ranges.Fluorescence),                      
         ], 
+    
+    'OXYGEN_CONCENTRATION': [
+        ('GLOBAL_RANGE', QCTests.range_test, Global_Threshold_Ranges.Oxygen), 
+        ('LOCAL_RANGE', QCTests.range_test, Local_Threshold_Ranges.Oxygen),                      
+        ],     
+    
     }
         

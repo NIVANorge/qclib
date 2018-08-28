@@ -78,7 +78,7 @@ class Areas:
         'lat': (53.5, 62.0, 66.0, 66.0, 53.5), 
         'lon': (10.0, 10.0, 20.0, 30.0, 30.0)
         }
-    NorthWestShelf = {
+    NW_Shelf = {
         'lat': ( 48,  68, 68, 48),
         'lon': (-30, -30, 15, 15) 
         }
@@ -121,10 +121,23 @@ class Areas:
 
 
 class Global_Threshold_Ranges: 
-    Fluorescence = {'min': -0.1, 'max': 80.0 }
-
+    '''
+    from 
+    http://archimer.ifremer.fr/doc/00251/36232/
+    '''    
+    Temperature =  { 'min': -2.5, 'max': 40.0 }
+    Salinity =     { 'min':  2.0, 'max': 41.0 }
+    Fluorescence = { 'min': -0.1, 'max': 80.0 }
+    Oxygen  =      { 'min':  0.0, 'max': 500.0 } # Micromoles per liter!
+    #Chlorophyll = {'min': -0.1, 'max': 80.0 } #Using Fluorescence method CPHL
+    
 class Local_Threshold_Ranges: 
-
+    '''
+    from 
+    http://archimer.ifremer.fr/doc/00251/36232/
+    '''
+    all_months = [1,2,3,4,5,6,7,8,9,10,11,12] 
+        
     Fluorescence =[ 
                   {'min': -0.1, 'max': 2.0,  'area': Areas.Arctic ,'months': [1,2,10,11,12]},
                   {'min': -0.1, 'max': 12.0, 'area': Areas.Arctic ,'months': [3,4] },  
@@ -134,22 +147,25 @@ class Local_Threshold_Ranges:
                   {'min': -0.1, 'max': 8.0,  'area': Areas.NorthSea,'months': [7,8]},    
                   {'min': -0.1, 'max': 12.0, 'area': Areas.NorthSea,'months': [9,10,11,12]},
                   
-                  {'min': -0.1, 'max': 14.0, 'area': Areas.NorthWestShelf, 
-                   'months': [1,2,3,4,5,6,7,8,9,10,11,12] }]
+                  {'min': 0.5, 'max': 25.0, 'area': Areas.Baltic,'months': [1,2,11,11,12]},
+                  {'min': 1.5, 'max': 77.6, 'area': Areas.Baltic,'months': [3,4,5]},
+                  {'min': 0.5, 'max': 36.8, 'area': Areas.Baltic,'months': [6,7,8,9]},
+                  
+                  {'min': -0.1, 'max': 20.0, 'area': Areas.NW_Shelf, 
+                   'months': [1,2,3,4,5,6,7,8,9]},
+                  {'min': -0.1, 'max': 20.0, 'area': Areas.NW_Shelf, 
+                   'months': [10,11,12] }                  
+                  ]
      
-    # Took the values from GLOBAL not global from the doc    
-    #NW_Shelf_1 = {'min': -0.1, 'max': 14.0, 'area': Areas.NorthWestShelf, 'months': [_] }
-    #NW_Shelf_2 = {'min': -0.1, 'max': 8.0,  'area': Areas.NorthWestShelf, 'months': [_] }    
-    #NW_Shelf_3 = {'min': -0.1, 'max': 12.0, 'area': Areas.NorthWestShelf, 'months': [_] }      
+    Oxygen =    [ 
+                  {'min': 200.0, 'max': 500.0, 'area': Areas.Arctic ,'months': all_months},
+                  {'min': 200.0, 'max': 500.0, 'area': Areas.NorthSea ,'months': all_months},  
+                  {'min': 200.0, 'max': 500.0, 'area': Areas.Baltic ,'months': all_months},
+                  {'min': 200.0, 'max': 500.0, 'area': Areas.NW_Shelf ,'months': all_months},                   
+                ]
+      
     
-
-
-    
-if False:
-    
-    
-    
-    
+if False:        
     POOLCATEGORIES = ('provider', 'platform', 'year')
     
     INSTALLATIONS_HEADER = ('ship', 'day', 'hour', 'par:Ed', 'dev:Ed', 
@@ -162,10 +178,7 @@ if False:
     VERSIONS_TO_KEEP = 10
     
     PI_NAME = 'Kai Sorensen'
-    
-    
+       
     # MERIS Wavelengths                                                                                                       
     MERIS_WLEN = [ 412, 443, 490, 510, 560, 620, 665, 681, 709, 753, 778, 865, 885 ]
-    MERIS_TRNG = [ 10-5, 10+5 ]
-        
-    
+    MERIS_TRNG = [ 10-5, 10+5 ]   
