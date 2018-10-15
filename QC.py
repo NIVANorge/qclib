@@ -17,9 +17,9 @@ import datetime
 import numpy as np
 import matplotlib as mpl
  
-from pyFerry.Conversions import date_to_day1950
+#from pyFerry.Conversions import date_to_day1950
 
-from pyFerry.Globals import Areas
+#from pyFerry.Globals import Areas
 from pyFerry.Globals import Local_Threshold_Ranges,Global_Threshold_Ranges
 # from .Globals import Areas raised an error 
 

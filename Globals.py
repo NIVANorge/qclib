@@ -7,7 +7,7 @@ pyFerry.Globals
 Provides package access to Global variables
 
 (C) 14. jan. 2016 Pierre Jaccard
-"""
+
 import datetime 
 from .Error import Error
 
@@ -71,7 +71,8 @@ class SQLTransformations:
     def sql2pos(cls, sql):
         pos = sql/cls.SCALE
         return(pos)
-       
+"""       
+
 class Areas:
 
     Baltic = {
@@ -165,7 +166,7 @@ class Local_Threshold_Ranges:
                 ]
       
     
-if False:        
+'''if False:        
     POOLCATEGORIES = ('provider', 'platform', 'year')
     
     INSTALLATIONS_HEADER = ('ship', 'day', 'hour', 'par:Ed', 'dev:Ed', 
@@ -181,4 +182,4 @@ if False:
        
     # MERIS Wavelengths                                                                                                       
     MERIS_WLEN = [ 412, 443, 490, 510, 560, 620, 665, 681, 709, 753, 778, 865, 885 ]
-    MERIS_TRNG = [ 10-5, 10+5 ]   
+    MERIS_TRNG = [ 10-5, 10+5 ]   '''
