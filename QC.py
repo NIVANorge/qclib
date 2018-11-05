@@ -16,16 +16,18 @@ import math
 import datetime
 import numpy as np
 import matplotlib as mpl
- 
-#from pyFerry.Conversions import date_to_day1950
-
-#from pyFerry.Globals import Areas
+import time 
+import pandas as pd 
 from pyFerry.Globals import Local_Threshold_Ranges,Global_Threshold_Ranges
-# from .Globals import Areas raised an error 
 
 
 class QCTests(object):
     """
+    Real Time QC Tests 
+    These tests are applied to one signal
+    (data aggregated during 15 minutes 
+    and sent to the cloud 
+    
     Specific tests are defined here. Add whatever new tests. 
     The standard calling syntax for these tests is :    
       obj.specific_qc_test_function(meta, data, **opts)
@@ -40,19 +42,6 @@ class QCTests(object):
     Return value from tests is an array of np.int8
     where 1 is PASSED, -1 is FAILED and 0 is not tested.
     """
-
-    COEF_SPIKE = (math.log(120)/5)*math.sqrt(2)
-
-    @classmethod
-    def frozen_test(cls, meta, data, **opts): #self,
-        """
-        Consecutive data with exactly the same value are flagged as bad.
-        """
-        good = np.ones(len(data), dtype=np.int8) #typo)? 
-        mask = (np.diff(data[:]) == 0.0)
-        mask = np.concatenate((mask[0:1], mask))
-        good[mask] = -1
-        return(good)
     
     @classmethod
     def range_test(clf, meta, data, **opts):
@@ -83,10 +72,10 @@ class QCTests(object):
         * lat : corresponding array of latitudes
         * lon : corresponding array of longitudes           
         """
-        import time 
-        import pandas as pd
+
         good = np.zeros(len(data), dtype=np.int8)
         mask = np.ones(len(data), dtype=np.bool)
+        COEF_SPIKE = (math.log(120)/5)*math.sqrt(2)
 
         if 'months' in opts and ('time' in meta): 
             meta_months = pd.Series([
@@ -118,22 +107,46 @@ class QCTests(object):
             pts[:,1] = meta['lat']
             inside = path.contains_points(pts)
             mask &= inside
-        #
+
         good[mask] = -1
-        #
         if 'min' in opts:
             mask &= (data >= opts['min'])
         if 'max' in opts:
             mask &= (data <= opts['max'])
-        #
         good[mask] = 1
         return(good)
-    
+
+
+    @classmethod
+    def missing_value_test(clf, meta, data, **opts):
+        """
+        Test data for a specific value defined for missing data.        
+        Options:
+          nan: value used for missing data
+        """
+        good = np.ones(len(data), dtype=np.int8)
+        mask = (data == opts['nan'])
+        good[mask] = -1
+        return(good)
+
+    @classmethod
+    def RT_frozen_test(cls, meta, data, **opts): #self,
+        """
+        Consecutive data with exactly the same value are flagged as bad.
+        """
+        good = np.ones(len(data), dtype=np.int8) #typo)? 
+        mask = (np.diff(data[:]) == 0.0)
+        mask = np.concatenate((mask[0:1], mask))
+        good[mask] = -1
+        return(good)
+   
     @classmethod
     def aic_spike_test(clf, meta, data, **opts):
         """
-        Executes spike test using an estimate of Aikake Information Criterion.      
-        This methods requires the last 4 points prior to the first point to test.
+        Executes spike test using an estimate of 
+        Aikake Information Criterion.      
+        This methods requires the last 4 points prior to the
+        first point to test.
         """
         good = np.zeros(len(data), dtype=np.int8)
         mask = np.zeros(len(data), dtype=np.bool)
@@ -158,10 +171,14 @@ class QCTests(object):
         Spike test according to BIO ARGO
         
         Options:
-          p10_min: factor for minimum 10 percentile median difference
-          p10_max: factor for maximum 10 percentile median difference
-          p90_min: factor for minimum 90 percentile median difference
-          p90_max: factor for maximum 90 percentile median difference
+          p10_min: factor for minimum 10 percentile 
+          median difference
+          p10_max: factor for maximum 10 percentile 
+          median difference
+          p90_min: factor for minimum 90 percentile 
+          median difference
+          p90_max: factor for maximum 90 percentile 
+          median difference
         """
         good = np.ones(len(data), dtype=np.int8)
         diff = np.zeros(len(data), dtype=np.float64)
@@ -189,7 +206,7 @@ class QCTests(object):
     def argo_spike_test(clf, meta, data, **opts):
         """
         Spike test according to MyOcean for T and S parameters
-        
+        http://www.coriolis.eu.org/content/download/4920/36075/file/Recommendations%20for%20RTQC%20procedures_V1_2.pdf
         Options:
           threshold: threshold for consecutive double 3-values differences
         """
@@ -203,6 +220,74 @@ class QCTests(object):
         good[0]  = 0
         good[-1] = 0
         return(good)
+        
+    @classmethod    
+    def sensor_comparison_test(clf, meta, data, **opts):
+        """
+        Check whether two sensors measuring the same parameter
+        provide a similar value.        
+        Argument data is a tuple (s1, s2) with measurement vectors
+        from sensor 1 and sensor 2 respectively.         
+        Options:
+          threshold: maximum difference allowed
+          
+          
+        Here the data dataframe should be changed in order 
+        to have two dependent parameters   
+          
+        """
+        good = np.ones(data.shape[0], dtype=np.int8)
+        diff = np.abs(data[1]-data[0])
+        mask = (diff > opts['threshold'])
+        good[mask] = -1
+        return(good)
+    
+    @classmethod
+    def sensor_relationship_test(clf, meta, data, **opts):
+        """
+        Check if the relationship between related parameters is within a certain value.
+        
+        Argument data is a tuple (p1, p2) with vectors of measurements from parameter 1 and 
+        parameter 2 respectively.
+        Here the data dataframe should be changed in order 
+        to have two dependent parameters     
+                     
+        Options:
+          p1_min: minimum difference allowed for parameter p1
+          p1_max: maximum difference allowed for parameter p1
+          p2_min: minimum difference allowed for parameter p2
+          p2_max: maximum difference allowed for parameter p2
+                    
+        """
+        good = np.ones(data.shape[0], dtype=np.int8)
+        mask = np.ones(data.shape[0], dtype=np.bool)
+        if 'p1_min' in opts:
+            mask &= (data[0] >= opts['p1_min'])
+        if 'p1_max' in opts:
+            mask &= (data[0] <= opts['p1_max'])
+        if 'p2_min' in opts:
+            mask &= (data[1] >= opts['p2_min'])
+        if 'p2_max' in opts:
+            mask &= (data[1] <= opts['p2_max'])
+        good[~mask] = -1
+        return(good)
+    
+class DM_QCTests(object):
+    
+    ''' Delayed mode Tests '''
+    
+    @classmethod
+    def DM_frozen_test(cls, meta, data, **opts): #self,
+        """
+        Consecutive data with exactly the same value are flagged as bad.
+        For the delayed mode we should add more datapoints 
+        """
+        good = np.ones(len(data), dtype=np.int8) #typo)? 
+        mask = (np.diff(data[:]) == 0.0)
+        mask = np.concatenate((mask[0:1], mask))
+        good[mask] = -1
+        return(good)
+
     
     @classmethod
     def argo_gradient_test(clf, meta, data, **opts):
@@ -261,81 +346,7 @@ class QCTests(object):
                 test &= (np.max(diff)  <= opts['delta_max'])
                 if not test:
                     good *= -1
-        return(good) 
-    
-    @classmethod    
-    def trigger_test(clf, meta, data, **opts):
-        """
-        Tests data against a trigger value.  
-        Return value here is not a quality flag,
-        but the information whether the data is
-        below (-1), equal (0) or above (1) trigger value. 
-        The flag itself has to be implemented by the calling function.  
-        Options:
-            threshold: threshold value
-        """
-        good = np.zeros(len(data), dtype=np.int8)
-        mask = (data < opts['threshold'])
-        good[mask] = -1
-        mask = (data > opts['threshold'])
-        good[mask] = 1
-        return(good)
-    
-    @classmethod
-    def missing_value_test(clf, meta, data, **opts):
-        """
-        Test data for a specific value defined for missing data.
-        
-        Options:
-          nan: value used for missing data
-        """
-        good = np.ones(len(data), dtype=np.int8)
-        mask = (data == opts['nan'])
-        good[mask] = -1
-        return(good)
-    
-    @classmethod    
-    def sensor_comparison_test(clf, meta, data, **opts):
-        """
-        Check whether two sensors measuring the same parameter provide a similar value.
-        
-        Argument data is a tuple (s1, s2) with measurement vectors from sensor 1 and sensor 2 respectively.
-         
-        Options:
-          threshold: maximum difference allowed
-        """
-        good = np.ones(data.shape[0], dtype=np.int8)
-        diff = np.abs(data[1]-data[0])
-        mask = (diff > opts['threshold'])
-        good[mask] = -1
-        return(good)
-    
-    @classmethod
-    def sensor_relationship_test(clf, meta, data, **opts):
-        """
-        Check if the relationship between related parameters is within a certain value.
-        
-        Argument data is a tuple (p1, p2) with vectors of measurements from parameter 1 and 
-        parameter 2 respectively.
-        
-        Options:
-          p1_min: minimum difference allowed for parameter p1
-          p1_max: maximum difference allowed for parameter p1
-          p2_min: minimum difference allowed for parameter p2
-          p2_max: maximum difference allowed for parameter p2
-        """
-        good = np.ones(data.shape[0], dtype=np.int8)
-        mask = np.ones(data.shape[0], dtype=np.bool)
-        if 'p1_min' in opts:
-            mask &= (data[0] >= opts['p1_min'])
-        if 'p1_max' in opts:
-            mask &= (data[0] <= opts['p1_max'])
-        if 'p2_min' in opts:
-            mask &= (data[1] >= opts['p2_min'])
-        if 'p2_max' in opts:
-            mask &= (data[1] <= opts['p2_max'])
-        good[~mask] = -1
-        return(good)
+        return(good)     
     
    
 COMMON_TESTS = {
@@ -348,7 +359,8 @@ COMMON_TESTS = {
     '''
     
     '*': [ 
-        ('FROZEN_VALUE', QCTests.frozen_test, {}), 
+        ('FROZEN_VALUE', QCTests.RT_frozen_test, {}), 
+        ('MISSING_VALUE', QCTests.missing_value_test)
         ],
     'TEMPERATURE': [ 
         ('GLOBAL_RANGE' , QCTests.range_test, Global_Threshold_Ranges.Temperature),
