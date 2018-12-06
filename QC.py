@@ -20,6 +20,7 @@ import time
 import pandas as pd 
 from pyFerry.Globals import Local_Threshold_Ranges,Global_Threshold_Ranges
 
+#FIXME: Only range_test and missing_value test has been adjusted to the new interface
 
 class QCTests(object):
     """
@@ -42,9 +43,20 @@ class QCTests(object):
     Return value from tests is an array of np.int8
     where 1 is PASSED, -1 is FAILED and 0 is not tested.
     """
-    
+
+
+    def check_data_size(func):
+        def func_wrapper(clf, *args, **opts):
+            if len(args[0]) < Properties.number_of_samples["QCTests."+func.__name__]:
+                raise Exception("Too few data points to perform this test")
+            result = func(clf, *args, **opts)
+            return result
+        return func_wrapper
+
+
     @classmethod
-    def range_test(clf, meta, data, **opts):
+    @check_data_size
+    def range_test(clf, df, **opts):
         """
         4.4 Global Range Tests 
         4.5 Local Range Tests 
@@ -67,32 +79,21 @@ class QCTests(object):
         * lon_max: maximum longitude for which the test applies
         * area   : dictionary of polygon edges, with keys 'lat' and 'lon'. 
                    These should be listed in CW order       
-        Meta:        
+        Data:
         * time: corresponding array of time (relative to 1950-01-01)
         * lat : corresponding array of latitudes
         * lon : corresponding array of longitudes           
+        * data: measured data (eg. salinity, or temperature,...)
         """
+        good = np.zeros(len(df["data"]), dtype=np.int8)
+        mask = np.ones(len(df["data"]), dtype=np.bool)
 
-        good = np.zeros(len(data), dtype=np.int8)
-        mask = np.ones(len(data), dtype=np.bool)
-        COEF_SPIKE = (math.log(120)/5)*math.sqrt(2)
-
-        if 'months' in opts and ('time' in meta): 
+        if 'months' in opts and ('time' in df.columns):
             meta_months = pd.Series([
-            time.strptime(n,'%Y-%m-%dT%H:%M:%S').tm_mon for n in meta['time']])
+            time.strptime(n,'%Y-%m-%dT%H:%M:%S').tm_mon for n in df['time']])
             mask &= meta_months.isin(opts['months'])
-        '''
-        if ('lat_min' in opts) and ('lat' in meta):
-            mask &= (meta['lat'] >= opts['lat_min'])
-        if ('lat_max' in opts) and ('lat' in meta):
-            mask &= (meta['lat'] <= opts['lat_max'])
-        #
-        if ('lon_min' in opts) and ('lon' in meta):
-            mask &= (meta['lon'] >= opts['lon_min'])
-        if ('lon_max' in opts) and ('lon' in meta):
-            mask &= (meta['lon'] <= opts['lon_max'])
-        '''
-                   
+
+
         if ('area' in opts):
             lon = opts['area']['lon']
             lat = opts['area']['lat']
@@ -102,46 +103,47 @@ class QCTests(object):
             vrt[0:npt,1] = lat
             vrt[npt,0:2] = [ lon[0], lat[0] ]
             path = mpl.path.Path(vrt)
-            pts = np.ones([len(meta['lon']), 2])
-            pts[:,0] = meta['lon']
-            pts[:,1] = meta['lat']
+            pts = np.ones([len(df['lon']), 2])
+            pts[:,0] = df["lon"]
+            pts[:,1] = df['lat']
             inside = path.contains_points(pts)
             mask &= inside
 
+
         good[mask] = -1
         if 'min' in opts:
-            mask &= (data >= opts['min'])
+            mask &= (df["data"] >= opts['min'])
         if 'max' in opts:
-            mask &= (data <= opts['max'])
+            mask &= (df["data"] <= opts['max'])
         good[mask] = 1
         return(good)
 
 
     @classmethod
-    def missing_value_test(clf, meta, data, **opts):
+    def missing_value_test(clf, df, **opts):
         """
         Test data for a specific value defined for missing data.        
         Options:
           nan: value used for missing data
         """
-        good = np.ones(len(data), dtype=np.int8)
-        mask = (data == opts['nan'])
+        good = np.ones(len(df["data"]), dtype=np.int8)
+        mask = (df["data"] == opts['nan'])
         good[mask] = -1
         return(good)
 
     @classmethod
-    def RT_frozen_test(cls, meta, data, **opts): #self,
+    def RT_frozen_test(cls, data, **opts): #self,
         """
         Consecutive data with exactly the same value are flagged as bad.
         """
-        good = np.ones(len(data), dtype=np.int8) #typo)? 
+        good = np.ones(len(data), dtype=np.int8) #typo)?
         mask = (np.diff(data[:]) == 0.0)
         mask = np.concatenate((mask[0:1], mask))
         good[mask] = -1
         return(good)
    
     @classmethod
-    def aic_spike_test(clf, meta, data, **opts):
+    def aic_spike_test(clf, data, **opts):
         """
         Executes spike test using an estimate of 
         Aikake Information Criterion.      
@@ -166,7 +168,7 @@ class QCTests(object):
         return(good)
     
     @classmethod
-    def bioargo_spike_test(clf, meta, data, **opts):
+    def bioargo_spike_test(clf, data, **opts):
         """
         Spike test according to BIO ARGO
         
@@ -203,7 +205,7 @@ class QCTests(object):
         return(good)
     
     @classmethod
-    def argo_spike_test(clf, meta, data, **opts):
+    def argo_spike_test(clf, data, **opts):
         """
         Spike test according to MyOcean for T and S parameters
         http://www.coriolis.eu.org/content/download/4920/36075/file/Recommendations%20for%20RTQC%20procedures_V1_2.pdf
@@ -222,7 +224,7 @@ class QCTests(object):
         return(good)
         
     @classmethod    
-    def sensor_comparison_test(clf, meta, data, **opts):
+    def sensor_comparison_test(clf, data, **opts):
         """
         Check whether two sensors measuring the same parameter
         provide a similar value.        
@@ -243,7 +245,7 @@ class QCTests(object):
         return(good)
     
     @classmethod
-    def sensor_relationship_test(clf, meta, data, **opts):
+    def sensor_relationship_test(clf, df, **opts):
         """
         Check if the relationship between related parameters is within a certain value.
         
@@ -297,7 +299,7 @@ class DM_QCTests(object):
         Options:
           threshold: threshold for consecutive 3-values difference
         """
-        good = np.ones(len(data), dtype=np.int8)
+        good = np.ones(len(data),  dtype=np.int8)
         diff = np.zeros(len(data), dtype=np.float64)
         ii   = range(1,len(data)-1)
         for i in ii:
@@ -349,36 +351,37 @@ class DM_QCTests(object):
         return(good)     
     
    
-COMMON_TESTS = {
-    
+# FIXME: re-think the way of storing information on required number of samples for each test + add all tests to the dict.
+class Properties:
+
+    number_of_samples = {"QCTests.range_test": 1, "QCTests.missing_value_test": 1}
+    common_tests = {
+
     '''
     In the document 
     http://archimer.ifremer.fr/doc/00251/36232/
     the ranges are defined for different depths 
     For now the ranges defined here only for the surface
     '''
-    
-    '*': [ 
-        ('FROZEN_VALUE', QCTests.RT_frozen_test, {}), 
-        ('MISSING_VALUE', QCTests.missing_value_test)
-        ],
-    'TEMPERATURE': [ 
-        ('GLOBAL_RANGE' , QCTests.range_test, Global_Threshold_Ranges.Temperature),
 
-        ],
-    'SALINITY': [
+    '*': [
+        ('FROZEN_VALUE', QCTests.RT_frozen_test, {}),
+        ('MISSING_VALUE', QCTests.missing_value_test)
+    ],
+    'temperature': [
+        ('GLOBAL_RANGE', QCTests.range_test, Global_Threshold_Ranges.Temperature),
+    ],
+    'salinity': [
         ('GLOBAL_RANGE', QCTests.range_test, Global_Threshold_Ranges.Salinity),
 
-        ],
-    'FLUORESCENCE': [
-        ('GLOBAL_RANGE', QCTests.range_test, Global_Threshold_Ranges.Fluorescence), 
-        ('LOCAL_RANGE', QCTests.range_test, Local_Threshold_Ranges.Fluorescence),                      
-        ], 
-    
-    'OXYGEN_CONCENTRATION': [
-        ('GLOBAL_RANGE', QCTests.range_test, Global_Threshold_Ranges.Oxygen), 
-        ('LOCAL_RANGE', QCTests.range_test, Local_Threshold_Ranges.Oxygen),                      
-        ],     
-    
+    ],
+    'fluorescence': [
+        ('GLOBAL_RANGE', QCTests.range_test, Global_Threshold_Ranges.Fluorescence),
+        ('LOCAL_RANGE', QCTests.range_test, Local_Threshold_Ranges.Fluorescence),
+    ],
+    'oxygen_concentration': [
+        ('GLOBAL_RANGE', QCTests.range_test, Global_Threshold_Ranges.Oxygen),
+        ('LOCAL_RANGE', QCTests.range_test, Local_Threshold_Ranges.Oxygen),
+    ],
+
     }
-        

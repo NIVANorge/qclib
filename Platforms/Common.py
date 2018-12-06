@@ -8,16 +8,14 @@ Common classes and tools for platforms
 Created on 14. feb. 2018
 '''
 
-import sys
 import json
 import datetime
 
 import numpy as np
-#from ..QC import QCTests, COMMON_TESTS
-#ValueError: attempted relative import beyond top-level package
-from pyFerry.Globals import Areas
-from pyFerry.QC import QCTests, COMMON_TESTS
-import code
+from pyFerry.QC import QCTests
+from pyFerry import QC
+COMMON_TESTS = QC.Properties.common_tests
+
 
 
 class PlatformQC(QCTests):
@@ -25,99 +23,38 @@ class PlatformQC(QCTests):
     QC_TESTS = 'to be subclassed'
        
     @classmethod                 
-    def applyQC(cls, meta, data):
+    def applyQC(cls, df, tests):
+
         """
-        Apply QC for all registered parameters
-        
-        Each platform should sublass this class and define its own list of tests in class variable `QC_TESTS`.
-        
-        QC definitions are found in the common list `COMMON_TESTS` and in the platform specific class variable 
-        `QC_TESTS`. 
-        
-        Argument `meta` is a dictionary with keys required by the specific QC tests, as well as
-        
-          *sensor_list*  : list of all lowest level sensors in the platform
-          *<sensor_name>*: a dictionary for each lowest level sensor sensor with key `parameter_type` defining 
-                           the type of parameter being measured.
-                         
-        Argument `data` is a dictionary with the data for each lowest level sensor.
-
-        The return value is a dictionary of flags where keys are sensor names containing dictonaries of
-        test results. 
-        
-        Example:
-        --------
-        
-          meta = { 
-            'signal_list': [ 'CTD_TEMPERATURE', 'CTD_SALINITY', 'O2T', ... ],
-            'CTD_TEMPERATURE': { 'parameter_type': 'TEMPERATURE' },
-            'CTD_SALINITY'   : { 'parameter_type': 'SALINITY' },
-            'O2T': { 'parameter_type': 'TEMPERATURE' },
-            }
-          data = {
-            'CTD_TEMPERATURE': np.array([ ... ]),
-            'CTD_SALINITY'   : np.array([ ... ]),
-            'O2T'            : np.array([ ... ]),
-            }
-        
-          flags = {
-            'CTD_TEMPERATURE': {
-              'FROZEN_VALUE': np.array([ ... ]),
-              'GLOBAL_RANGE': np.array([ ... ]),
-              ...
-              },
-            'CTD_SALINITY': {
-              'FROZEN_VALUE': np.array([ ... ]),
-              'GLOBAL_RANGE': np.array([ ... ]),
-              ...
-              },
-            ...
-            }
-            
+    df : dataframe wih col: datetime, lon, lat, measurement_value
+         where measurement is e.g. salinity or temperature, or fdom, etc.,..
+     tests : dictionary with key being name (e.g. temperature, or salinity, or...) and with value being a list of tests =["global_range","local_range"]...
         """
-        
-        flags  = {}
-        # Concatenate lists of QC_TESTS 
-        qclist = {}        
-        qclist.update(COMMON_TESTS)
-        for k in cls.QC_TESTS.keys():
-            if k not in qclist:
-                qclist[k] = cls.QC_TESTS[k]
-            else:
-                qclist[k].append(cls.QC_TESTS[k])
-            
-        # Apply QC for each parameter
-        signal_list = meta['signal_list']
-        for signal_k in signal_list:
-            signal_d = data[signal_k]
-            if signal_k not in flags:
-                flags[signal_k] = {}
+# FIXME
+        """ somewhere in the code concatenation of common tests with specific platform tests needs to happen
+    Currently common_tests are imported from QC and match to the metadata during ingest (rtjson_ingest) so tests contain only common tests which have respective metadata info
+    For now it is not a problem because none of the platforms have additional tests
+        """
+        flags=[]
+        key = list(tests.keys())[0]
+# Build a list of all QC tests
+        for test in tests[key]:
+            for qcdef in COMMON_TESTS[key]:
+                if test == qcdef[0]:
+                    flag =-9999
+                    if type(qcdef[2]) is list:
+                        name = qcdef[0]
+                        test = qcdef[1]
+                        arr = [[name, test, x] for x in qcdef[2]]
+                        for a in arr:
+                            flag = a[1](df, **a[2])
+                            flags.append(flag)
+                    else:
+                        flag = qcdef[1](df, **qcdef[2])
+                    flags.append(flag)
+        return flags
 
-            param_t = meta[signal_k]['parameter_type']
 
-            # For code simplicity, build a list of all QC for that parameter
-            qcl = []
-            if '*' in qclist:
-                qcl += qclist['*']
-            if param_t in qclist:
-                #print (param_t)
-                if len(qclist[param_t]) > 1 :
-                    name = qclist[param_t][1][0]
-                    test = qclist[param_t][1][1]
-                    arr =[[name,test,x] for x in qclist[param_t][1][2]]        
-                    qcl += map(lambda x: x,arr)
-                else:        
-                    qcl += qclist[param_t]
-            # Apply each QC
-            for qcdef in qcl:
-                
-                flag_d = qcdef[1](meta, signal_d, **qcdef[2])
-                flag_k = qcdef[0].upper()
-                flags[signal_k][flag_k] = flag_d.tolist()
-                
-        return(flags)
-        
-          
             
     @classmethod
     def CMEMScodes(cls, flags):

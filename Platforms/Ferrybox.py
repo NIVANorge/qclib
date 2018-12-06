@@ -13,8 +13,8 @@ class FerryboxQC(Common.PlatformQC):
     # 'SALINITY': ['SPIKE_TEST' , QCTests.argo_spike_test, {'threshold':2 }],
     }
      
-    def QC(self, meta, data):
-        flags = self.applyQC(meta, data)       
+    def QC(self,df,tests):
+        flags = self.applyQC(df, tests)
         return flags
     
     def cmems(self,flags):       

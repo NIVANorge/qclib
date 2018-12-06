@@ -100,5 +100,7 @@ class Local_Threshold_Ranges:
                   {'min': 200.0, 'max': 500.0, 'area': Areas.Baltic ,'months': all_months},
                   {'min': 200.0, 'max': 500.0, 'area': Areas.NW_Shelf ,'months': all_months},                   
                 ]
-      
+
+
+
     
