@@ -12,12 +12,11 @@ import json
 import datetime
 
 import numpy as np
-from QCLib.QC import QCTests
-COMMON_TESTS = QCLib.QC.Properties.common_tests
 
+from . import QC
+COMMON_TESTS = QC.Properties.common_tests
 
-
-class PlatformQC(QCTests):
+class PlatformQC(QC.QCTests):
     
     QC_TESTS = 'to be subclassed'
        
