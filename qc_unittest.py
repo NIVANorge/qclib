@@ -1,10 +1,7 @@
 '''
 Created on 15. jan. 2018
-
 @author: ELP
 '''
-import QC
-#import json
 import unittest
 import pandas as pd 
 

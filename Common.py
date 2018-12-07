@@ -12,9 +12,8 @@ import json
 import datetime
 
 import numpy as np
-from QCLib import QC
-from QC import QCTests
-COMMON_TESTS = QC.Properties.common_tests
+from QCLib.QC import QCTests
+COMMON_TESTS = QCLib.QC.Properties.common_tests
 
 
 

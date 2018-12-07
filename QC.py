@@ -1,8 +1,6 @@
 '''
 .. moduleauthor: Pierre Jaccard <pja@niva.no>
 
-pyFerry.QC
-==========
 
 Quality control tests to be applied on data. 
 Tests are implemented according to the document  
@@ -16,7 +14,7 @@ import numpy as np
 import matplotlib as mpl
 import time 
 import pandas as pd 
-from QCLib.Globals import Local_Threshold_Ranges,Global_Threshold_Ranges
+from Globals import Local_Threshold_Ranges,Global_Threshold_Ranges
 
 #FIXME: Only range_test and missing_value test has been adjusted to the new interface
 

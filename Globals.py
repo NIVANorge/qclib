@@ -1,9 +1,6 @@
 """
 .. moduleauthor: Pierre Jaccard <pja@niva.no>
 
-pyFerry.Globals
-===============
-
 Provides package access to Global variables
 
 (C) 14. jan. 2016 Pierre Jaccard
