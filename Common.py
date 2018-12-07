@@ -10,10 +10,8 @@ Created on 14. feb. 2018
 
 import json
 import datetime
-
 import numpy as np
-
-from . import QC
+import QC
 COMMON_TESTS = QC.Properties.common_tests
 
 class PlatformQC(QC.QCTests):
