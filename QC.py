@@ -12,13 +12,11 @@ http://archimer.ifremer.fr/doc/00251/36232/34792.pdf
 Created on 6. feb. 2018
 '''
 
-import math
-import datetime
 import numpy as np
 import matplotlib as mpl
 import time 
 import pandas as pd 
-from pyFerry.Globals import Local_Threshold_Ranges,Global_Threshold_Ranges
+from QCLib.Globals import Local_Threshold_Ranges,Global_Threshold_Ranges
 
 #FIXME: Only range_test and missing_value test has been adjusted to the new interface
 

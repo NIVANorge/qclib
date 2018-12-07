@@ -8,7 +8,7 @@ Specific tools for WaveGlider
 Created on 14. feb. 2018
 '''
 
-from  pyFerry.Platforms import Common 
+from  QCLib.Platforms import Common
 
 class WaveGliderQC(Common.PlatformQC):
     

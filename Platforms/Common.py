@@ -12,8 +12,8 @@ import json
 import datetime
 
 import numpy as np
-from pyFerry.QC import QCTests
-from pyFerry import QC
+from QCLib import QC
+from QC import QCTests
 COMMON_TESTS = QC.Properties.common_tests
 
 
@@ -37,7 +37,6 @@ class PlatformQC(QCTests):
         """
         flags=[]
         key = list(tests.keys())[0]
-# Build a list of all QC tests
         for test in tests[key]:
             for qcdef in COMMON_TESTS[key]:
                 if test == qcdef[0]:

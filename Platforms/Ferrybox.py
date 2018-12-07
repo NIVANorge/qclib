@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from  pyFerry.Platforms import Common 
-from pyFerry.QC import QCTests
+from  QCLib.Platforms import Common
 
 class FerryboxQC(Common.PlatformQC):
     
