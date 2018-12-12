@@ -12,7 +12,6 @@ import json
 import datetime
 import numpy as np
 import QC
-COMMON_TESTS = QC.Properties.common_tests
 
 class PlatformQC(QC.QCTests):
     
@@ -22,8 +21,8 @@ class PlatformQC(QC.QCTests):
     def applyQC(cls, df, tests):
 
         """
-    df : dataframe wih col: datetime, lon, lat, measurement_value
-         where measurement is e.g. salinity or temperature, or fdom, etc.,..
+    df : dataframe wih col: datetime, name (platform code), lon, lat, data
+         where data is e.g. salinity or temperature, or fdom, etc.,..
      tests : dictionary with key being name (e.g. temperature, or salinity, or...) and with value being a list of tests =["global_range","local_range"]...
         """
 # FIXME
@@ -34,7 +33,10 @@ class PlatformQC(QC.QCTests):
         flags=[]
         key = list(tests.keys())[0]
         for test in tests[key]:
-            for qcdef in COMMON_TESTS[key]:
+            for qcdef in QC.Properties.common_tests[key]:
+                ns = QC.Properties.number_of_samples["QCTests."+qcdef[1].__name__]
+                df = df[0:ns]
+                print(df)
                 if test == qcdef[0]:
                     flag =-9999
                     if type(qcdef[2]) is list:

@@ -15,8 +15,8 @@ import matplotlib as mpl
 import time 
 import pandas as pd 
 from Globals import Local_Threshold_Ranges,Global_Threshold_Ranges
+import functools
 
-#FIXME: Only range_test and missing_value test has been adjusted to the new interface
 
 class QCTests(object):
     """
@@ -42,7 +42,9 @@ class QCTests(object):
 
 
     def check_data_size(func):
+        @functools.wraps(func)
         def func_wrapper(clf, *args, **opts):
+
             if len(args[0]) < Properties.number_of_samples["QCTests."+func.__name__]:
                 raise Exception("Too few data points to perform this test")
             result = func(clf, *args, **opts)
@@ -347,8 +349,7 @@ class DM_QCTests(object):
         return(good)     
     
    
-# FIXME: re-think the way of storing information on required number of samples for each test + add all tests to the dict.
-class Properties:
+class QCProperties:
 
     number_of_samples = {"QCTests.range_test": 1, "QCTests.missing_value_test": 1}
     common_tests = {
