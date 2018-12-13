@@ -14,9 +14,9 @@ import numpy as np
 import matplotlib as mpl
 import time 
 import pandas as pd 
-from Globals import Local_Threshold_Ranges,Global_Threshold_Ranges
+from Thresholds import Local_Threshold_Ranges,Global_Threshold_Ranges
 import functools
-from inspect import signature
+import logging
 
 class QCTests(object):
     """
@@ -40,23 +40,23 @@ class QCTests(object):
     where 1 is PASSED, -1 is FAILED and 0 is not tested.
     """
 
-#    def check_size(size):
-    def check_data_size(func):
-        @functools.wraps(func)
-        def func_wrapper(clf, *args, **opts):
-            print(args[0])
-            if len(args[0]) < QCProperties.number_of_samples["QCTests." + func.__name__]:
-                raise Exception("Too few data points to perform this test")
-            return func(clf, *args, **opts)
-#        func_wrapper.size = size
-        return func_wrapper
-#        return check_data_size
+    def check_size(size):
+        def check_data_size(func):
+            @functools.wraps(func)
+            def func_wrapper(clf, *args, **opts):
+                if len(args[0]) < size:
+#FIXME distinguish cases when fetching data failed (raise error) and when there is no data (ship just started,...)
+#                raise Exception("Too few data points to perform this test")
+                    logging.warn("Too few data points to perform this test")
+                return func(clf, *args, **opts)
+            func_wrapper.size = size
+            return func_wrapper
+        return check_data_size
 
 
 
     @classmethod
-#    @check_size(10)
-    @check_data_size
+    @check_size(1)
     def range_test(clf, df, **opts):
         """
         4.4 Global Range Tests 
@@ -121,6 +121,7 @@ class QCTests(object):
 
 
     @classmethod
+    @check_size(1)
     def missing_value_test(clf, df, **opts):
         """
         Test data for a specific value defined for missing data.        
@@ -133,6 +134,7 @@ class QCTests(object):
         return(good)
 
     @classmethod
+    @check_size(1)
     def RT_frozen_test(cls, data, **opts): #self,
         """
         Consecutive data with exactly the same value are flagged as bad.
@@ -144,6 +146,7 @@ class QCTests(object):
         return(good)
    
     @classmethod
+    @check_size(1)
     def aic_spike_test(clf, data, **opts):
         """
         Executes spike test using an estimate of 
@@ -169,6 +172,7 @@ class QCTests(object):
         return(good)
     
     @classmethod
+    @check_size(1)
     def bioargo_spike_test(clf, data, **opts):
         """
         Spike test according to BIO ARGO
@@ -206,6 +210,7 @@ class QCTests(object):
         return(good)
     
     @classmethod
+    @check_size(1)
     def argo_spike_test(clf, data, **opts):
         """
         Spike test according to MyOcean for T and S parameters
@@ -224,7 +229,8 @@ class QCTests(object):
         good[-1] = 0
         return(good)
         
-    @classmethod    
+    @classmethod
+    @check_size(1)
     def sensor_comparison_test(clf, data, **opts):
         """
         Check whether two sensors measuring the same parameter
@@ -246,6 +252,7 @@ class QCTests(object):
         return(good)
     
     @classmethod
+    @check_size(1)
     def sensor_relationship_test(clf, df, **opts):
         """
         Check if the relationship between related parameters is within a certain value.
@@ -275,11 +282,10 @@ class QCTests(object):
         good[~mask] = -1
         return(good)
     
-class DM_QCTests(object):
-    
-    ''' Delayed mode Tests '''
+
     
     @classmethod
+    @check_size(1)
     def DM_frozen_test(cls, meta, data, **opts): #self,
         """
         Consecutive data with exactly the same value are flagged as bad.
@@ -293,6 +299,7 @@ class DM_QCTests(object):
 
     
     @classmethod
+    @check_size(1)
     def argo_gradient_test(clf, meta, data, **opts):
         """
         Gradient test according to BIO ARGO
@@ -311,7 +318,8 @@ class DM_QCTests(object):
         good[-1] = 0
         return(good)
     
-    @classmethod               
+    @classmethod
+    @check_size(1)
     def frozen_profile_test(clf, meta, data, **opts):
         """
         Test for frozen profiles.In this case,
@@ -351,11 +359,8 @@ class DM_QCTests(object):
                     good *= -1
         return(good)     
     
-   
-class QCProperties:
 
-    number_of_samples = {"QCTests.range_test": 10, "QCTests.missing_value_test": 1}
-    common_tests = {
+common_tests = {
 
     '''
     In the document 

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import Common
+import PlatformQC
 
 
-class FerryboxQC(Common.PlatformQC):
+class FerryboxQC(PlatformQC.PlatformQC):
 
     # values for threshold should be checked and changed 
     
@@ -25,7 +25,7 @@ class FerryboxQC(Common.PlatformQC):
         return codes,overall_flags
 
 
-class SailBuoyQC(Common.PlatformQC):
+class SailBuoyQC(PlatformQC.PlatformQC):
     QC_TESTS = {}
 
     def QC(self, meta, data):
@@ -37,7 +37,7 @@ class SailBuoyQC(Common.PlatformQC):
         return codes, overall_flags
 
 
-class SeaGliderQC(Common.PlatformQC):
+class SeaGliderQC(PlatformQC.PlatformQC):
     QC_TESTS = {}
 
     def QC(self, meta, data):
@@ -49,7 +49,7 @@ class SeaGliderQC(Common.PlatformQC):
         return codes, overall_flags
 
 
-class WaveGliderQC(Common.PlatformQC):
+class WaveGliderQC(PlatformQC.PlatformQC):
     QC_TESTS = {}
 
     def QC(self, meta, data):

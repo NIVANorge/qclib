@@ -11,9 +11,10 @@ Created on 14. feb. 2018
 import json
 import datetime
 import numpy as np
-import QC
+import QCTests
 
-class PlatformQC(QC.QCTests):
+#QC.QCTests
+class PlatformQC():
     
     QC_TESTS = 'to be subclassed'
        
@@ -30,13 +31,13 @@ class PlatformQC(QC.QCTests):
     Currently common_tests are imported from QC and match to the metadata during ingest (rtjson_ingest) so tests contain only common tests which have respective metadata info
     For now it is not a problem because none of the platforms have additional tests
         """
+
         flags=[]
         key = list(tests.keys())[0]
         for test in tests[key]:
-            for qcdef in QC.QCProperties.common_tests[key]:
-                ns = QC.QCProperties.number_of_samples["QCTests."+qcdef[1].__name__]
+            for qcdef in QCTests.common_tests[key]:
+                ns = qcdef[1].size
                 df = df[0:ns]
-                print(df)
                 if test == qcdef[0]:
                     flag =-9999
                     if type(qcdef[2]) is list:
@@ -45,10 +46,14 @@ class PlatformQC(QC.QCTests):
                         arr = [[name, test, x] for x in qcdef[2]]
                         for a in arr:
                             flag = a[1](df, **a[2])
+                            if ns > 1:
+                                flag = flag[0]
                             flags.append(flag)
                     else:
                         flag = qcdef[1](df, **qcdef[2])
-                    flags.append(flag)
+                        if ns>1:
+                            flag=flag[0]
+                        flags.append(flag)
         return flags
 
 

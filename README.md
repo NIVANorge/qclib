@@ -13,29 +13,29 @@ list of tests =["global_range","local_range"]...
 The `dataframe` is indexed with timestamps. 
 QC should be performed for the latest timestamp (the first in the `dataframe`),
 the remaining data points are provided if they are required by any of the tests.
-Number of extra data points is specified for each test in QCProperties
+Number of extra data points is as an argument to a decorator for each test in QCTests.
 
-# Common.py
+# PlatformQC.py
 
 Contains definition of PlatformQC class.
 applyQC method of this class executes the QC functions for each test and stores relevant QC flags.
 Apart from applyQC methods, there are several more functions which seem unused(?)
 
+
 # Platforms.py
 Contains definitions of subclasses for each platform: FerryboxQC, SeaGliderQC, WaveGliderQC, SailbuoyQC 
 which hold platform specific information.
-They all inherit from common base, which is PlatformQC defined in Common.py
+They all inherit from common base, which is PlatformQC defined in PlatformQC.py
 For now sampling frequency (important for fetching additional data during ingestion) is specified for ferryboxQC class.
 In the future these subclasses can hold information about additional tests or calibration constants, etc.
 
 
-# QC.py 
-Contains definition of two classes:
-1. QCProperties: specifies number of samples for each test and a list of test for each measurement
-    Currently only range tests and missing value test are specified
-2. QCTests : list of function definitions for each QC test and a decorator checking number of sample requirements for each test
+# QCTests.py 
+Contains definition of QCTests class which has a list 
+of (static) function definitions for each QC test and a decorator checking number of sample requirements for each test.
+A global array common_test specifies tests which are common for all platforms.
 
-# Globals.py 
+# Thresholds.py 
 Defines threshold values for range tests.
 
 
