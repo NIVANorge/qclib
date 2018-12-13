@@ -33,8 +33,8 @@ class PlatformQC(QC.QCTests):
         flags=[]
         key = list(tests.keys())[0]
         for test in tests[key]:
-            for qcdef in QC.Properties.common_tests[key]:
-                ns = QC.Properties.number_of_samples["QCTests."+qcdef[1].__name__]
+            for qcdef in QC.QCProperties.common_tests[key]:
+                ns = QC.QCProperties.number_of_samples["QCTests."+qcdef[1].__name__]
                 df = df[0:ns]
                 print(df)
                 if test == qcdef[0]:

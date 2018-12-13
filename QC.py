@@ -16,7 +16,7 @@ import time
 import pandas as pd 
 from Globals import Local_Threshold_Ranges,Global_Threshold_Ranges
 import functools
-
+from inspect import signature
 
 class QCTests(object):
     """
@@ -40,19 +40,22 @@ class QCTests(object):
     where 1 is PASSED, -1 is FAILED and 0 is not tested.
     """
 
-
+#    def check_size(size):
     def check_data_size(func):
         @functools.wraps(func)
         def func_wrapper(clf, *args, **opts):
-
-            if len(args[0]) < Properties.number_of_samples["QCTests."+func.__name__]:
+            print(args[0])
+            if len(args[0]) < QCProperties.number_of_samples["QCTests." + func.__name__]:
                 raise Exception("Too few data points to perform this test")
-            result = func(clf, *args, **opts)
-            return result
+            return func(clf, *args, **opts)
+#        func_wrapper.size = size
         return func_wrapper
+#        return check_data_size
+
 
 
     @classmethod
+#    @check_size(10)
     @check_data_size
     def range_test(clf, df, **opts):
         """
@@ -351,7 +354,7 @@ class DM_QCTests(object):
    
 class QCProperties:
 
-    number_of_samples = {"QCTests.range_test": 1, "QCTests.missing_value_test": 1}
+    number_of_samples = {"QCTests.range_test": 10, "QCTests.missing_value_test": 1}
     common_tests = {
 
     '''
