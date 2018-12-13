@@ -18,7 +18,7 @@ Number of extra data points is as an argument to a decorator for each test in QC
 # PlatformQC.py
 
 Contains definition of PlatformQC class.
-applyQC method of this class executes the QC functions for each test and stores relevant QC flags.
+applyQC method of this class executes the QC tests and returns QC flags.
 Apart from applyQC methods, there are several more functions which seem unused(?)
 
 
