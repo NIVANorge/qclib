@@ -1,4 +1,4 @@
-# Standalone package containing quality tests
+# Standalone module containing quality tests
 
 Input to the libary is a `dataframe` with the following column names:
 1. name (platform code)
