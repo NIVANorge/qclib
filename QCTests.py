@@ -360,33 +360,4 @@ class QCTests(object):
         return(good)     
     
 
-common_tests = {
 
-    '''
-    In the document 
-    http://archimer.ifremer.fr/doc/00251/36232/
-    the ranges are defined for different depths 
-    For now the ranges defined here only for the surface
-    '''
-
-    '*': [
-        ('FROZEN_VALUE', QCTests.RT_frozen_test, {}),
-        ('MISSING_VALUE', QCTests.missing_value_test)
-    ],
-    'temperature': [
-        ('GLOBAL_RANGE', QCTests.range_test, Global_Threshold_Ranges.Temperature),
-    ],
-    'salinity': [
-        ('GLOBAL_RANGE', QCTests.range_test, Global_Threshold_Ranges.Salinity),
-
-    ],
-    'fluorescence': [
-        ('GLOBAL_RANGE', QCTests.range_test, Global_Threshold_Ranges.Fluorescence),
-        ('LOCAL_RANGE', QCTests.range_test, Local_Threshold_Ranges.Fluorescence),
-    ],
-    'oxygen_concentration': [
-        ('GLOBAL_RANGE', QCTests.range_test, Global_Threshold_Ranges.Oxygen),
-        ('LOCAL_RANGE', QCTests.range_test, Local_Threshold_Ranges.Oxygen),
-    ],
-
-    }

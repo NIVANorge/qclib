@@ -64,6 +64,7 @@ class Global_Threshold_Ranges:
     Fluorescence = { 'min': -0.1, 'max': 80.0 }
     Oxygen  =      { 'min':  0.0, 'max': 500.0 } # Micromoles per liter!
     #Chlorophyll = {'min': -0.1, 'max': 80.0 } #Using Fluorescence method CPHL
+    Temperature_Ferrybox = { 'min': -2.5, 'max': 100.0 }
     
 class Local_Threshold_Ranges: 
     '''
