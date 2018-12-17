@@ -8,7 +8,7 @@ import Thresholds
 class FerryboxQC(PlatformQC.PlatformQC):
 
     sampling_frequency = 60
-    frequency_units = "minutes"
+    frequency_units = "seconds"
 
 
     qc_tests = {}
