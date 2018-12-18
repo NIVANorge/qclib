@@ -42,7 +42,6 @@ class PlatformQC(QCTests):
     sampling_frequency = 60
     frequency_units = "seconds"
 
-    qc_tests = {}
     def __init__(self):
         self.qc_tests = common_tests.copy()
 
