@@ -94,7 +94,6 @@ class QCTests(object):
             time.strptime(n,'%Y-%m-%dT%H:%M:%S').tm_mon for n in df['time']])
             mask &= meta_months.isin(opts['months'])
 
-
         if ('area' in opts):
             lon = opts['area']['lon']
             lat = opts['area']['lat']
@@ -134,7 +133,7 @@ class QCTests(object):
         return(good)
 
     @classmethod
-    @check_size(1)
+    @check_size(5)
     def RT_frozen_test(cls, data, **opts): #self,
         """
         Consecutive data with exactly the same value are flagged as bad.

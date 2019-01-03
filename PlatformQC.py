@@ -14,27 +14,36 @@ import numpy as np
 from QCTests import QCTests
 import Thresholds
 
-
+# '''
+# In the document 
+# http://archimer.ifremer.fr/doc/00251/36232/
+# the ranges are defined for different depths 
+# For now the ranges defined here only for the surface
+# '''
 common_tests = {
 
-     '''
-     In the document 
-     http://archimer.ifremer.fr/doc/00251/36232/
-     the ranges are defined for different depths 
-     For now the ranges defined here only for the surface
-     '''
- 
      '*':
-         { 'FROZEN_VALUE': [QCTests.RT_frozen_test,{}], 'MISSING_VALUE': [QCTests.missing_value_test,] },
+         { 'FROZEN_TEST': [QCTests.RT_frozen_test], 
+           'MISSING_VALUE': [QCTests.missing_value_test] },
      'temperature':
-         { 'GLOBAL_RANGE': [QCTests.range_test, Thresholds.Global_Threshold_Ranges.Temperature] },
+         { 'GLOBAL_RANGE': [QCTests.range_test, 
+                            Thresholds.Global_Threshold_Ranges.Temperature] },
      'salinity':
-         { 'GLOBAL_RANGE': [QCTests.range_test, Thresholds.Global_Threshold_Ranges.Salinity] },
+         { 'GLOBAL_RANGE': [QCTests.range_test, 
+                            Thresholds.Global_Threshold_Ranges.Salinity] },
      'fluorescence':
-         { 'GLOBAL_RANGE': [QCTests.range_test, Thresholds.Global_Threshold_Ranges.Fluorescence],'LOCAL_RANGE': [QCTests.range_test, Thresholds.Local_Threshold_Ranges.Fluorescence] },
+         { 'GLOBAL_RANGE': [QCTests.range_test, 
+                            Thresholds.Global_Threshold_Ranges.Fluorescence]},
+           #'LOCAL_RANGE' : [QCTests.range_test, 
+           #                 Thresholds.Local_Threshold_Ranges.Fluorescence] },
      'oxygen_concentration':
-         { 'GLOBAL_RANGE': [QCTests.range_test, Thresholds.Global_Threshold_Ranges.Oxygen], 'LOCAL_RANGE': [QCTests.range_test, Thresholds.Local_Threshold_Ranges.Oxygen] }
-    }
+         { 'GLOBAL_RANGE': [QCTests.range_test, 
+                            Thresholds.Global_Threshold_Ranges.Oxygen],
+           'LOCAL_RANGE' : [QCTests.range_test, 
+                            Thresholds.Local_Threshold_Ranges.Oxygen],
+           'FROZEN_TEST': [QCTests.RT_frozen_test,{}],
+           'MISSING_VALUE': [QCTests.missing_value_test,{} ] }
+        }
 
 
 class PlatformQC(QCTests):
@@ -50,11 +59,13 @@ class PlatformQC(QCTests):
         """
       df : dataframe wih col: datetime, name (platform code), lon, lat, data
          where data is e.g. salinity or temperature, or fdom, etc.,..
-     tests : dictionary with key being name (e.g. temperature, or salinity, or...) and with value being a list of tests =["global_range","local_range"]...
+     tests : dictionary with key being name (e.g. temperature, or salinity, or...)
+      and with value being a list of tests =["global_range","local_range"]...
         """
 
         flags={}
         key = list(tests.keys())[0]
+        #print (key)
 #        for test in tests[key]:
         for test in self.qc_tests[key]:
             ns = self.qc_tests[key][test][0].size
@@ -71,10 +82,11 @@ class PlatformQC(QCTests):
                 flag = self.qc_tests[key][test][0](df, **self.qc_tests[key][test][1])
                 if test not in flags:
                     flags[test] = flag[0]
-
+        
         return flags
 
-# FIXME: ask Liza and Pierre about CMEMScodes function (needed?) and local_range (does format_flags do what it should...?)
+    # FIXME: ask Liza and Pierre about CMEMScodes function (needed?) 
+    # and local_range (does format_flags do what it should...?)
     def format_flags(self,flags):
 
         for k,v in flags.items():
@@ -85,6 +97,8 @@ class PlatformQC(QCTests):
                     flags[k]=0
                 else:
                     flags[k]=1
+                    
+                    
     @classmethod
     def derive_overall_flag(cls,flags, system_flags):
 
@@ -96,7 +110,8 @@ class PlatformQC(QCTests):
 
     @classmethod
     def CMEMScodes(cls, flags):
-# FIXME This function will not work with the new interface, since flags do not have the top level key being measurement name.
+    # FIXME This function will not work with the new interface, 
+    # since flags do not have the top level key being measurement name.
         """
         Convert the given flags to the standards CMEMS flag codes
         Argument flags is expected to be in the same format 
@@ -126,22 +141,3 @@ class PlatformQC(QCTests):
             overall_flags[signal_k] = overall_flag.tolist()
 
         return(codes,overall_flags)
-
-
-# Testing here
-if __name__ == '__main__':
-    
-    # Testing JSON flags conversion
-    t0 = datetime.datetime.now()
-    dt = datetime.timedelta(days=1)
-    t  = np.array([t0, t0+dt, t0+2*dt, t0+3*dt])
-    f  = { 
-        'CTD_T': { 'GR': [ 1, 2, 3, 4], 'LR': [ 10, 20, 30, 40] },
-        'CTD_S': { 'GR': [ -1, -2, -3, -4], 'LR': [ -10, -20, -30, -40] },
-        }
-    #s = PlatformQC.clusterizeFlags(f)
-    s = PlatformQC.JSONformat('flag_name', f, t)
-    pass
-
-          
-    
