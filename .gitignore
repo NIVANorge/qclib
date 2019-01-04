@@ -1,0 +1,11 @@
+# Eclipse project settings
+.project
+.pydevproject
+.settings/
+__pycache__/
+qclib.egg-info/
+
+
+
+
+
