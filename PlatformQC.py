@@ -23,28 +23,26 @@ import Thresholds
 common_tests = {
 
      '*':
-         { 'FROZEN_TEST': [QCTests.RT_frozen_test], 
-           'MISSING_VALUE': [QCTests.missing_value_test] },
+         { 'FROZEN_TEST': [QCTests.RT_frozen_test,{} 
+            # ],Correct Value for Missing Value
+           #'MISSING_VALUE': [QCTests.missing_value_test,{'nan':np.nan}
+                             ]},
      'temperature':
          { 'GLOBAL_RANGE': [QCTests.range_test, 
-                            Thresholds.Global_Threshold_Ranges.Temperature] },
+                            Thresholds.Global_Threshold_Ranges.Temperature]},
      'salinity':
          { 'GLOBAL_RANGE': [QCTests.range_test, 
-                            Thresholds.Global_Threshold_Ranges.Salinity] },
+                            Thresholds.Global_Threshold_Ranges.Salinity]},
      'fluorescence':
          { 'GLOBAL_RANGE': [QCTests.range_test, 
-                            Thresholds.Global_Threshold_Ranges.Fluorescence]},
-           #'LOCAL_RANGE' : [QCTests.range_test, 
-           #                 Thresholds.Local_Threshold_Ranges.Fluorescence] },
+                            Thresholds.Global_Threshold_Ranges.Fluorescence],
+           'LOCAL_RANGE' : [QCTests.range_test, 
+                            Thresholds.Local_Threshold_Ranges.Fluorescence]},
      'oxygen_concentration':
          { 'GLOBAL_RANGE': [QCTests.range_test, 
                             Thresholds.Global_Threshold_Ranges.Oxygen],
            'LOCAL_RANGE' : [QCTests.range_test, 
-                            Thresholds.Local_Threshold_Ranges.Oxygen],
-           'FROZEN_TEST': [QCTests.RT_frozen_test,{}],
-           'MISSING_VALUE': [QCTests.missing_value_test,{} ] }
-        }
-
+                            Thresholds.Local_Threshold_Ranges.Oxygen]}}
 
 class PlatformQC(QCTests):
 
@@ -65,12 +63,17 @@ class PlatformQC(QCTests):
 
         flags={}
         key = list(tests.keys())[0]
-        #print (key)
-#        for test in tests[key]:
+        if key in ['temperature','oxygen_concentration']:
+            self.qc_tests[key].update(self.qc_tests['*']) 
+        
+        # uncomment to use tests from metadata 
+        #for test in tests[key]:
+        
         for test in self.qc_tests[key]:
             ns = self.qc_tests[key][test][0].size
             df = df[0:ns]
             if type(self.qc_tests[key][test][1]) is list:
+                # ONLY LOCAL_RANGE TEST 
                 arr = [[test,self.qc_tests[key][test][0], x] for x in self.qc_tests[key][test][1]]
                 for a in arr:
                     flag = a[1](df, **a[2])
@@ -78,16 +81,23 @@ class PlatformQC(QCTests):
                         flags[test] = flag.tolist()
                     else:
                         flags[test].append(flag[0])
+                # format_flag       
+                if flags[test].count(-1)>0:
+                    flags[test]=-1
+                elif all([f == 0 for f in flags[test]]):
+                    flags[test] = 0 
+                else: 
+                    flags[test] = 1       
             else:
                 flag = self.qc_tests[key][test][0](df, **self.qc_tests[key][test][1])
                 if test not in flags:
                     flags[test] = flag[0]
-        
+            
         return flags
 
     # FIXME: ask Liza and Pierre about CMEMScodes function (needed?) 
     # and local_range (does format_flags do what it should...?)
-    def format_flags(self,flags):
+    '''def format_flags(self,flags):
 
         for k,v in flags.items():
             if type(v) is list:
@@ -96,7 +106,7 @@ class PlatformQC(QCTests):
                 elif  all([v == 0 for v in flags ]):
                     flags[k]=0
                 else:
-                    flags[k]=1
+                    flags[k]=1'''
                     
                     
     @classmethod
