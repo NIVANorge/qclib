@@ -43,6 +43,20 @@ common_tests = {
                             Thresholds.Global_Threshold_Ranges.Oxygen],
            'LOCAL_RANGE' : [QCTests.range_test, 
                             Thresholds.Local_Threshold_Ranges.Oxygen]}}
+                            
+"""common_tests = {
+
+
+        '*':
+         { 'FROZEN_TEST': [QCTests.RT_frozen_test,{} 
+            # ],Correct Value for Missing Value
+           #'MISSING_VALUE': [QCTests.missing_value_test,{'nan':np.nan}
+                             ]},
+         'oxygen_concentration':
+         { 'GLOBAL_RANGE': [QCTests.range_test, 
+                            Thresholds.Global_Threshold_Ranges.Oxygen],
+           'LOCAL_RANGE' : [QCTests.range_test, 
+                            Thresholds.Local_Threshold_Ranges.Oxygen]}}"""
 
 class PlatformQC(QCTests):
 
@@ -70,8 +84,8 @@ class PlatformQC(QCTests):
         #for test in tests[key]:
         
         for test in self.qc_tests[key]:
-            ns = self.qc_tests[key][test][0].size
-            df = df[0:ns]
+            #ns = self.qc_tests[key][test][0].size
+            #df = df[0:ns]
             if type(self.qc_tests[key][test][1]) is list:
                 # ONLY LOCAL_RANGE TEST 
                 arr = [[test,self.qc_tests[key][test][0], x] for x in self.qc_tests[key][test][1]]
