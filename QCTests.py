@@ -323,7 +323,7 @@ class QCTests(object):
         return(good)
     
     @classmethod
-    @check_size(1)
+    @check_size(5)
     def frozen_profile_test(clf, meta, data, **opts):
         """
         Test for frozen profiles.In this case,
