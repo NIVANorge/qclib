@@ -22,8 +22,7 @@ class QCTests(object):
     """
     Real Time QC Tests 
     These tests are applied to one signal
-    (data aggregated during 15 minutes 
-    and sent to the cloud 
+    (data aggregated during 15 minutes and sent to the cloud 
     
     Specific tests are defined here. Add whatever new tests. 
     The standard calling syntax for these tests is :    
@@ -86,6 +85,7 @@ class QCTests(object):
         * lon : corresponding array of longitudes           
         * data: measured data (eg. salinity, or temperature,...)
         """
+        
         good = np.zeros(len(df["data"]), dtype=np.int8)
         mask = np.ones(len(df["data"]), dtype=np.bool)
 
@@ -134,15 +134,20 @@ class QCTests(object):
 
     @classmethod
     @check_size(5)
-    def RT_frozen_test(cls, data, **opts): #self,
+    def RT_frozen_test(cls, df, **opts):
         """
-        Consecutive data with exactly the same value are flagged as bad.
+        Consecutive data with exactly the same value are flagged as bad
         """
-        good = np.ones(len(data), dtype=np.int8) #typo)?
-        mask = (np.diff(data[:]) == 0.0)
-        mask = np.concatenate((mask[0:1], mask))
-        good[mask] = -1
-        return(good)
+        if len(df["data"]) < 5: 
+            print ('not enough data points')
+            flags = np.zeros(len(df["data"]), dtype=np.int8)
+        else:     
+            flags = np.ones(len(df["data"]), dtype=np.int8) 
+            mask = (np.diff(df["data"][:]) == 0.0)
+            mask = np.concatenate((mask[0:1], mask))
+            flags[mask] = -1
+            
+        return flags
    
     @classmethod
     @check_size(1)
