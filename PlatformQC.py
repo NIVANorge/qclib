@@ -65,7 +65,7 @@ class PlatformQC(QCTests):
     def __init__(self):
         self.qc_tests = common_tests.copy()
 
-    def applyQC(self, signal_meta = fetch_signal_meta(sig, QCmethod)):
+    def applyQC(self, df, tests)):
 
         """
       df : dataframe wih col: datetime, name (platform code), lon, lat, data
