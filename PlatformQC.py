@@ -23,9 +23,8 @@ import Thresholds
 common_tests = {
 
      '*':
-         { 'FROZEN_TEST': [QCTests.RT_frozen_test,{} 
-            # ],Correct Value for Missing Value
-           #'MISSING_VALUE': [QCTests.missing_value_test,{'nan':np.nan}
+         { 'FROZEN_TEST': [QCTests.RT_frozen_test,{}],
+           'MISSING_VALUE': [QCTests.missing_value_test,{'nan':-999}
                              ]},
      'temperature':
          { 'GLOBAL_RANGE': [QCTests.range_test, 
@@ -66,7 +65,7 @@ class PlatformQC(QCTests):
     def __init__(self):
         self.qc_tests = common_tests.copy()
 
-    def applyQC(self, df, tests):
+    def applyQC(self, signal_meta = fetch_signal_meta(sig, QCmethod)):
 
         """
       df : dataframe wih col: datetime, name (platform code), lon, lat, data
@@ -77,7 +76,7 @@ class PlatformQC(QCTests):
 
         flags={}
         key = list(tests.keys())[0]
-        if key in ['temperature','oxygen_concentration']:
+        if key in ['temperature','oxygen_concentration','fluorescence']:
             self.qc_tests[key].update(self.qc_tests['*']) 
         
         # uncomment to use tests from metadata 
