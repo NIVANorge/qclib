@@ -35,22 +35,31 @@ common_tests = {
                             Thresholds.Local_Threshold_Ranges.Oxygen]}}
 
 
-signal_meta = {"time" : datetime.datetime.now(),"name":'TF',"lon":45,"lat":45}
+
 
 parameter_types = {'CTD_SALINITY' : 'salinity' }
 
 
 class Tests(unittest.TestCase):
-    good = {
+    bad_df = {
        'CHLA_FLUORESCENCE' : [0.345, 10.0, 50,50,148],
-       'CTD_SALINITY' :      [ 25.700, 25.720, 77 , 77, 145],
+       'salinity' :      [ 250.700, 250.720, -77 , -77, 145],
        'CTD_TEMPERATURE' :   [14.024, 14.014, -20, -20,500],
        'GPS_LATITUDE' :      [59.9091, 59.9091, 59.9091, 159.9091,45],
        'GPS_LONGITUDE' :     [10.7057, 10.7077, 10.7087, 70.7087,45],
+       'oxygen_concentration' : [1,1,1,1,1],
        'SHIP_CODE' :         ['FA','FA','FA','FA','FA']
         }
+        
+    now =  '2017-01-12T14:12:06'    
+    signal_meta = {
+         "time" : [now,now,now,now,now],
+         "name":  ['TF','TF','TF','TF','TF'],
+         "lat": [55,55,55,55,55], 
+         "lon": [5,5,5,5,5]}    
+        
          
-    df_a = pd.DataFrame(data=good)
+    #df_a = pd.DataFrame(data=good_df)
     
     good = np.ones(5, dtype=np.int8)
     bad = [-1,-1,-1,-1,-1]
@@ -72,14 +81,49 @@ class Tests(unittest.TestCase):
         
         self.assertEqual(list(flags),self.bad)     
     
-    def test_range(self):
-        #meas_name = 'CTD_SALINITY'
-        #param_type = parameter_types[meas_name]        
-        #tests_dict = {}
-        #tests_dict[meas_name] = common_tests[param_type]    
-        pass
-   
+    def test_range_global(self):
+        df = pd.DataFrame(data = self.signal_meta)
+        
+        meas_name = 'salinity'
+        df['data'] = self.bad_df[meas_name]
+        params = common_tests[meas_name]['GLOBAL_RANGE'][1]
+
+        flags = common_tests[meas_name]['GLOBAL_RANGE'][0](df,**params)   
+
+        self.assertEqual(list(flags),self.bad)
+        
+    def test_range_local(self):
+        df = pd.DataFrame(data = self.signal_meta)
+        
+        meas_name = 'oxygen_concentration'
+        df['data'] = self.bad_df[meas_name]        
+        params = common_tests[meas_name]['LOCAL_RANGE'][1]        
+        arr = [[common_tests[meas_name]['LOCAL_RANGE'][0], x] for x in params]
+
+        flags = []
+        for a in arr:
+            #print (a[0],'-',a[1])
+            flag = a[0](df, **a[1])
+            flags.append(flag.tolist())
+
+        # format_flag       
+        print(flags,flags.count(-1))
+        if flags.count(-1)>0:
+            flags=-1
+        elif all([f == 0 for f in flags]):
+            flags = 0 
+        else: 
+            flags = 1  
+                        
+        print (flags)
+
+        #flags = common_tests[meas_name]['LOCAL_RANGE'][0](df,**params)   
+        #print (flags)
+        #self.assertEqual(list(flags),self.bad)
+    
 
             
 if __name__ == '__main__':
     unittest.main()
+    
+    
