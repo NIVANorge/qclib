@@ -116,6 +116,7 @@ class QCTests(object):
         if 'max' in opts:
             mask &= (df["data"] <= opts['max'])
         good[mask] = 1
+        
         return(good)
 
 
