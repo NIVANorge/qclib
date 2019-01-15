@@ -34,9 +34,6 @@ common_tests = {
            'LOCAL_RANGE' : [QCTests.range_test, 
                             Thresholds.Local_Threshold_Ranges.Oxygen]}}
 
-
-
-
 parameter_types = {'CTD_SALINITY' : 'salinity' }
 
 
@@ -58,14 +55,17 @@ class Tests(unittest.TestCase):
          "lat": [55,55,55,55,55], 
          "lon": [5,5,5,5,5]}    
         
-         
-    #df_a = pd.DataFrame(data=good_df)
-    
-    good = np.ones(5, dtype=np.int8)
-    bad = [-1,-1,-1,-1,-1]
-    
-    def test_frozen(self):
+    df = pd.DataFrame(data = signal_meta)     
 
+    # all tests should fail with this list of flags 
+    #good = np.ones(5, dtype=np.int8)
+    
+    # flags to check tests 
+    bad = [-1,-1,-1,-1,-1]
+   
+    def test_frozen(self):
+        ''' Checks if values are frozen for 5 or more values in a row 
+            should give -1 flags for bad data '''
         df_frozen = pd.DataFrame()
         df_frozen['data'] = [25.700, 25.700, 25.700, 25.700, 25.700]
         flags = common_tests['*']['FROZEN_TEST'][0](df_frozen)
@@ -73,7 +73,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(list(flags),self.bad)
 
     def test_missing_value(self): 
-               
+        ''' Checks if values are missing with defined value 
+            should give -1 flags for bad data '''               
         df_missing = pd.DataFrame()
         df_missing['data'] = [ -999,  -999,  -999,  -999, -999]
         params = common_tests['*']['MISSING_VALUE'][1]
@@ -82,46 +83,42 @@ class Tests(unittest.TestCase):
         self.assertEqual(list(flags),self.bad)     
     
     def test_range_global(self):
-        df = pd.DataFrame(data = self.signal_meta)
-        
+        ''' Checks if values are within defined range 
+            should give -1 flags for outliers'''            
         meas_name = 'salinity'
-        df['data'] = self.bad_df[meas_name]
+        self.df['data'] = self.bad_df[meas_name]
         params = common_tests[meas_name]['GLOBAL_RANGE'][1]
 
-        flags = common_tests[meas_name]['GLOBAL_RANGE'][0](df,**params)   
+        flags = common_tests[meas_name]['GLOBAL_RANGE'][0](self.df,**params)   
 
         self.assertEqual(list(flags),self.bad)
         
     def test_range_local(self):
-        df = pd.DataFrame(data = self.signal_meta)
-        
+        ''' Checks if values are within defined range 
+            for local regions and time periods
+            should give -1 flags for outliers'''       
         meas_name = 'oxygen_concentration'
-        df['data'] = self.bad_df[meas_name]        
+        self.df['data'] = self.bad_df[meas_name]        
         params = common_tests[meas_name]['LOCAL_RANGE'][1]        
         arr = [[common_tests[meas_name]['LOCAL_RANGE'][0], x] for x in params]
 
-        flags = []
-        for a in arr:
-            #print (a[0],'-',a[1])
-            flag = a[0](df, **a[1])
-            flags.append(flag.tolist())
+        flags = np.zeros([len(arr),len(self.df.data)])
+        for n,a in enumerate(arr):
+            flag = a[0](self.df, **a[1])
+            flags[n] = flag
+        flags = flags.T
 
-        # format_flag       
-        print(flags,flags.count(-1))
-        if flags.count(-1)>0:
-            flags=-1
-        elif all([f == 0 for f in flags]):
-            flags = 0 
-        else: 
-            flags = 1  
-                        
-        print (flags)
-
-        #flags = common_tests[meas_name]['LOCAL_RANGE'][0](df,**params)   
-        #print (flags)
-        #self.assertEqual(list(flags),self.bad)
+        combined_flags = []
+        for f in flags:
+            if (f == -1).sum() > 0:
+                combined_flags.append(-1)
+            elif all([ff == 0 for ff in f]):
+                combined_flags.append(0)
+            else: 
+                combined_flags.append(1)
+                
+        self.assertEqual(combined_flags,self.bad)                                 
     
-
             
 if __name__ == '__main__':
     unittest.main()
