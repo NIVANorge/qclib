@@ -13,6 +13,7 @@ import datetime
 import numpy as np
 from QCTests import QCTests
 import Thresholds
+import itertools
 
 # '''
 # In the document 
@@ -43,20 +44,6 @@ common_tests = {
            'LOCAL_RANGE' : [QCTests.range_test, 
                             Thresholds.Local_Threshold_Ranges.Oxygen]}}
                             
-"""common_tests = {
-
-
-        '*':
-         { 'FROZEN_TEST': [QCTests.RT_frozen_test,{} 
-            # ],Correct Value for Missing Value
-           #'MISSING_VALUE': [QCTests.missing_value_test,{'nan':np.nan}
-                             ]},
-         'oxygen_concentration':
-         { 'GLOBAL_RANGE': [QCTests.range_test, 
-                            Thresholds.Global_Threshold_Ranges.Oxygen],
-           'LOCAL_RANGE' : [QCTests.range_test, 
-                            Thresholds.Local_Threshold_Ranges.Oxygen]}}"""
-
 class PlatformQC(QCTests):
 
     sampling_frequency = 60
@@ -88,23 +75,30 @@ class PlatformQC(QCTests):
             if type(self.qc_tests[key][test][1]) is list:
                 # ONLY LOCAL_RANGE TEST 
                 arr = [[test,self.qc_tests[key][test][0], x] for x in self.qc_tests[key][test][1]]
-                for a in arr:
+
+                for n,a in enumerate(arr):
                     flag = a[1](df, **a[2])
                     if test not in flags:
-                        flags[test] = flag.tolist()
+                        flags[test] = np.zeros([len(arr),len(df.data)])
+                        flags[test][n] = flag 
                     else:
-                        flags[test].append(flag[0])
-                # format_flag       
-                if flags[test].count(-1)>0:
-                    flags[test]=-1
-                elif all([f == 0 for f in flags[test]]):
-                    flags[test] = 0 
-                else: 
-                    flags[test] = 1       
+                        flags[test][n] = flag                       
+               
+                combined_flags = []
+                for f in flags[test].T:
+                    if (f == -1).sum() > 0:
+                        combined_flags.append(-1)
+                    elif all([ff == 0 for ff in f]):
+                        combined_flags.append(0)
+                    else: 
+                        combined_flags.append(1)                
+                flags[test] =  combined_flags
+                #print ('after' ,flags[test])
+    
             else:
                 flag = self.qc_tests[key][test][0](df, **self.qc_tests[key][test][1])
                 if test not in flags:
-                    flags[test] = flag[0]
+                    flags[test] = flag
             
         return flags
 
@@ -124,12 +118,37 @@ class PlatformQC(QCTests):
                     
     @classmethod
     def derive_overall_flag(cls,flags, system_flags):
-
+        #print ('derive_overall_flag',flags)
         derived_flags = [v for k,v in flags.items()]
-        flag = -1 if system_flags.count(-1) > 0 or derived_flags.count(-1) > 0 else 1
-        if all([v == 0 for v in derived_flags]):
-            flag = 0
-        return flag
+        n_meas = len(derived_flags[0])
+        
+        flgs = list(itertools.chain.from_iterable(derived_flags))        
+
+        if n_meas == 1 and len(flgs) > 1 : 
+            if all([ff == -1 for ff in flgs]):
+                overall_flags= -1
+            elif all([ff == 0 for ff in flgs]):
+                overall_flags= 0 
+            else: 
+                overall_flags= 1    
+            #print ('one meas, many tests',overall_flags) 
+        elif (n_meas == 1 and len(flgs) == 1) : 
+            overall_flags = flgs
+            #print ('only one', flgs)            
+        else:
+            overall_flags = []
+            # This loop does not take into accout 
+            # levels and system flags 
+            for f in np.array(derived_flags).T :
+                if all([ff == -1 for ff in f]):
+                    overall_flags.append(-1)
+                elif all([ff == 0 for ff in f]):
+                    overall_flags.append(0)
+                else: 
+                    overall_flags.append(1)            
+            #print ('long case ',n_meas,overall_flags)
+
+        return overall_flags
 
     @classmethod
     def CMEMScodes(cls, flags):
