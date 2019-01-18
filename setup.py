@@ -2,15 +2,7 @@
 """A setuptools based module for the NIVA tsb module/application.
 """
 
-from setuptools import setup, find_packages
-from codecs import open
-from os import path
-
-here = path.abspath(path.dirname(__file__))
-
-# Get the long description from the README.md file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
+from setuptools import setup
 
 setup(
     name='qclib',
@@ -21,7 +13,6 @@ setup(
     version='0.1',
 
     description="Module containing QC tests",
-    long_description=long_description,
 
     # The project's main homepage.
     url='https://github.com/NIVANorge/qclib',
@@ -53,7 +44,16 @@ setup(
     ],
 
     keywords='data quality tests',
-    packages=find_packages(exclude=['contrib', 'docs', 'tests']),
-    install_requires=['pandas', 'numpy'],
-    test_suite='tests',
+    packages=["."],
+    install_requires=[
+        'pandas',
+        'numpy',
+        'matplotlib'
+    ],
+    extras_require={
+      "test": [
+          "pytest"
+      ]
+    },
+    test_suite='qc_unittest',
 )
