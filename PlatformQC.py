@@ -63,16 +63,18 @@ class PlatformQC(QCTests):
 
         flags={}
         key = list(tests.keys())[0]
-        if key in ['temperature','oxygen_concentration','fluorescence']:
-            self.qc_tests[key].update(self.qc_tests['*']) 
-        
-        # uncomment to use tests from metadata 
+        if key in ['temperature','oxygen_concentration','fluorescence','salinity']:
+            self.qc_tests[key].update(self.qc_tests['*'])
+
+        # uncomment to use tests from metadata
         for test in tests[key]:
-        
 #        for test in self.qc_tests[key]:
 # TODO check why below was commented out
             #ns = self.qc_tests[key][test][0].size
             #df = df[0:ns]
+            if key not in self.qc_tests:
+                key = "*"
+
             if type(self.qc_tests[key][test][1]) is list:
                 # ONLY LOCAL_RANGE TEST 
                 arr = [[test,self.qc_tests[key][test][0], x] for x in self.qc_tests[key][test][1]]
@@ -97,6 +99,7 @@ class PlatformQC(QCTests):
                 #print ('after' ,flags[test])
     
             else:
+                print(df)
                 flag = self.qc_tests[key][test][0](df, **self.qc_tests[key][test][1])
                 if test not in flags:
                     flags[test] = flag
@@ -146,10 +149,24 @@ class PlatformQC(QCTests):
                 elif all([ff == 0 for ff in f]):
                     overall_flags.append(0)
                 else: 
-                    overall_flags.append(1)            
+                    overall_flags.append(1)
             #print ('long case ',n_meas,overall_flags)
 
         return overall_flags
+
+    @classmethod
+    def overall_derived_flag(cls, flags):
+        # print ('derive_overall_flag',flags)
+
+        if all([flg == 0 for flg in flags]):
+            return 0
+
+        for flg in flags:
+            if flg == -1:
+                return -1
+
+        overall_flag = 1
+        return overall_flag
 
     @classmethod
     def CMEMScodes(cls, flags):
