@@ -67,9 +67,10 @@ class PlatformQC(QCTests):
             self.qc_tests[key].update(self.qc_tests['*']) 
         
         # uncomment to use tests from metadata 
-        #for test in tests[key]:
+        for test in tests[key]:
         
-        for test in self.qc_tests[key]:
+#        for test in self.qc_tests[key]:
+# TODO check why below was commented out
             #ns = self.qc_tests[key][test][0].size
             #df = df[0:ns]
             if type(self.qc_tests[key][test][1]) is list:

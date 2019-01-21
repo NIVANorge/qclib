@@ -10,7 +10,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.1',
+    version='0.2.1',
 
     description="Module containing QC tests",
 
@@ -27,10 +27,10 @@ setup(
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         # How mature is this project? Common values are
-        #   3 - Alpha
-        #   4 - Beta
-        #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        #   0 - Alpha
+        #   1 - Beta
+        #   2 - Production/Stable
+        'Development Status :: 0 - Alpha',
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
