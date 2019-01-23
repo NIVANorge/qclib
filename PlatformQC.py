@@ -25,23 +25,23 @@ common_tests = {
 
      '*':
          { 'FROZEN_TEST': [QCTests.RT_frozen_test,{}],
-           'MISSING_VALUE': [QCTests.missing_value_test,{'nan':-999}
+           'MISSING_VALUE_TEST': [QCTests.missing_value_test,{'nan':-999}
                              ]},
      'temperature':
-         { 'GLOBAL_RANGE': [QCTests.range_test, 
+         { 'GLOBAL_RANGE_TEST': [QCTests.range_test,
                             Thresholds.Global_Threshold_Ranges.Temperature]},
      'salinity':
-         { 'GLOBAL_RANGE': [QCTests.range_test, 
+         { 'GLOBAL_RANGE_TEST': [QCTests.range_test,
                             Thresholds.Global_Threshold_Ranges.Salinity]},
      'fluorescence':
-         { 'GLOBAL_RANGE': [QCTests.range_test, 
+         { 'GLOBAL_RANGE_TEST': [QCTests.range_test,
                             Thresholds.Global_Threshold_Ranges.Fluorescence],
-           'LOCAL_RANGE' : [QCTests.range_test, 
+           'LOCAL_RANGE_TEST' : [QCTests.range_test,
                             Thresholds.Local_Threshold_Ranges.Fluorescence]},
      'oxygen_concentration':
-         { 'GLOBAL_RANGE': [QCTests.range_test, 
+         { 'GLOBAL_RANGE_TEST': [QCTests.range_test,
                             Thresholds.Global_Threshold_Ranges.Oxygen],
-           'LOCAL_RANGE' : [QCTests.range_test, 
+           'LOCAL_RANGE_TEST' : [QCTests.range_test,
                             Thresholds.Local_Threshold_Ranges.Oxygen]}}
                             
 class PlatformQC(QCTests):
