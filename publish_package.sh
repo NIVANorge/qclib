@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 
-set -x 
 VERSION=$(python setup.py --version)
 python setup.py sdist
 
