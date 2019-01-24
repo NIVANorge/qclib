@@ -46,7 +46,7 @@ class QCTests(object):
                 if len(args[0]) < size:
 #FIXME distinguish cases when fetching data failed (raise error) and when there is no data (ship just started,...)
 #                raise Exception("Too few data points to perform this test")
-                    logging.warn("Too few data points to perform this test")
+                    logging.warning("Too few data points to perform %s test" % func.__name__)
                 return func(clf, *args, **opts)
             func_wrapper.size = size
             return func_wrapper
@@ -140,7 +140,7 @@ class QCTests(object):
         Consecutive data with exactly the same value are flagged as bad
         """
         if len(df["data"]) < 5: 
-            print ('not enough data points')
+            # print ('not enough data points')
             flags = np.zeros(len(df["data"]), dtype=np.int8)
         else:     
             flags = np.ones(len(df["data"]), dtype=np.int8) 
