@@ -99,7 +99,6 @@ class PlatformQC(QCTests):
                 #print ('after' ,flags[test])
     
             else:
-                print(df)
                 flag = self.qc_tests[key][test][0](df, **self.qc_tests[key][test][1])
                 if test not in flags:
                     flags[test] = flag
@@ -155,7 +154,7 @@ class PlatformQC(QCTests):
         return overall_flags
 
     @classmethod
-    def overall_derived_flag(cls, flags):
+    def get_overall_rt_flag(cls, flags):
         # print ('derive_overall_flag',flags)
 
         if all([flg == 0 for flg in flags]):
@@ -167,6 +166,11 @@ class PlatformQC(QCTests):
 
         overall_flag = 1
         return overall_flag
+
+    @classmethod
+    def get_rt_flag(cls, flags):
+        flag = int(flags[0])
+        return flag
 
     @classmethod
     def CMEMScodes(cls, flags):
