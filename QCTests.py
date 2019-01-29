@@ -91,7 +91,7 @@ class QCTests(object):
 
         if 'months' in opts and ('time' in df.columns):
             meta_months = pd.Series([
-            time.strptime(str(n),'%Y-%m-%dT%H:%M:%S').tm_mon for n in df['time']])
+            time.strptime(str(n),'%Y-%m-%d %H:%M:%S').tm_mon for n in df['time']])
             mask &= meta_months.isin(opts['months'])
 
         if ('area' in opts):
