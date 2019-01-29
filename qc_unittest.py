@@ -48,7 +48,7 @@ class Tests(unittest.TestCase):
        'SHIP_CODE' :         ['FA','FA','FA','FA','FA']
         }
         
-    now =  '2017-01-12T14:12:06'    
+    now =  '2017-01-12 14:12:06'
     signal_meta = {
          "time" : [now,now,now,now,now],
          "name":  ['TF','TF','TF','TF','TF'],
