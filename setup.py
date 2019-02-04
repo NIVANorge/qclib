@@ -3,6 +3,7 @@
 """
 
 from setuptools import setup
+import qclib
 
 setup(
     name='qclib',
@@ -10,8 +11,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.2.7',
-
+    version=qclib.__version__,
     description="Module containing QC tests",
 
     # The project's main homepage.

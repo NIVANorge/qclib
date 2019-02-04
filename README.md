@@ -49,12 +49,8 @@ This class is a base for PlatformQC.
 Defines threshold values for range tests.
 
 
-# TODO
+# Version update
 
-1. Update all function def in QCTests to the new input (currently only range_test and missing_value test work)
-2. Required number of samples in the decorators should be updated accoring to needs (now all have 1)
-3. Add timestamp info on the returned flags (required for spike)
-4. Add logic testing
+In order to update qclib version, update __version__ attribute in qclib/__init__.py
 
-Note that geographical information (latitude and longitude) is only provided for the latest
-timestamp.
+
