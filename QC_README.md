@@ -60,6 +60,11 @@ Description:
         
    
         
-![Areas for Local Range Test](../figs/Local_range_test_areas.png)        
-      
+![Areas for Local Range Test](../figs/Local_range_test_areas.png) 
+
+TODO: 
+* Tests/flags Hierarchy description 
+* More tests description 
+* Visualize ranges ?
+
         
