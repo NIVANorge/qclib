@@ -70,10 +70,9 @@ class PlatformQC(QCTests):
         #for test in tests[key]:
         
         for test in self.qc_tests[key]:
-            #ns = self.qc_tests[key][test][0].size
-            #df = df[0:ns]
+            # ONLY LOCAL_RANGE TEST            
             if type(self.qc_tests[key][test][1]) is list:
-                # ONLY LOCAL_RANGE TEST 
+
                 arr = [[test,self.qc_tests[key][test][0], x] for x in self.qc_tests[key][test][1]]
 
                 for n,a in enumerate(arr):
@@ -85,16 +84,18 @@ class PlatformQC(QCTests):
                         flags[test][n] = flag                       
                
                 combined_flags = []
+               
                 for f in flags[test].T:
                     if (f == -1).sum() > 0:
                         combined_flags.append(-1)
                     elif all([ff == 0 for ff in f]):
                         combined_flags.append(0)
-                    else: 
-                        combined_flags.append(1)                
+                    else:
+                        combined_flags.append(1)
                 flags[test] =  combined_flags
-                #print ('after' ,flags[test])
-    
+                # TODO: Correct, function should return dataframe 
+                # with timestamp as index 
+            # all other tests  
             else:
                 flag = self.qc_tests[key][test][0](df, **self.qc_tests[key][test][1])
                 if test not in flags:
@@ -140,6 +141,7 @@ class PlatformQC(QCTests):
             # This loop does not take into accout 
             # levels and system flags 
             for f in np.array(derived_flags).T :
+                # any of tests -1 
                 if all([ff == -1 for ff in f]):
                     overall_flags.append(-1)
                 elif all([ff == 0 for ff in f]):

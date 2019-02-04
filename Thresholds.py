@@ -1,9 +1,9 @@
 """
 .. moduleauthor: Pierre Jaccard <pja@niva.no>
-
 Provides package access to Global variables
+(C) 14. jan. 2016 Pierre Jaccard, Elizaveta Protsenko
 
-(C) 14. jan. 2016 Pierre Jaccard
+Source 1 = http://archimer.ifremer.fr/doc/00251/36232/ 
 """
    
 class Areas:
@@ -55,10 +55,7 @@ class Areas:
 
 
 class Global_Threshold_Ranges: 
-    '''
-    from 
-    http://archimer.ifremer.fr/doc/00251/36232/
-    '''    
+    ''' from Source 1 ''' 
     Temperature =  { 'min': -2.5, 'max': 40.0 }
     Salinity =     { 'min':  2.0, 'max': 41.0 }
     Fluorescence = { 'min': -0.1, 'max': 80.0 }
@@ -67,10 +64,7 @@ class Global_Threshold_Ranges:
     Temperature_Ferrybox = { 'min': -2.5, 'max': 100.0 }
     
 class Local_Threshold_Ranges: 
-    '''
-    from 
-    http://archimer.ifremer.fr/doc/00251/36232/
-    '''
+    ''' from Source 1 '''
     all_months = [1,2,3,4,5,6,7,8,9,10,11,12] 
         
     Fluorescence =[ 
