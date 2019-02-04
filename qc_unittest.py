@@ -63,7 +63,7 @@ class Tests(unittest.TestCase):
     # flags to check tests 
     bad = [-1,-1,-1,-1,-1]
    
-    def test_frozen(self):
+    def test_all_frozen(self):
         ''' Checks if values are frozen for 5 or more values in a row 
             should give -1 flags for bad data '''
         df_frozen = pd.DataFrame()
@@ -71,6 +71,12 @@ class Tests(unittest.TestCase):
         flags = common_tests['*']['FROZEN_TEST'][0](df_frozen)
 
         self.assertEqual(list(flags),self.bad)
+
+    def test_part_frozen(self):
+        df_frozen = pd.DataFrame()
+        df_frozen['data'] = [5.,5.,5.,5.,5.,0.,1.]           
+        flags = common_tests['*']['FROZEN_TEST'][0](df_frozen)
+        self.assertEqual(list(flags),[-1,1,1,0,0,0,0])        
 
     def test_missing_value(self): 
         ''' Checks if values are missing with defined value 
@@ -88,7 +94,6 @@ class Tests(unittest.TestCase):
         meas_name = 'salinity'
         self.df['data'] = self.bad_df[meas_name]
         params = common_tests[meas_name]['GLOBAL_RANGE'][1]
-
         flags = common_tests[meas_name]['GLOBAL_RANGE'][0](self.df,**params)   
 
         self.assertEqual(list(flags),self.bad)
