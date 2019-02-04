@@ -4,6 +4,10 @@
 .settings/
 __pycache__/
 qclib.egg-info/
+.eggs
+dist
+.idea
+venv
 
 
 

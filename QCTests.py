@@ -50,7 +50,7 @@ class QCTests(object):
                 if len(args[0]) < size:
 #FIXME distinguish cases when fetching data failed (raise error) and when there is no data (ship just started,...)
 #                raise Exception("Too few data points to perform this test")
-                    logging.warn("Too few data points to perform this test")
+                    logging.warning("Too few data points to perform %s test" % func.__name__)
                 return func(clf, *args, **opts)
             func_wrapper.size = size
             return func_wrapper
@@ -95,7 +95,7 @@ class QCTests(object):
 
         if 'months' in opts and ('time' in df.columns):
             meta_months = pd.Series([
-            time.strptime(n,'%Y-%m-%dT%H:%M:%S').tm_mon for n in df['time']])
+            time.strptime(str(n),'%Y-%m-%d %H:%M:%S').tm_mon for n in df['time']])
             mask &= meta_months.isin(opts['months'])
 
         if ('area' in opts):

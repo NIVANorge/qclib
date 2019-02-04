@@ -18,7 +18,6 @@ def init(name):
 def execute(obj, df, tests):
     
     flags = obj.applyQC(df,tests)
-    print (flags)
     #obj.format_flags(flags)
     return flags
 
