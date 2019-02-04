@@ -5,7 +5,12 @@
 Quality control tests to be applied on data. 
 Tests are implemented according to the document  
 Quality Control of Biogeochemical Measurements
-http://archimer.ifremer.fr/doc/00251/36232/34792.pdf  
+
+Source documents:
+Source 1 https://archimer.ifremer.fr/doc/00251/36232/34792.pdf 
+[2 MyOcean] http://www.coriolis.eu.org/content/download/4920/36075/file/Recommendations%20for%20RTQC%20procedures_V1_2.pdf 
+
+
 
 Created on 6. feb. 2018
 '''
@@ -22,17 +27,16 @@ class QCTests(object):
     """
     Real Time QC Tests 
     These tests are applied to one signal
-    (data aggregated during 15 minutes and sent to the cloud 
+    (data aggregated during N #check minutes and sent to the cloud)
     
-    Specific tests are defined here. Add whatever new tests. 
     The standard calling syntax for these tests is :    
       obj.specific_qc_test_function(meta, data, **opts)
     
     where        
-      meta: a dict including any meta information required to perform the test,
-            for example position and time (see specific tests below)
-      data: normally, this is the data of the parameter to be tested. 
-            However. some tests require a data structure or aggregation.
+
+      df: data and supporting data (meta) of the parameter to be tested . 
+          some tests require a data structure or aggregation
+
       opts: options specific to the test, for example threshold values
         
     Return value from tests is an array of np.int8
@@ -137,16 +141,26 @@ class QCTests(object):
     @check_size(5)
     def RT_frozen_test(cls, df, **opts):
         """
+        df[0] - last timestamp!
         Consecutive data with exactly the same value are flagged as bad
         """
-        if len(df["data"]) < 5: 
+        flags = np.zeros(len(df["data"]), dtype=np.int8) 
+        d = df['data']
+        if len(d) < 5: 
             print ('not enough data points')
-            flags = np.zeros(len(df["data"]), dtype=np.int8)
-        else:     
-            flags = np.ones(len(df["data"]), dtype=np.int8) 
-            mask = (np.diff(df["data"][:]) == 0.0)
-            mask = np.concatenate((mask[0:1], mask))
-            flags[mask] = -1
+        elif len(d) == 5: 
+            v = all(d[n] == d[n+1] for n in range(4))
+            if v:
+                flags[:] = -1
+        elif len(d) > 5:        
+            for i in range(len(d) - 4):
+                #n = i 
+                v = all(d[n] == d[n+1] for n in np.arange(i,i+4))
+                if v:
+                    # assign -1 flag
+                    flags[i] = -1
+                else:
+                    flags[i] = 1
             
         return flags
    
@@ -215,13 +229,17 @@ class QCTests(object):
         return(good)
     
     @classmethod
-    @check_size(1)
+    @check_size(5)
     def argo_spike_test(clf, data, **opts):
         """
-        Spike test according to MyOcean for T and S parameters
-        http://www.coriolis.eu.org/content/download/4920/36075/file/Recommendations%20for%20RTQC%20procedures_V1_2.pdf
+        Spike test according to [2 MyOcean] for T and S parameters
+
         Options:
           threshold: threshold for consecutive double 3-values differences
+          returns an array of flags with 0 to not tested parts. 
+          current point (last) will always have 0 
+          Flags are changes for first timestamps from 0 to tested new
+          value 
         """
         good = np.ones(len(data), dtype=np.int8)
         diff = np.zeros(len(data), dtype=np.float64)
@@ -258,7 +276,7 @@ class QCTests(object):
     
     @classmethod
     @check_size(1)
-    def sensor_relationship_test(clf, df, **opts):
+    def sensor_relationship_test(clf, data, **opts):
         """
         Check if the relationship between related parameters is within a certain value.
         
