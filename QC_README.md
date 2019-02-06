@@ -18,19 +18,25 @@ https://archimer.ifremer.fr/doc/00298/40879/42267.pdf
 
 Flags meaning: 
 
-*  1  is PASSED 
-
+* 1  is PASSED 
 * -1 is FAILED 
+* 0 is NOT TESTED
 
-*  0 is NOT TESTED
+### real Time QC Tests  (class QCTests)
 
+#### 1. Frozen test
 
+The tests checks if 4 consecutive values before the tested value are equal. 
 
-##### real Time QC Tests  (class QCTests)
+dataframe is reversed in time (df[0] is the latest element) 
+
+array [5.,5., 5.,5., 5.,0.,1.] gives [-1,1, 1,0, 0,0,0] 
+
+#### 2. Range test
+
 `def range_test(clf, meta, data, **opts)`
 
 The Function is used by Global range test , Local range test
-
 
 Description:
 
