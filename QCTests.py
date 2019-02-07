@@ -10,7 +10,7 @@ Source documents:
 Source 1 https://archimer.ifremer.fr/doc/00251/36232/34792.pdf 
 [2 MyOcean] http://www.coriolis.eu.org/content/download/4920/36075/file/Recommendations%20for%20RTQC%20procedures_V1_2.pdf 
 
-
+Tests descriptions are at qc_readme/QC_README.md
 
 Created on 6. feb. 2018
 '''
@@ -62,34 +62,16 @@ class QCTests(object):
     @check_size(1)
     def range_test(clf, df, **opts):
         """
-        4.4 Global Range Tests 
-        4.5 Local Range Tests 
+        Global Range Tests 
+        Local Range Tests 
         
         Checks that data is within a specified range.Accepts time range 
         and geographic range. The latter is based on minimum and maximum 
         latitudes and longitudes values. An later improvement could be
         to accept a geographic box.  
-        
-        Options:         
-        * min    : minimum value (inclusive)
-        * max    : maximum value (inclusive)
-        * day_min: minimum date for which the test applies,
-                   can be `py:class:datetime.date` or a decimal date
-                   relative to 1950-01-01
-        * day_max: maximum date for which the test applies (same format as `day_min`) 
-        * lat_min: minimum latitude for which the test applies
-        * lat_max: maximum latitude for which the test applies
-        * lon_min: minimum longitude for which the test applies
-        * lon_max: maximum longitude for which the test applies
-        * area   : dictionary of polygon edges, with keys 'lat' and 'lon'. 
-                   These should be listed in CW order       
-        Data:
-        * time: corresponding array of time (relative to 1950-01-01)
-        * lat : corresponding array of latitudes
-        * lon : corresponding array of longitudes           
-        * data: measured data (eg. salinity, or temperature,...)
+
         """
-        
+      
         good = np.zeros(len(df["data"]), dtype=np.int8)
         mask = np.ones(len(df["data"]), dtype=np.bool)
 
@@ -141,7 +123,6 @@ class QCTests(object):
     @check_size(5)
     def RT_frozen_test(cls, df, **opts):
         """
-        df[0] - last timestamp!
         Consecutive data with exactly the same value are flagged as bad
         """
         flags = np.zeros(len(df["data"]), dtype=np.int8) 
