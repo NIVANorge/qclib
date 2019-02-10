@@ -14,11 +14,11 @@ import numpy as np
 import matplotlib as mpl
 import time
 import pandas as pd
-from utils.Thresholds import Local_Threshold_Ranges, Global_Threshold_Ranges
-from utils.qc_input import QCInput
+from Thresholds import Local_Threshold_Ranges, Global_Threshold_Ranges
+from qc_input import QCInput
 import functools
 import logging
-from utils.transform_input import merge_data
+from transform_input import merge_data
 
 
 class QCTests(object):
@@ -46,10 +46,12 @@ class QCTests(object):
         def check_data_size(func):
             @functools.wraps(func)
             def func_wrapper(clf, *args, **opts):
-                if len(args[0]) < size:
-                    logging.warning("Too few data points to perform %s test" % func.__name__)
+                if size > 1:
+                    if args[0].historical_data is None:
+                        logging.warning("No historical data available to perform %s test" % func.__name__)
+                    elif len(args[0].historical_data)+1 < size:
+                        logging.warning("Too few data points to perform %s test" % func.__name__)
                 return func(clf, *args, **opts)
-
             func_wrapper.size = size
             return func_wrapper
 
@@ -81,7 +83,7 @@ class QCTests(object):
         * area   : dictionary of polygon edges, with keys 'lat' and 'lon'. 
                    These should be listed in CW order
         """
-        df = pd.DataFrame.from_dict({"data": qcinput.value, "time": qcinput.timestamp})
+        df = pd.DataFrame.from_dict({"data": [qcinput.value], "time": [qcinput.timestamp]})
         good = np.zeros(len(df["data"]), dtype=np.int8)
         mask = np.ones(len(df["data"]), dtype=np.bool)
 
@@ -133,14 +135,17 @@ class QCTests(object):
         """
         Consecutive data with exactly the same value are flagged as bad
         """
-        df = pd.DataFrame.from_dict({"data": qcinput.value, "time": qcinput.timestamp})
+        df = pd.DataFrame.from_dict({"data": [qcinput.value], "time": [qcinput.timestamp]})
         df_delayed = qcinput.historical_data
         data = merge_data(df, df_delayed)
+        if len(data["data"]) < 5:
+            flags = np.zeros(len(df["data"]), dtype=np.int8)
+        else:
         # FIXME check only 5 points (in case there is more historical data)
-        flags = np.ones(len(data["data"]), dtype=np.int8)
-        mask = (np.diff(data["data"][:]) == 0.0)
-        mask = np.concatenate((mask[0:1], mask))
-        flags[mask] = -1
+            flags = np.ones(len(data["data"]), dtype=np.int8)
+            mask = (np.diff(data["data"][:]) == 0.0)
+            mask = np.concatenate((mask[0:1], mask))
+            flags[mask] = -1
 
         return int(flags[0])
 
