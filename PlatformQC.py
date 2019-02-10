@@ -8,10 +8,10 @@ Common classes and tools for platforms
 Created on 14. feb. 2018
 '''
 import numpy as np
-from utils.qc_input import QCInput
 from typing import Dict
 from QCTests import QCTests
-from utils import Thresholds
+import Thresholds
+from qc_input import QCInput
 import itertools
 
 # '''
@@ -78,15 +78,14 @@ class PlatformQC(QCTests):
                     else:
                         flags[test][n] = flag
 
-                combined_flags = []
-                for f in flags[test]:
-                    if (f == -1).sum() > 0:
-                        combined_flags.append(-1)
-                    elif all([ff == 0 for ff in f]):
-                        combined_flags.append(0)
-                    else:
-                        combined_flags.append(1)
-                flags[test] = int(combined_flags[0])
+                if all([flg == 0 for flg in flags[test]]):
+                    combined_flag = 0
+                elif any([flg == -1 for flg in flags[test]]):
+                    combined_flag = -1
+                else:
+                    combined_flag = 1
+                flags[test] = combined_flag
+
             else:
                 flag = self.qc_tests[key][test][0](qcinput, **self.qc_tests[key][test][1])
                 if test not in flags:
@@ -127,6 +126,20 @@ class PlatformQC(QCTests):
             # print ('long case ',n_meas,overall_flags)
 
         return overall_flags
+
+    @classmethod
+    def rt_get_overall_flag(cls, flags):
+        # print ('derive_overall_flag',flags)
+
+        if all([flg == 0 for flg in flags]):
+            return 0
+
+        for flg in flags:
+            if flg == -1:
+                return -1
+
+        overall_flag = 1
+        return overall_flag
 
     @classmethod
     def CMEMScodes(cls, flags):

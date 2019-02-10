@@ -2,13 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import PlatformQC
-import Thresholds
-
 
 class FerryboxQC(PlatformQC.PlatformQC):
-
-    sampling_frequency = 60
-    frequency_units = "seconds"
 
     def __init__(self):
         super().__init__()
