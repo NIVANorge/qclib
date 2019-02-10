@@ -7,10 +7,11 @@ Common classes and tools for platforms
 
 Created on 14. feb. 2018
 '''
-
 import numpy as np
+from utils.qc_input import QCInput
+from typing import Dict
 from QCTests import QCTests
-import Thresholds
+from utils import Thresholds
 import itertools
 
 # '''
@@ -22,35 +23,33 @@ import itertools
 common_tests = {
 
     '*':
-        {'frozen_test': [QCTests.RT_frozen_test, {}],
-         'missing_value_test': [QCTests.missing_value_test, {'nan': -999}
+        {'frozen_test': [QCTests.rt_frozen_test, {}],
+         'missing_value_test': [QCTests.rt_missing_value_test, {'nan': -999}
                                 ]},
     'temperature':
-        {'global_range_test': [QCTests.range_test,
+        {'global_range_test': [QCTests.rt_range_test,
                                Thresholds.Global_Threshold_Ranges.Temperature]},
     'salinity':
-        {'global_range_test': [QCTests.range_test,
+        {'global_range_test': [QCTests.rt_range_test,
                                Thresholds.Global_Threshold_Ranges.Salinity]},
     'fluorescence':
-        {'global_range_test': [QCTests.range_test,
+        {'global_range_test': [QCTests.rt_range_test,
                                Thresholds.Global_Threshold_Ranges.Fluorescence],
-         'local_range_test': [QCTests.range_test,
+         'local_range_test': [QCTests.rt_range_test,
                               Thresholds.Local_Threshold_Ranges.Fluorescence]},
     'oxygen_concentration':
-        {'global_range_test': [QCTests.range_test,
+        {'global_range_test': [QCTests.rt_range_test,
                                Thresholds.Global_Threshold_Ranges.Oxygen],
-         'local_range_test': [QCTests.range_test,
+         'local_range_test': [QCTests.rt_range_test,
                               Thresholds.Local_Threshold_Ranges.Oxygen]}}
 
 
 class PlatformQC(QCTests):
-    sampling_frequency = 60
-    frequency_units = "seconds"
 
     def __init__(self):
         self.qc_tests = common_tests.copy()
 
-    def applyQC(self, df, tests):
+    def applyQC(self, qcinput: QCInput, tests: Dict[str, str]) -> Dict[str, int]:
 
         """
       df : dataframe wih col: datetime, name (platform code), lon, lat, data
@@ -64,24 +63,17 @@ class PlatformQC(QCTests):
         if key in ['temperature', 'oxygen_concentration', 'fluorescence', 'salinity']:
             self.qc_tests[key].update(self.qc_tests['*'])
 
-        # uncomment to use tests from metadata
         for test in tests[key]:
-
-            #        for test in self.qc_tests[key]:
-            # TODO check why below was commented out
-            # ns = self.qc_tests[key][test][0].size
-            # df = df[0:ns]
             if key not in self.qc_tests:
                 key = "*"
 
-            if type(self.qc_tests[key][test][1]) is list:
-                # ONLY LOCAL_RANGE TEST 
+            if type(self.qc_tests[key][test][1]) is list:  # only range test
                 arr = [[test, self.qc_tests[key][test][0], x] for x in self.qc_tests[key][test][1]]
 
                 for n, a in enumerate(arr):
-                    flag = a[1](df, **a[2])
+                    flag = a[1](qcinput, **a[2])
                     if test not in flags:
-                        flags[test] = np.zeros([len(arr), len(df.data)])
+                        flags[test] = np.zeros(len(arr))
                         flags[test][n] = flag
                     else:
                         flags[test][n] = flag
@@ -94,28 +86,13 @@ class PlatformQC(QCTests):
                         combined_flags.append(0)
                     else:
                         combined_flags.append(1)
-                flags[test] = combined_flags
-                # print ('after' ,flags[test])
-
+                flags[test] = int(combined_flags[0])
             else:
-                flag = self.qc_tests[key][test][0](df, **self.qc_tests[key][test][1])
+                flag = self.qc_tests[key][test][0](qcinput, **self.qc_tests[key][test][1])
                 if test not in flags:
                     flags[test] = flag
 
         return flags
-
-    # FIXME: ask Liza and Pierre about CMEMScodes function (needed?) 
-    # and local_range (does format_flags do what it should...?)
-    '''def format_flags(self,flags):
-
-        for k,v in flags.items():
-            if type(v) is list:
-                if v.count(-1)>0:
-                    flags[k]=-1
-                elif  all([v == 0 for v in flags ]):
-                    flags[k]=0
-                else:
-                    flags[k]=1'''
 
     @classmethod
     def derive_overall_flag(cls, flags, system_flags):
@@ -152,25 +129,6 @@ class PlatformQC(QCTests):
         return overall_flags
 
     @classmethod
-    def get_overall_rt_flag(cls, flags):
-        # print ('derive_overall_flag',flags)
-
-        if all([flg == 0 for flg in flags]):
-            return 0
-
-        for flg in flags:
-            if flg == -1:
-                return -1
-
-        overall_flag = 1
-        return overall_flag
-
-    @classmethod
-    def get_rt_flag(cls, flags):
-        flag = int(flags[0])
-        return flag
-
-    @classmethod
     def CMEMScodes(cls, flags):
         # FIXME This function will not work with the new interface,
         # since flags do not have the top level key being measurement name.
@@ -202,4 +160,4 @@ class PlatformQC(QCTests):
             codes[signal_k] = code.tolist()
             overall_flags[signal_k] = overall_flag.tolist()
 
-        return (codes, overall_flags)
+        return codes, overall_flags
