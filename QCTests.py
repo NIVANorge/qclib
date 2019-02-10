@@ -12,11 +12,14 @@ Created on 6. feb. 2018
 
 import numpy as np
 import matplotlib as mpl
-import time 
-import pandas as pd 
-from Thresholds import Local_Threshold_Ranges,Global_Threshold_Ranges
+import time
+import pandas as pd
+from utils.Thresholds import Local_Threshold_Ranges, Global_Threshold_Ranges
+from utils.qc_input import QCInput
 import functools
 import logging
+from utils.transform_input import merge_data
+
 
 class QCTests(object):
     """
@@ -44,19 +47,17 @@ class QCTests(object):
             @functools.wraps(func)
             def func_wrapper(clf, *args, **opts):
                 if len(args[0]) < size:
-#FIXME distinguish cases when fetching data failed (raise error) and when there is no data (ship just started,...)
-#                raise Exception("Too few data points to perform this test")
                     logging.warning("Too few data points to perform %s test" % func.__name__)
                 return func(clf, *args, **opts)
+
             func_wrapper.size = size
             return func_wrapper
+
         return check_data_size
-
-
 
     @classmethod
     @check_size(1)
-    def range_test(clf, df, **opts):
+    def rt_range_test(clf, qcinput, **opts):
         """
         4.4 Global Range Tests 
         4.5 Local Range Tests 
@@ -78,37 +79,31 @@ class QCTests(object):
         * lon_min: minimum longitude for which the test applies
         * lon_max: maximum longitude for which the test applies
         * area   : dictionary of polygon edges, with keys 'lat' and 'lon'. 
-                   These should be listed in CW order       
-        Data:
-        * time: corresponding array of time (relative to 1950-01-01)
-        * lat : corresponding array of latitudes
-        * lon : corresponding array of longitudes           
-        * data: measured data (eg. salinity, or temperature,...)
+                   These should be listed in CW order
         """
-        
+        df = pd.DataFrame.from_dict({"data": qcinput.value, "time": qcinput.timestamp})
         good = np.zeros(len(df["data"]), dtype=np.int8)
         mask = np.ones(len(df["data"]), dtype=np.bool)
 
         if 'months' in opts and ('time' in df.columns):
             meta_months = pd.Series([
-            time.strptime(str(n),'%Y-%m-%d %H:%M:%S').tm_mon for n in df['time']])
+                time.strptime(str(n), '%Y-%m-%d %H:%M:%S').tm_mon for n in df['time']])
             mask &= meta_months.isin(opts['months'])
 
         if ('area' in opts):
             lon = opts['area']['lon']
             lat = opts['area']['lat']
             npt = len(lon)
-            vrt = np.ones([npt+1,2], dtype=np.float64)
-            vrt[0:npt,0] = lon
-            vrt[0:npt,1] = lat
-            vrt[npt,0:2] = [ lon[0], lat[0] ]
+            vrt = np.ones([npt + 1, 2], dtype=np.float64)
+            vrt[0:npt, 0] = lon
+            vrt[0:npt, 1] = lat
+            vrt[npt, 0:2] = [lon[0], lat[0]]
             path = mpl.path.Path(vrt)
-            pts = np.ones([len(df['lon']), 2])
-            pts[:,0] = df["lon"]
-            pts[:,1] = df['lat']
+            pts = np.ones([len(df), 2])
+            pts[:, 0] = qcinput.longitude
+            pts[:, 1] = qcinput.latitude
             inside = path.contains_points(pts)
             mask &= inside
-
 
         good[mask] = -1
         if 'min' in opts:
@@ -116,253 +111,262 @@ class QCTests(object):
         if 'max' in opts:
             mask &= (df["data"] <= opts['max'])
         good[mask] = 1
-        
-        return(good)
 
+        return int(good[0])
 
     @classmethod
     @check_size(1)
-    def missing_value_test(clf, df, **opts):
+    def rt_missing_value_test(clf, qcinput, **opts)->int:
         """
         Test data for a specific value defined for missing data.        
         Options:
           nan: value used for missing data
         """
-        good = np.ones(len(df["data"]), dtype=np.int8)
-        mask = (df["data"] == opts['nan'])
-        good[mask] = -1
-        return(good)
+        flag = 1
+        if qcinput.value == opts['nan']:
+            flag = -1
+        return flag
 
     @classmethod
     @check_size(5)
-    def RT_frozen_test(cls, df, **opts):
+    def rt_frozen_test(cls, qcinput: QCInput) -> int:
         """
         Consecutive data with exactly the same value are flagged as bad
         """
-        if len(df["data"]) < 5: 
-            # print ('not enough data points')
-            flags = np.zeros(len(df["data"]), dtype=np.int8)
-        else:     
-            flags = np.ones(len(df["data"]), dtype=np.int8) 
-            mask = (np.diff(df["data"][:]) == 0.0)
-            mask = np.concatenate((mask[0:1], mask))
-            flags[mask] = -1
-            
-        return flags
-   
-    @classmethod
-    @check_size(1)
-    def aic_spike_test(clf, data, **opts):
-        """
-        Executes spike test using an estimate of 
-        Aikake Information Criterion.      
-        This methods requires the last 4 points prior to the
-        first point to test.
-        """
-        good = np.zeros(len(data), dtype=np.int8)
-        mask = np.zeros(len(data), dtype=np.bool)
-        ii = range(4,len(data))
-        for i in ii:
-            jj = range(4)
-            ig = i - range(1,5)
-            sg = np.std(data[ig])
-            ib = i - range(5)
-            sb = np.std(data[ib])
-            Ug = 4*np.log(sg)
-            Ub = 4*np.log(sb) - self.COEF_SPIKE
-            if (Ug < Ub):
-                good[i] = -1
-            else:
-                good[i] = 1
-        return(good)
-    
-    @classmethod
-    @check_size(1)
-    def bioargo_spike_test(clf, data, **opts):
-        """
-        Spike test according to BIO ARGO
-        
-        Options:
-          p10_min: factor for minimum 10 percentile 
-          median difference
-          p10_max: factor for maximum 10 percentile 
-          median difference
-          p90_min: factor for minimum 90 percentile 
-          median difference
-          p90_max: factor for maximum 90 percentile 
-          median difference
-        """
-        good = np.ones(len(data), dtype=np.int8)
-        diff = np.zeros(len(data), dtype=np.float64)
-        ii   = range(2,len(data)-2)
-        for i in ii:
-            jj = range(i-2,i+2)
-            diff[i] = data[i] - np.median(data[jj])
-        p10  = np.percentile(diff,10)
-        p90  = np.percentile(diff,90)
-        mask = np.ones(len(data), dtype=np.bool)
-        if 'p10_min' in opts:
-            mask &= (diff >= opts['p10_min']*p10)
-        if 'p10_max' in opts:
-            mask &= (diff <= opts['p10_max']*p10)
-        if 'p90_min' in opts:
-            mask &= (diff >= opts['p90_min']*p90)
-        if 'p90_max' in opts:
-            mask &= (diff <= opts['p90_max']*p90)
-        good[~mask] = -1
-        good[:2]  = 0
-        good[-2:] = 0
-        return(good)
-    
-    @classmethod
-    @check_size(1)
-    def argo_spike_test(clf, data, **opts):
-        """
-        Spike test according to MyOcean for T and S parameters
-        http://www.coriolis.eu.org/content/download/4920/36075/file/Recommendations%20for%20RTQC%20procedures_V1_2.pdf
-        Options:
-          threshold: threshold for consecutive double 3-values differences
-        """
-        good = np.ones(len(data), dtype=np.int8)
-        diff = np.zeros(len(data), dtype=np.float64)
-        ii   = range(1,len(data)-1)
-        for i in ii:
-            diff[i] = np.abs(data[i] - 0.5*(data[i-1]+data[i+1])) - 0.5*np.abs(data[i+1]-data[i-1])
-        mask = (diff >= opts['threshold'])
-        good[mask] = -1
-        good[0]  = 0
-        good[-1] = 0
-        return(good)
-        
-    @classmethod
-    @check_size(1)
-    def sensor_comparison_test(clf, data, **opts):
-        """
-        Check whether two sensors measuring the same parameter
-        provide a similar value.        
-        Argument data is a tuple (s1, s2) with measurement vectors
-        from sensor 1 and sensor 2 respectively.         
-        Options:
-          threshold: maximum difference allowed
-          
-          
-        Here the data dataframe should be changed in order 
-        to have two dependent parameters   
-          
-        """
-        good = np.ones(data.shape[0], dtype=np.int8)
-        diff = np.abs(data[1]-data[0])
-        mask = (diff > opts['threshold'])
-        good[mask] = -1
-        return(good)
-    
-    @classmethod
-    @check_size(1)
-    def sensor_relationship_test(clf, df, **opts):
-        """
-        Check if the relationship between related parameters is within a certain value.
-        
-        Argument data is a tuple (p1, p2) with vectors of measurements from parameter 1 and 
-        parameter 2 respectively.
-        Here the data dataframe should be changed in order 
-        to have two dependent parameters     
-                     
-        Options:
-          p1_min: minimum difference allowed for parameter p1
-          p1_max: maximum difference allowed for parameter p1
-          p2_min: minimum difference allowed for parameter p2
-          p2_max: maximum difference allowed for parameter p2
-                    
-        """
-        good = np.ones(data.shape[0], dtype=np.int8)
-        mask = np.ones(data.shape[0], dtype=np.bool)
-        if 'p1_min' in opts:
-            mask &= (data[0] >= opts['p1_min'])
-        if 'p1_max' in opts:
-            mask &= (data[0] <= opts['p1_max'])
-        if 'p2_min' in opts:
-            mask &= (data[1] >= opts['p2_min'])
-        if 'p2_max' in opts:
-            mask &= (data[1] <= opts['p2_max'])
-        good[~mask] = -1
-        return(good)
-    
-
-    
-    @classmethod
-    @check_size(1)
-    def DM_frozen_test(cls, meta, data, **opts): #self,
-        """
-        Consecutive data with exactly the same value are flagged as bad.
-        For the delayed mode we should add more datapoints 
-        """
-        good = np.ones(len(data), dtype=np.int8) #typo)? 
-        mask = (np.diff(data[:]) == 0.0)
+        df = pd.DataFrame.from_dict({"data": qcinput.value, "time": qcinput.timestamp})
+        df_delayed = qcinput.historical_data
+        data = merge_data(df, df_delayed)
+        # FIXME check only 5 points (in case there is more historical data)
+        flags = np.ones(len(data["data"]), dtype=np.int8)
+        mask = (np.diff(data["data"][:]) == 0.0)
         mask = np.concatenate((mask[0:1], mask))
-        good[mask] = -1
-        return(good)
+        flags[mask] = -1
 
-    
-    @classmethod
-    @check_size(1)
-    def argo_gradient_test(clf, meta, data, **opts):
-        """
-        Gradient test according to BIO ARGO
-        
-        Options:
-          threshold: threshold for consecutive 3-values difference
-        """
-        good = np.ones(len(data),  dtype=np.int8)
-        diff = np.zeros(len(data), dtype=np.float64)
-        ii   = range(1,len(data)-1)
-        for i in ii:
-            diff[i] = np.abs(data[i] - 0.5*(data[i-1]+data[i+1]))
-        mask = (diff >= opts['threshold'])
-        good[mask] = -1
-        good[0]  = 0
-        good[-1] = 0
-        return(good)
-    
-    @classmethod
-    @check_size(5)
-    def frozen_profile_test(clf, meta, data, **opts):
-        """
-        Test for frozen profiles.In this case,
-        data is a tuple with (depth, data) 
-        where depth and data are vectors of the same length. 
-        ! This test flags the whole profile.
-        
-        Options:
-            mean_delta: max value for the mean profile difference
-            min_delta : max value for the minimum profile difference
-            max_delta : max value for the maximum profile difference          
-        Meta:
-            previous_profile: similar data tuple for the previous profile
-        """
-        good = np.zeros(data.shape[0], dtype=np.int8)
-        if 'previous_profile' in meta:
-            prev = meta['previous_profile']
-            zmax = min([np.max(data[0], prev[0])])
-            slab = range(0,zmax,50)
-            diff = np.zeros(len(slab), dtype=np.float64)
-            for i in range(len(slab)):
-                zmin = slab[i]
-                zmax = zmin + 50
-                ii = (data[0] >= zmin) & (data[0] < zmax)
-                jj = (prev[0] >= zmin) & (prev[0] < zmax)
-                if not np.any(ii) or not np.any(jj):
-                    diff[i] = np.nan
-                    break
-                else:
-                    diff[i] = np.median(data[1][ii]) - np.median(prev[1][jj])
-            if not np.any(np.isnan(diff)):
-                good  = np.ones(len(data), dtype=np.int8)
-                test  = (np.mean(diff) <= opts['delta_mean'])
-                test &= (np.min(diff)  <= opts['delta_min'])
-                test &= (np.max(diff)  <= opts['delta_max'])
-                if not test:
-                    good *= -1
-        return(good)     
-    
+        return int(flags[0])
 
 
+    # @classmethod
+    # @check_size(1)
+    # def missing_value_test_array(clf, qcinput, **opts):
+    #      """
+    #         Test data for a specific value defined for missing data.
+    #         Options:
+    #           nan: value used for missing data
+    #         """
+    #
+    #     df = pd.DataFrame.from_dict({"data": qcinput.value, "time": qcinput.timestamp})
+    #     good = np.ones(len(df["data"]), dtype=np.int8)
+    #     mask = (df["data"] == opts['nan'])
+    #     good[mask] = -1
+    #     return good
+
+        # @classmethod
+    # @check_size(1)
+    # def aic_spike_test(clf, data, **opts):
+    #     """
+    #     Executes spike test using an estimate of
+    #     Aikake Information Criterion.
+    #     This methods requires the last 4 points prior to the
+    #     first point to test.
+    #     """
+    #     good = np.zeros(len(data), dtype=np.int8)
+    #     mask = np.zeros(len(data), dtype=np.bool)
+    #     ii = range(4, len(data))
+    #     for i in ii:
+    #         jj = range(4)
+    #         ig = i - range(1, 5)
+    #         sg = np.std(data[ig])
+    #         ib = i - range(5)
+    #         sb = np.std(data[ib])
+    #         Ug = 4 * np.log(sg)
+    #         Ub = 4 * np.log(sb) - self.COEF_SPIKE
+    #         if (Ug < Ub):
+    #             good[i] = -1
+    #         else:
+    #             good[i] = 1
+    #     return (good)
+    #
+    # @classmethod
+    # @check_size(1)
+    # def bioargo_spike_test(clf, data, **opts):
+    #     """
+    #     Spike test according to BIO ARGO
+    #
+    #     Options:
+    #       p10_min: factor for minimum 10 percentile
+    #       median difference
+    #       p10_max: factor for maximum 10 percentile
+    #       median difference
+    #       p90_min: factor for minimum 90 percentile
+    #       median difference
+    #       p90_max: factor for maximum 90 percentile
+    #       median difference
+    #     """
+    #     good = np.ones(len(data), dtype=np.int8)
+    #     diff = np.zeros(len(data), dtype=np.float64)
+    #     ii = range(2, len(data) - 2)
+    #     for i in ii:
+    #         jj = range(i - 2, i + 2)
+    #         diff[i] = data[i] - np.median(data[jj])
+    #     p10 = np.percentile(diff, 10)
+    #     p90 = np.percentile(diff, 90)
+    #     mask = np.ones(len(data), dtype=np.bool)
+    #     if 'p10_min' in opts:
+    #         mask &= (diff >= opts['p10_min'] * p10)
+    #     if 'p10_max' in opts:
+    #         mask &= (diff <= opts['p10_max'] * p10)
+    #     if 'p90_min' in opts:
+    #         mask &= (diff >= opts['p90_min'] * p90)
+    #     if 'p90_max' in opts:
+    #         mask &= (diff <= opts['p90_max'] * p90)
+    #     good[~mask] = -1
+    #     good[:2] = 0
+    #     good[-2:] = 0
+    #     return (good)
+    #
+    # @classmethod
+    # @check_size(1)
+    # def argo_spike_test(clf, data, **opts):
+    #     """
+    #     Spike test according to MyOcean for T and S parameters
+    #     http://www.coriolis.eu.org/content/download/4920/36075/file/Recommendations%20for%20RTQC%20procedures_V1_2.pdf
+    #     Options:
+    #       threshold: threshold for consecutive double 3-values differences
+    #     """
+    #     good = np.ones(len(data), dtype=np.int8)
+    #     diff = np.zeros(len(data), dtype=np.float64)
+    #     ii = range(1, len(data) - 1)
+    #     for i in ii:
+    #         diff[i] = np.abs(data[i] - 0.5 * (data[i - 1] + data[i + 1])) - 0.5 * np.abs(data[i + 1] - data[i - 1])
+    #     mask = (diff >= opts['threshold'])
+    #     good[mask] = -1
+    #     good[0] = 0
+    #     good[-1] = 0
+    #     return (good)
+    #
+    # @classmethod
+    # @check_size(1)
+    # def sensor_comparison_test(clf, data, **opts):
+    #     """
+    #     Check whether two sensors measuring the same parameter
+    #     provide a similar value.
+    #     Argument data is a tuple (s1, s2) with measurement vectors
+    #     from sensor 1 and sensor 2 respectively.
+    #     Options:
+    #       threshold: maximum difference allowed
+    #
+    #
+    #     Here the data dataframe should be changed in order
+    #     to have two dependent parameters
+    #
+    #     """
+    #     good = np.ones(data.shape[0], dtype=np.int8)
+    #     diff = np.abs(data[1] - data[0])
+    #     mask = (diff > opts['threshold'])
+    #     good[mask] = -1
+    #     return (good)
+    #
+    # @classmethod
+    # @check_size(1)
+    # def sensor_relationship_test(clf, df, **opts):
+    #     """
+    #     Check if the relationship between related parameters is within a certain value.
+    #
+    #     Argument data is a tuple (p1, p2) with vectors of measurements from parameter 1 and
+    #     parameter 2 respectively.
+    #     Here the data dataframe should be changed in order
+    #     to have two dependent parameters
+    #
+    #     Options:
+    #       p1_min: minimum difference allowed for parameter p1
+    #       p1_max: maximum difference allowed for parameter p1
+    #       p2_min: minimum difference allowed for parameter p2
+    #       p2_max: maximum difference allowed for parameter p2
+    #
+    #     """
+    #     good = np.ones(data.shape[0], dtype=np.int8)
+    #     mask = np.ones(data.shape[0], dtype=np.bool)
+    #     if 'p1_min' in opts:
+    #         mask &= (data[0] >= opts['p1_min'])
+    #     if 'p1_max' in opts:
+    #         mask &= (data[0] <= opts['p1_max'])
+    #     if 'p2_min' in opts:
+    #         mask &= (data[1] >= opts['p2_min'])
+    #     if 'p2_max' in opts:
+    #         mask &= (data[1] <= opts['p2_max'])
+    #     good[~mask] = -1
+    #     return (good)
+    #
+    # @classmethod
+    # @check_size(1)
+    # def DM_frozen_test(cls, meta, data, **opts):  # self,
+    #     """
+    #     Consecutive data with exactly the same value are flagged as bad.
+    #     For the delayed mode we should add more datapoints
+    #     """
+    #     good = np.ones(len(data), dtype=np.int8)  # typo)?
+    #     mask = (np.diff(data[:]) == 0.0)
+    #     mask = np.concatenate((mask[0:1], mask))
+    #     good[mask] = -1
+    #     return (good)
+    #
+    # @classmethod
+    # @check_size(1)
+    # def argo_gradient_test(clf, meta, data, **opts):
+    #     """
+    #     Gradient test according to BIO ARGO
+    #
+    #     Options:
+    #       threshold: threshold for consecutive 3-values difference
+    #     """
+    #     good = np.ones(len(data), dtype=np.int8)
+    #     diff = np.zeros(len(data), dtype=np.float64)
+    #     ii = range(1, len(data) - 1)
+    #     for i in ii:
+    #         diff[i] = np.abs(data[i] - 0.5 * (data[i - 1] + data[i + 1]))
+    #     mask = (diff >= opts['threshold'])
+    #     good[mask] = -1
+    #     good[0] = 0
+    #     good[-1] = 0
+    #     return (good)
+    #
+    # @classmethod
+    # @check_size(5)
+    # def frozen_profile_test(clf, meta, data, **opts):
+    #     """
+    #     Test for frozen profiles.In this case,
+    #     data is a tuple with (depth, data)
+    #     where depth and data are vectors of the same length.
+    #     ! This test flags the whole profile.
+    #
+    #     Options:
+    #         mean_delta: max value for the mean profile difference
+    #         min_delta : max value for the minimum profile difference
+    #         max_delta : max value for the maximum profile difference
+    #     Meta:
+    #         previous_profile: similar data tuple for the previous profile
+    #     """
+    #     good = np.zeros(data.shape[0], dtype=np.int8)
+    #     if 'previous_profile' in meta:
+    #         prev = meta['previous_profile']
+    #         zmax = min([np.max(data[0], prev[0])])
+    #         slab = range(0, zmax, 50)
+    #         diff = np.zeros(len(slab), dtype=np.float64)
+    #         for i in range(len(slab)):
+    #             zmin = slab[i]
+    #             zmax = zmin + 50
+    #             ii = (data[0] >= zmin) & (data[0] < zmax)
+    #             jj = (prev[0] >= zmin) & (prev[0] < zmax)
+    #             if not np.any(ii) or not np.any(jj):
+    #                 diff[i] = np.nan
+    #                 break
+    #             else:
+    #                 diff[i] = np.median(data[1][ii]) - np.median(prev[1][jj])
+    #         if not np.any(np.isnan(diff)):
+    #             good = np.ones(len(data), dtype=np.int8)
+    #             test = (np.mean(diff) <= opts['delta_mean'])
+    #             test &= (np.min(diff) <= opts['delta_min'])
+    #             test &= (np.max(diff) <= opts['delta_max'])
+    #             if not test:
+    #                 good *= -1
+    #     return (good)
