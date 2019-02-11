@@ -14,11 +14,10 @@ import numpy as np
 import matplotlib as mpl
 import time
 import pandas as pd
-from utils.Thresholds import Local_Threshold_Ranges, Global_Threshold_Ranges
-from utils.qc_input import QCInput
+from .utils.qc_input import QCInput
 import functools
 import logging
-from utils.transform_input import merge_data, validate_data_for_time_gaps
+from .utils.transform_input import merge_data, validate_data_for_time_gaps
 
 
 class QCTests(object):
