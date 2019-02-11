@@ -13,7 +13,7 @@ def merge_data(df, df_delayed):
     return result
 
 
-def validate_data_for_time_gaps(df):
+def validate_data_for_time_gaps(df)->bool:
     dt = df["time"].diff().dropna()
     no_time_gaps = all(dt == dt[1])
-    assert no_time_gaps == True, "Time gaps in data"
+    return no_time_gaps

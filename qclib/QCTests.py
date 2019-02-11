@@ -143,8 +143,10 @@ class QCTests(object):
         flag = 1
         if len(data["data"]) < size:
             flag = 0
+        elif not validate_data_for_time_gaps(data):
+            logging.warning("Gaps in historical data, skipping test")
+            flag = -1
         else:
-            validate_data_for_time_gaps(data)
             data_diff = data["data"].diff().dropna()
             if all(data_diff[-size+1:]) == 0.0:
                 flag = -1
