@@ -10,6 +10,7 @@ from qclib.utils.Thresholds import Global_Threshold_Ranges
 import numpy as np
 from datetime import datetime
 
+
 platform_code = 'TF'
 common_tests = qclib.QC.init(platform_code).qc_tests
 
@@ -29,6 +30,10 @@ class Tests(unittest.TestCase):
     missing_data = QCInput(value=-999, timestamp=now)
     global_bad_salinity_data = QCInput(value=-77, timestamp=now)
     local_bad_oxygen_concentration_data = QCInput(value=1, timestamp=now, longitude=10.7087, latitude=59.9091)
+
+    final_flag_is_plus_one = [0,0,1,0,0]
+    final_flag_is_minus_one = [0, 0, 1, 0, -1]
+    final_flag_is_zero = [0, 0, 0, 0, 0]
 
     def test_rt_frozen_test(self):
         # Checks if values are frozen for 5 or more values in a row should give -1 flags for bad data '''
@@ -66,7 +71,15 @@ class Tests(unittest.TestCase):
         else:
             combined_flag = 1
         self.assertEqual(combined_flag, -1)
-    
-            
+
+    def test_final_flag_logic(self):
+        from qclib.PlatformQC import PlatformQC
+        flag = PlatformQC.rt_get_overall_flag(self.final_flag_is_plus_one)
+        self.assertEqual(flag, 1)
+        flag = PlatformQC.rt_get_overall_flag(self.final_flag_is_minus_one)
+        self.assertEqual(flag, -1)
+        flag = PlatformQC.rt_get_overall_flag(self.final_flag_is_zero)
+        self.assertEqual(flag, 0)
+
 if __name__ == '__main__':
     unittest.main()
