@@ -4,16 +4,14 @@ Created on 15. jan. 2018
 '''
 import unittest
 import pandas as pd 
-import QC
+import qclib.QC
 from qclib.utils.qc_input import QCInput
 from qclib.utils.Thresholds import Global_Threshold_Ranges
 import numpy as np
 from datetime import datetime
 
-
-
 platform_code = 'TF'
-common_tests = QC.init(platform_code).qc_tests
+common_tests = qclib.QC.init(platform_code).qc_tests
 
 
 class Tests(unittest.TestCase):
