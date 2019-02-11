@@ -140,11 +140,11 @@ class QCTests(object):
         df = pd.DataFrame.from_dict({"data": [qcinput.value], "time": [qcinput.timestamp]})
         df_delayed = qcinput.historical_data
         data = merge_data(df, df_delayed)
-        validate_data_for_time_gaps(data)
         flag = 1
         if len(data["data"]) < size:
             flag = 0
         else:
+            validate_data_for_time_gaps(data)
             data_diff = data["data"].diff().dropna()
             if all(data_diff[-size+1:]) == 0.0:
                 flag = -1
