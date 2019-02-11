@@ -8,7 +8,7 @@ class QCInput:
     timestamp: datetime
     longitude: Optional[float]
     latitude: Optional[float]
-    historical_data: Optional
+    historical_data: Optional # This is pandas DataFrame with data, indexed with timestamp
 
     def __init__(self, value, timestamp, longitude=None, latitude=None, historical_data=None):
         self.value = value
