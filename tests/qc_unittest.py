@@ -5,7 +5,8 @@ Created on 15. jan. 2018
 import unittest
 import pandas as pd 
 import QC
-from utils.qc_input import QCInput
+from qclib.utils.qc_input import QCInput
+from qclib.utils.Thresholds import Global_Threshold_Ranges
 import numpy as np
 from datetime import datetime
 

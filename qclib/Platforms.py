@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import PlatformQC
+from . import PlatformQC
 
 class FerryboxQC(PlatformQC.PlatformQC):
 
