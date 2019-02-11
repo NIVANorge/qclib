@@ -8,9 +8,9 @@ Created on 14. feb. 2018
 '''
 import numpy as np
 from typing import Dict
-from QCTests import QCTests
-from utils import Thresholds
-from utils.qc_input import QCInput
+from .QCTests import QCTests
+from .utils import Thresholds
+from .utils.qc_input import QCInput
 import itertools
 
 # '''

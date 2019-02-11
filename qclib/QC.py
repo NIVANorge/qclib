@@ -1,7 +1,7 @@
 from typing import Dict
-from PlatformQC import PlatformQC
-from utils.qc_input import QCInput
-import Platforms
+from .PlatformQC import PlatformQC
+from .utils.qc_input import QCInput
+from . import Platforms
 
 # NOTE: when a new platform is added it has to be added to the array below, with "new_platform": Common.PlatformQC
 platform_dict = {'TF': Platforms.FerryboxQC,
