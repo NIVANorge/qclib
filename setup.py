@@ -44,7 +44,7 @@ setup(
     ],
 
     keywords='data quality tests',
-    packages=["qclib", "."],
+    packages=["qclib", ".", "utils"],
     install_requires=[
         'pandas',
         'numpy',
@@ -55,5 +55,5 @@ setup(
           "pytest"
       ]
     },
-    test_suite='qc_unittest',
+    test_suite='tests.qc_unittest',
 )

@@ -14,11 +14,11 @@ import numpy as np
 import matplotlib as mpl
 import time
 import pandas as pd
-from Thresholds import Local_Threshold_Ranges, Global_Threshold_Ranges
-from qc_input import QCInput
+from utils.Thresholds import Local_Threshold_Ranges, Global_Threshold_Ranges
+from utils.qc_input import QCInput
 import functools
 import logging
-from transform_input import merge_data
+from utils.transform_input import merge_data, validate_data_for_time_gaps
 
 
 class QCTests(object):
@@ -59,7 +59,8 @@ class QCTests(object):
 
     @classmethod
     @check_size(1)
-    def rt_range_test(clf, qcinput, **opts):
+    def rt_range_test(clf, qcinput, **opts) -> int:
+        # FIXME since this test runs now per point, its definition can be significantly simplified
         """
         4.4 Global Range Tests 
         4.5 Local Range Tests 
@@ -135,19 +136,20 @@ class QCTests(object):
         """
         Consecutive data with exactly the same value are flagged as bad
         """
+        # FIXME: get size below from decorator (if possible)
+        size = 5
         df = pd.DataFrame.from_dict({"data": [qcinput.value], "time": [qcinput.timestamp]})
         df_delayed = qcinput.historical_data
         data = merge_data(df, df_delayed)
-        if len(data["data"]) < 5:
-            flags = np.zeros(len(df["data"]), dtype=np.int8)
+        validate_data_for_time_gaps(data)
+        flag = 1
+        if len(data["data"]) < size:
+            flag = 0
         else:
-        # FIXME check only 5 points (in case there is more historical data)
-            flags = np.ones(len(data["data"]), dtype=np.int8)
-            mask = (np.diff(data["data"][:]) == 0.0)
-            mask = np.concatenate((mask[0:1], mask))
-            flags[mask] = -1
-
-        return int(flags[0])
+            data_diff = data["data"].diff().dropna()
+            if all(data_diff[-size+1:]) == 0.0:
+                flag = -1
+        return flag
 
 
     # @classmethod

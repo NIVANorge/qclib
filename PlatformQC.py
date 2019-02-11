@@ -1,7 +1,6 @@
 '''
 .. moduleauthor: Pierre Jaccard <pja@niva.no>
 
-pyFerry.Platforms.Common
 ========================
 Common classes and tools for platforms
 
@@ -10,8 +9,8 @@ Created on 14. feb. 2018
 import numpy as np
 from typing import Dict
 from QCTests import QCTests
-import Thresholds
-from qc_input import QCInput
+from utils import Thresholds
+from utils.qc_input import QCInput
 import itertools
 
 # '''
