@@ -1,6 +1,6 @@
 from typing import Dict
 from PlatformQC import PlatformQC
-from qc_input import QCInput
+from utils.qc_input import QCInput
 import Platforms
 
 # NOTE: when a new platform is added it has to be added to the array below, with "new_platform": Common.PlatformQC
