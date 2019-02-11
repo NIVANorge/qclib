@@ -44,7 +44,7 @@ setup(
     ],
 
     keywords='data quality tests',
-    packages=find_packages(),
+    packages=["qclib", "qclib.utils", ".", "tests"],
     install_requires=[
         'pandas',
         'numpy',
