@@ -13,21 +13,27 @@ class Areas:
         'lon': (10.0, 10.0, 20.0, 30.0, 30.0)
         }
     NW_Shelf = {
-        'lat': ( 48,  68, 68, 48),
-        'lon': (-30, -30, 15, 15) 
+        'lat': ( 50,  60, 60, 50),
+        'lon': (-20, -20, 10, 10) 
         }
+    SW_Shelf = {
+        'lat': ( 25,  50, 50,25),
+        'lon': (-30, -30, 0, 0) 
+        }
+
     NorthSea = {
         'lat': (51, 60.0, 60., 51.), 
         'lon': (-3., -3., 10, 10)
         }         
     Arctic = {
-        'lat': (  67,   89,  89,  67), 
+        'lat': (  60,   89,  89,  60), 
         'lon': (-180, -180, 180, 180)
         }
     Iberic = {
         'lat': ( 30.0,  48.0, 48.0, 42.0, 40.0, 30.0),   
         'lon': (-30.0, -30.0,  0.0,  0.0, -5.5, -5.5)
         }
+
     MedSea = {
         'lat': (30.0, 40.0, 46.0, 46.0, 40.25, 40.25, 30.0), 
         'lon': (-5.5, -5.5,  5.0, 20.0, 26.60, 36.50, 36.5)
@@ -90,9 +96,19 @@ class Local_Threshold_Ranges:
                   {'min': 200.0, 'max': 500.0, 'area': Areas.Arctic ,'months': all_months},
                   {'min': 200.0, 'max': 500.0, 'area': Areas.NorthSea ,'months': all_months},  
                   {'min': 200.0, 'max': 500.0, 'area': Areas.Baltic ,'months': all_months},
-                  {'min': 200.0, 'max': 500.0, 'area': Areas.NW_Shelf ,'months': all_months},                   
+                  {'min': 200.0, 'max': 500.0, 'area': Areas.NW_Shelf ,'months': all_months},               
                 ]
 
+    Temperature = [
+                  {'min': -2.0, 'max': 24.0, 'area': Areas.NW_Shelf,'months': all_months}, 
+                  {'min': -2.0, 'max': 30.0, 'area': Areas.SW_Shelf,'months': all_months}, 
+                  {'min': -2.0, 'max': 24.0, 'area': Areas.Arctic,'months': all_months}, 
+                ] 
 
+    Salinity = [
+                  {'min': 0.0, 'max':37.0, 'area': Areas.NW_Shelf,'months': all_months}, 
+                  {'min': 0.0, 'max': 38.0, 'area': Areas.SW_Shelf,'months': all_months}, 
+                  {'min': -2.0, 'max': 24.0, 'area': Areas.Arctic,'months': all_months}, 
+                ] 
 
     
