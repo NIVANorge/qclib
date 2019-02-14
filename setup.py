@@ -55,5 +55,5 @@ setup(
           "pytest"
       ]
     },
-    test_suite='tests.qc_unittest',
+    test_suite='tests',
 )
