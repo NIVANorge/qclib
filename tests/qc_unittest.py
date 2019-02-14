@@ -25,7 +25,6 @@ class Tests(unittest.TestCase):
                   datetime.strptime('2017-01-12 14:09:06', '%Y-%m-%d %H:%M:%S'),
                   datetime.strptime('2017-01-12 14:10:06', '%Y-%m-%d %H:%M:%S'),
                   datetime.strptime('2017-01-12 14:11:06', '%Y-%m-%d %H:%M:%S')]})
-    historical_data = historical_data.set_index(["time"])
     frozen_data = QCInput(value=12, timestamp=now, historical_data=historical_data)
     missing_data = QCInput(value=-999, timestamp=now)
     global_bad_salinity_data = QCInput(value=-77, timestamp=now)
