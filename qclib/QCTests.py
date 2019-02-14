@@ -152,21 +152,28 @@ class QCTests(object):
                 flag = -1
         return flag
 
+    @classmethod
+    @check_size(1)
+    def argo_spike_test(clf, data, **opts):
+        """
+        Spike test according to MyOcean for T and S parameters
+        http://www.coriolis.eu.org/content/download/4920/36075/file/Recommendations%20for%20RTQC%20procedures_V1_2.pdf
 
-    # @classmethod
-    # @check_size(1)
-    # def missing_value_test_array(clf, qcinput, **opts):
-    #      """
-    #         Test data for a specific value defined for missing data.
-    #         Options:
-    #           nan: value used for missing data
-    #         """
-    #
-    #     df = pd.DataFrame.from_dict({"data": qcinput.value, "time": qcinput.timestamp})
-    #     good = np.ones(len(df["data"]), dtype=np.int8)
-    #     mask = (df["data"] == opts['nan'])
-    #     good[mask] = -1
-    #     return good
+       
+
+        Options:
+          threshold: threshold for consecutive double 3-values differences
+        """
+        good = np.ones(len(data), dtype=np.int8)
+        diff = np.zeros(len(data), dtype=np.float64)
+        ii = range(1, len(data) - 1)
+        for i in ii:
+            diff[i] = np.abs(data[i] - 0.5 * (data[i - 1] + data[i + 1])) - 0.5 * np.abs(data[i + 1] - data[i - 1])
+        mask = (diff >= opts['threshold'])
+        good[mask] = -1
+        good[0] = 0
+        good[-1] = 0
+        return (good)    
 
         # @classmethod
     # @check_size(1)
@@ -232,25 +239,7 @@ class QCTests(object):
     #     good[-2:] = 0
     #     return (good)
     #
-    # @classmethod
-    # @check_size(1)
-    # def argo_spike_test(clf, data, **opts):
-    #     """
-    #     Spike test according to MyOcean for T and S parameters
-    #     http://www.coriolis.eu.org/content/download/4920/36075/file/Recommendations%20for%20RTQC%20procedures_V1_2.pdf
-    #     Options:
-    #       threshold: threshold for consecutive double 3-values differences
-    #     """
-    #     good = np.ones(len(data), dtype=np.int8)
-    #     diff = np.zeros(len(data), dtype=np.float64)
-    #     ii = range(1, len(data) - 1)
-    #     for i in ii:
-    #         diff[i] = np.abs(data[i] - 0.5 * (data[i - 1] + data[i + 1])) - 0.5 * np.abs(data[i + 1] - data[i - 1])
-    #     mask = (diff >= opts['threshold'])
-    #     good[mask] = -1
-    #     good[0] = 0
-    #     good[-1] = 0
-    #     return (good)
+
     #
     # @classmethod
     # @check_size(1)
@@ -378,3 +367,7 @@ class QCTests(object):
     #             if not test:
     #                 good *= -1
     #     return (good)
+
+
+
+

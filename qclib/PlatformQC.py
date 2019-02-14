@@ -137,35 +137,4 @@ class PlatformQC(QCTests):
 
         return overall_flag
 
-    # @classmethod
-    # def CMEMScodes(cls, flags):
-    #     # FIXME This function will not work with the new interface,
-    #     # since flags do not have the top level key being measurement name.
-    #     """
-    #     Convert the given flags to the standards CMEMS flag codes
-    #     Argument flags is expected to be in the same format
-    #     as the result from method `applyQC`.
-    #     Return value is a dict where signal names
-    #     has mapped to the array of CMEMS QC codes.
-    #     """
-    #     codes = {}
-    #     overall_flags = {}
-    #     for signal_k in flags.keys():
-    #         flst = list(flags[signal_k].keys())
-    #         if not flst:
-    #             continue
-    #         nmax = len(flags[signal_k][flst[0]])
-    #         code = np.concatenate(list(flags[signal_k].values()), axis=0)
-    #         code = np.reshape(code, [len(flst), nmax])
-    #         mask_1 = np.any(code == -1, axis=0)
-    #         mask_0 = np.all(code == 0, axis=0)
-    #         code = np.ones(code.shape[1], dtype=np.int8)
-    #         overall_flag = code.copy()
-    #         overall_flag[mask_1] = -1
-    #         overall_flag[mask_0] = 0
-    #         code[mask_1] = 4
-    #         code[mask_0] = 0
-    #         codes[signal_k] = code.tolist()
-    #         overall_flags[signal_k] = overall_flag.tolist()
-    #
-    #     return codes, overall_flags
+
