@@ -111,4 +111,4 @@ class Local_Threshold_Ranges:
                   {'min': -2.0, 'max': 24.0, 'area': Areas.Arctic,'months': all_months}, 
                 ] 
 
-    
+Spike_Thresholds = {'temperature': 6, 'salinity': 0.9} #Surface only   

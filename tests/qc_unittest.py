@@ -16,17 +16,30 @@ common_tests = qclib.QC.init(platform_code).qc_tests
 
 
 class Tests(unittest.TestCase):
+    f = '%Y-%m-%d %H:%M:%S'
+    now = datetime.strptime('2017-01-12 14:12:06', f)
 
-    now = datetime.strptime('2017-01-12 14:12:06', '%Y-%m-%d %H:%M:%S')
-
-    historical_data = pd.DataFrame.from_dict(
+    frozen_historical_data = pd.DataFrame.from_dict(
         {"data": [12, 12, 12, 12],
-         "time": [datetime.strptime('2017-01-12 14:08:06', '%Y-%m-%d %H:%M:%S'),
-                  datetime.strptime('2017-01-12 14:09:06', '%Y-%m-%d %H:%M:%S'),
-                  datetime.strptime('2017-01-12 14:10:06', '%Y-%m-%d %H:%M:%S'),
-                  datetime.strptime('2017-01-12 14:11:06', '%Y-%m-%d %H:%M:%S')]})
-    historical_data = historical_data.set_index(["time"])
-    frozen_data = QCInput(value=12, timestamp=now, historical_data=historical_data)
+         "time": [datetime.strptime('2017-01-12 14:08:06', f),
+                  datetime.strptime('2017-01-12 14:09:06', f),
+                  datetime.strptime('2017-01-12 14:10:06', f),
+                  datetime.strptime('2017-01-12 14:11:06', f)]})
+
+    spiky_historical_data = pd.DataFrame.from_dict(
+        {"data": [3, 20],
+         "time": [datetime.strptime('2017-01-12 14:08:06', f),
+                  datetime.strptime('2017-01-12 14:11:06', f)]})
+
+
+
+    frozen_historical_data = frozen_historical_data.set_index(["time"])
+    spiky_historical_data = spiky_historical_data.set_index(["time"])
+
+    spiky_data = QCInput(value=2, timestamp=now, historical_data = spiky_historical_data)
+    frozen_data = QCInput(value=12, timestamp=now, historical_data = frozen_historical_data)
+    spiky_data = QCInput(value=2, timestamp=now, historical_data = spiky_historical_data)
+    
     missing_data = QCInput(value=-999, timestamp=now)
     global_bad_salinity_data = QCInput(value=-77, timestamp=now)
     local_bad_oxygen_concentration_data = QCInput(value=1, timestamp=now, longitude=10.7087, latitude=59.9091)
@@ -71,6 +84,14 @@ class Tests(unittest.TestCase):
         else:
             combined_flag = 1
         self.assertEqual(combined_flag, -1)
+
+    def test_argo_spike(self):
+        measurement_name = 'temperature'
+        params = common_tests[measurement_name]['argo_spike_test'][1]
+        flags = common_tests[measurement_name]['argo_spike_test'][0](self.spiky_data,**params)
+        self.assertEqual(flags,[0,-1,0]) 
+        #[0](self.global_bad_salinity_data, **params)
+        #flags = common_tests['*']['argo_spike_test'][0](self.frozen_data)
 
     def test_final_flag_logic(self):
         from qclib.PlatformQC import PlatformQC

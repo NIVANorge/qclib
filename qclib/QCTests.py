@@ -5,8 +5,8 @@
 Quality control tests to be applied on data. 
 Tests are implemented according to the document  
 Quality Control of Biogeochemical Measurements
-http://archimer.ifremer.fr/doc/00251/36232/34792.pdf  
-
+[1] http://archimer.ifremer.fr/doc/00251/36232/34792.pdf  
+[2] http://www.coriolis.eu.org/content/download/4920/36075/file/Recommendations%20for%20RTQC%20procedures_V1_2.pdf
 Created on 6. feb. 2018
 '''
 
@@ -153,27 +153,27 @@ class QCTests(object):
         return flag
 
     @classmethod
-    @check_size(1)
-    def argo_spike_test(clf, data, **opts):
+    @check_size(3)
+    def argo_spike_test(clf, qcinput, **opts)->int:
         """
-        Spike test according to MyOcean for T and S parameters
-        http://www.coriolis.eu.org/content/download/4920/36075/file/Recommendations%20for%20RTQC%20procedures_V1_2.pdf
-
-       
-
+        Spike test according to MyOcean [2] for T and S parameters
+        
         Options:
           threshold: threshold for consecutive double 3-values differences
         """
-        good = np.ones(len(data), dtype=np.int8)
-        diff = np.zeros(len(data), dtype=np.float64)
-        ii = range(1, len(data) - 1)
-        for i in ii:
-            diff[i] = np.abs(data[i] - 0.5 * (data[i - 1] + data[i + 1])) - 0.5 * np.abs(data[i + 1] - data[i - 1])
-        mask = (diff >= opts['threshold'])
-        good[mask] = -1
-        good[0] = 0
-        good[-1] = 0
-        return (good)    
+
+        df = pd.DataFrame.from_dict({"data": [qcinput.value], "time": [qcinput.timestamp]})
+        df_delayed = qcinput.historical_data
+        data = merge_data(df, df_delayed)['data']
+        k_diff = np.abs(data[1] - 0.5 * (data[2] + data[0])) - 0.5 * np.abs(data[2] - data[0])
+
+        # FIXME: To check the logic and what the function should return. 
+
+        if k_diff >= opts['spike_threshold']:
+            flags = [0,-1,0]
+        elif k_diff < opts['spike_threshold']:
+            flags = [0,1,0]
+        return flags 
 
         # @classmethod
     # @check_size(1)

@@ -25,9 +25,17 @@ common_tests = {
         {'frozen_test': [QCTests.rt_frozen_test, {}],
          'missing_value_test': [QCTests.rt_missing_value_test, {'nan': -999}
                                 ]},
+    #'temperature':
+    #    {'global_range_test': [QCTests.rt_range_test,
+    #                           Thresholds.Global_Threshold_Ranges.Temperature]},
+
     'temperature':
         {'global_range_test': [QCTests.rt_range_test,
-                               Thresholds.Global_Threshold_Ranges.Temperature]},
+                               Thresholds.Global_Threshold_Ranges.Temperature],
+         'argo_spike_test': [QCTests.argo_spike_test,
+                    {'spike_threshold':Thresholds.Spike_Thresholds['temperature']}]},
+
+
     'salinity':
         {'global_range_test': [QCTests.rt_range_test,
                                Thresholds.Global_Threshold_Ranges.Salinity]},
