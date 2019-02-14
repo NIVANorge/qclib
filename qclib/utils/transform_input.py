@@ -25,7 +25,6 @@ def validate_data_for_time_gaps(df, fuzzy_seconds: int = 0) -> bool:
         return abs(dt - first_dt) <= datetime.timedelta(seconds=fuzzy_seconds)
 
     dt_list = df["time"].diff().dropna()
-    # first row will be dropped as it does not have a delta to itself
-    first_dt = dt_list[2]
+    first_dt = dt_list.iloc[0]
     no_time_gaps = all(has_timegaps(dt, first_dt) for dt in dt_list)
     return no_time_gaps
