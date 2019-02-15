@@ -263,37 +263,7 @@ class QCTests(object):
     #     good[mask] = -1
     #     return (good)
     #
-    # @classmethod
-    # @check_size(1)
-    # def sensor_relationship_test(clf, df, **opts):
-    #     """
-    #     Check if the relationship between related parameters is within a certain value.
-    #
-    #     Argument data is a tuple (p1, p2) with vectors of measurements from parameter 1 and
-    #     parameter 2 respectively.
-    #     Here the data dataframe should be changed in order
-    #     to have two dependent parameters
-    #
-    #     Options:
-    #       p1_min: minimum difference allowed for parameter p1
-    #       p1_max: maximum difference allowed for parameter p1
-    #       p2_min: minimum difference allowed for parameter p2
-    #       p2_max: maximum difference allowed for parameter p2
-    #
-    #     """
-    #     good = np.ones(data.shape[0], dtype=np.int8)
-    #     mask = np.ones(data.shape[0], dtype=np.bool)
-    #     if 'p1_min' in opts:
-    #         mask &= (data[0] >= opts['p1_min'])
-    #     if 'p1_max' in opts:
-    #         mask &= (data[0] <= opts['p1_max'])
-    #     if 'p2_min' in opts:
-    #         mask &= (data[1] >= opts['p2_min'])
-    #     if 'p2_max' in opts:
-    #         mask &= (data[1] <= opts['p2_max'])
-    #     good[~mask] = -1
-    #     return (good)
-    #
+
     # @classmethod
     # @check_size(1)
     # def DM_frozen_test(cls, meta, data, **opts):  # self,
@@ -326,47 +296,7 @@ class QCTests(object):
     #     good[0] = 0
     #     good[-1] = 0
     #     return (good)
-    #
-    # @classmethod
-    # @check_size(5)
-    # def frozen_profile_test(clf, meta, data, **opts):
-    #     """
-    #     Test for frozen profiles.In this case,
-    #     data is a tuple with (depth, data)
-    #     where depth and data are vectors of the same length.
-    #     ! This test flags the whole profile.
-    #
-    #     Options:
-    #         mean_delta: max value for the mean profile difference
-    #         min_delta : max value for the minimum profile difference
-    #         max_delta : max value for the maximum profile difference
-    #     Meta:
-    #         previous_profile: similar data tuple for the previous profile
-    #     """
-    #     good = np.zeros(data.shape[0], dtype=np.int8)
-    #     if 'previous_profile' in meta:
-    #         prev = meta['previous_profile']
-    #         zmax = min([np.max(data[0], prev[0])])
-    #         slab = range(0, zmax, 50)
-    #         diff = np.zeros(len(slab), dtype=np.float64)
-    #         for i in range(len(slab)):
-    #             zmin = slab[i]
-    #             zmax = zmin + 50
-    #             ii = (data[0] >= zmin) & (data[0] < zmax)
-    #             jj = (prev[0] >= zmin) & (prev[0] < zmax)
-    #             if not np.any(ii) or not np.any(jj):
-    #                 diff[i] = np.nan
-    #                 break
-    #             else:
-    #                 diff[i] = np.median(data[1][ii]) - np.median(prev[1][jj])
-    #         if not np.any(np.isnan(diff)):
-    #             good = np.ones(len(data), dtype=np.int8)
-    #             test = (np.mean(diff) <= opts['delta_mean'])
-    #             test &= (np.min(diff) <= opts['delta_min'])
-    #             test &= (np.max(diff) <= opts['delta_max'])
-    #             if not test:
-    #                 good *= -1
-    #     return (good)
+
 
 
 

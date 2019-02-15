@@ -6,7 +6,7 @@ import unittest
 import pandas as pd 
 import qclib.QC
 from qclib.utils.qc_input import QCInput
-from qclib.utils.Thresholds import Global_Threshold_Ranges
+import qclib.utils.Thresholds
 import numpy as np
 from datetime import datetime
 
