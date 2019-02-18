@@ -1,18 +1,15 @@
-from typing import Optional
+from typing import Optional, List, Any
 from datetime import datetime
 
+from pandas import DataFrame
+from pydantic import BaseModel
 
-class QCInput:
 
+class QCInput(BaseModel):
     value: float
     timestamp: datetime
     longitude: Optional[float]
     latitude: Optional[float]
-    historical_data: Optional # This is pandas DataFrame with data, indexed with timestamp
+    historical_data: Any
+    future_data: Any
 
-    def __init__(self, value, timestamp, longitude=None, latitude=None, historical_data=None):
-        self.value = value
-        self.timestamp = timestamp
-        self.longitude = longitude
-        self.latitude = latitude
-        self.historical_data = historical_data

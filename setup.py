@@ -46,8 +46,9 @@ setup(
     keywords='data quality tests',
     packages=["qclib", "qclib.utils", ".", "tests"],
     install_requires=[
-        'pandas',
+        'pandas==0.24.1',
         'numpy',
+        'pydantic==0.19',
         'matplotlib'
     ],
     extras_require={
