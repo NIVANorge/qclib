@@ -12,6 +12,7 @@ from .QCTests import QCTests
 from .utils import Thresholds
 from .utils.qc_input import QCInput
 import itertools
+import copy
 
 # '''
 # In the document 
@@ -62,7 +63,7 @@ common_tests = {
 class PlatformQC(QCTests):
 
     def __init__(self):
-        self.qc_tests = common_tests.copy()
+        self.qc_tests = copy.deepcopy(common_tests)
 
     def applyQC(self, qcinput: QCInput, tests: Dict[str, str]) -> Dict[str, int]:
 
