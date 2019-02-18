@@ -32,7 +32,6 @@ class Tests(unittest.TestCase):
                   datetime.strptime('2017-01-12 14:11:06', f)]})
 
 
-
     frozen_historical_data = frozen_historical_data.set_index(["time"])
     spiky_historical_data = spiky_historical_data.set_index(["time"])
 

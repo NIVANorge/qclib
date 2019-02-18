@@ -143,7 +143,7 @@ class QCTests(object):
         flag = 1
         if len(data["data"]) < size:
             flag = 0
-        elif not validate_data_for_time_gaps(data):
+        elif not validate_data_for_time_gaps(data, fuzzy_seconds=1):
             logging.warning("Gaps in historical data, skipping test")
             flag = 0
         else:
