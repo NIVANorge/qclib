@@ -25,12 +25,14 @@ class Tests(unittest.TestCase):
                   datetime.strptime('2017-01-12 14:09:06', '%Y-%m-%d %H:%M:%S'),
                   datetime.strptime('2017-01-12 14:10:06', '%Y-%m-%d %H:%M:%S'),
                   datetime.strptime('2017-01-12 14:11:06', '%Y-%m-%d %H:%M:%S')]})
-    frozen_data = QCInput(value=12, timestamp=now, historical_data=historical_data)
-    missing_data = QCInput(value=-999, timestamp=now)
-    global_bad_salinity_data = QCInput(value=-77, timestamp=now)
-    local_bad_oxygen_concentration_data = QCInput(value=1, timestamp=now, longitude=10.7087, latitude=59.9091)
 
-    final_flag_is_plus_one = [0,0,1,0,0]
+    frozen_data = QCInput(value=12, timestamp=now, historical_data=historical_data, future_data=None)
+    missing_data = QCInput(value=-999, timestamp=now, historical_data=None, future_data=None)
+    global_bad_salinity_data = QCInput(value=-77, timestamp=now, historical_data=None, future_data=None)
+    local_bad_oxygen_concentration_data = QCInput(value=1, timestamp=now, longitude=10.7087, latitude=59.9091,
+                                                  historical_data=None, future_data=None)
+
+    final_flag_is_plus_one = [0, 0, 1, 0, 0]
     final_flag_is_minus_one = [0, 0, 1, 0, -1]
     final_flag_is_zero = [0, 0, 0, 0, 0]
 

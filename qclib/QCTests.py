@@ -41,23 +41,29 @@ class QCTests(object):
     where 1 is PASSED, -1 is FAILED and 0 is not tested.
     """
 
-    def check_size(size):
+    def check_size(number_of_historical, number_of_future):
         def check_data_size(func):
             @functools.wraps(func)
             def func_wrapper(clf, *args, **opts):
-                if size > 1:
+                if number_of_historical > 0:
                     if args[0].historical_data is None:
                         logging.warning("No historical data available to perform %s test" % func.__name__)
-                    elif len(args[0].historical_data)+1 < size:
-                        logging.warning("Too few data points to perform %s test" % func.__name__)
+                    elif len(args[0].historical_data) < number_of_historical:
+                        logging.warning("Too few historical data points to perform %s test" % func.__name__)
+                if number_of_future > 0:
+                    if args[0].future_data is None:
+                        logging.warning("No future data available to perform %s test" % func.__name__)
+                    elif len(args[0].future_data) < number_of_future:
+                        logging.warning("Too few future data points to perform %s test" % func.__name__)
                 return func(clf, *args, **opts)
-            func_wrapper.size = size
+            func_wrapper.number_of_historical = number_of_historical
+            func_wrapper.number_of_future = number_of_future
             return func_wrapper
 
         return check_data_size
 
     @classmethod
-    @check_size(1)
+    @check_size(0, 0)
     def rt_range_test(clf, qcinput, **opts) -> int:
         # FIXME since this test runs now per point, its definition can be significantly simplified
         """
@@ -117,7 +123,7 @@ class QCTests(object):
         return int(good[0])
 
     @classmethod
-    @check_size(1)
+    @check_size(0, 0)
     def rt_missing_value_test(clf, qcinput, **opts)->int:
         """
         Test data for a specific value defined for missing data.        
@@ -130,25 +136,25 @@ class QCTests(object):
         return flag
 
     @classmethod
-    @check_size(5)
+    @check_size(4, 0)
     def rt_frozen_test(cls, qcinput: QCInput) -> int:
         """
         Consecutive data with exactly the same value are flagged as bad
         """
         # FIXME: get size below from decorator (if possible)
-        size = 5
+        size = 4
         df = pd.DataFrame.from_dict({"data": [qcinput.value], "time": [qcinput.timestamp]})
         df_delayed = qcinput.historical_data
         data = merge_data(df, df_delayed)
         flag = 1
-        if len(data["data"]) < size:
+        if len(data["data"]) <= size:
             flag = 0
         elif not validate_data_for_time_gaps(data, fuzzy_seconds=1):
             logging.warning("Gaps in historical data, skipping test")
             flag = 0
         else:
             data_diff = data["data"].diff().dropna()
-            if all(data_diff[-size+1:]) == 0.0:
+            if all(data_diff[-size:]) == 0.0:
                 flag = -1
         return flag
 
