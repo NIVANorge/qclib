@@ -144,8 +144,9 @@ class QCTests(object):
         # FIXME: get size below from decorator (if possible)
         size = 4
         df = pd.DataFrame.from_dict({"data": [qcinput.value], "time": [qcinput.timestamp]})
-        df = df.set_index(['time'])
+        #df = df.set_index(['time'])
         df_delayed = qcinput.historical_data
+        df_delayed["time"] = df_delayed.index
         data = merge_data(df, df_delayed)
         flag = 1
         if len(data["data"]) <= size:
