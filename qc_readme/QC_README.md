@@ -68,6 +68,29 @@ Description:
         
 ![Areas for Local Range Test](../figs/Local_range_test_areas.png) 
 
+
+#### 3.Spike test
+
+Tests the difference between sequential measurements. 
+
+Based on http://www.coriolis.eu.org/content/download/4920/36075/file/Recommendations%20for%20RTQC%20procedures_V1_2.pdf 
+
+Array to test [V1,V2,V3]
+
+Only V2 is being tested for a spike: 
+      
+        K_difference = abs(V2-(V3+V1)/2) - abs((V3_V1)/2)
+
+        if K_difference > Threshold :
+            V2 flag = -1 
+
+        V1,V3 cannot be tested here. 
+
+What should the function return? 
+
+Spike test should be done in a delayed mode. 
+        
+
 TODO: 
 * Tests/flags Hierarchy description 
 * More tests description 

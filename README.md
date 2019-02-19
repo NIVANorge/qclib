@@ -53,4 +53,4 @@ Defines threshold values for range tests.
 
 In order to update qclib version, update __version__ attribute in qclib/__init__.py
 
-
+    pip install -e . 
