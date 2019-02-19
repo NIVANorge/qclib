@@ -33,14 +33,12 @@ class TimegapsTest(unittest.TestCase):
 
     def test_should_detect_time_gaps(self):
         df = pd.DataFrame({'time': self.dates}, columns=["time"])
-        df.set_index("time", inplace=True)
         sorted = df.sort_values(by="time", ascending=True)
         self.assertEqual(validate_data_for_time_gaps(sorted), False)
         self.assertEqual(validate_data_for_time_gaps(sorted, fuzzy_seconds=1), True)
 
     def test_should_work_with_arbitrary_sort_order(self):
         df = pd.DataFrame({'time': self.dates})
-        df.set_index("time", inplace=True)
         sorted = df.sort_values(by="time", ascending=False)
         self.assertEqual(validate_data_for_time_gaps(sorted), False)
         self.assertEqual(validate_data_for_time_gaps(sorted, 1), True)
