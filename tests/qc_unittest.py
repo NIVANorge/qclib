@@ -6,7 +6,7 @@ import unittest
 import pandas as pd 
 import qclib.QC
 from qclib.utils.qc_input import QCInput
-from qclib.utils.Thresholds import Global_Threshold_Ranges
+import qclib.utils.Thresholds
 import numpy as np
 from datetime import datetime
 
@@ -16,17 +16,29 @@ common_tests = qclib.QC.init(platform_code).qc_tests
 
 
 class Tests(unittest.TestCase):
+    f = '%Y-%m-%d %H:%M:%S'
+    now = datetime.strptime('2017-01-12 14:12:06', f)
 
-    now = datetime.strptime('2017-01-12 14:12:06', '%Y-%m-%d %H:%M:%S')
-
-    historical_data = pd.DataFrame.from_dict(
+    frozen_historical_data = pd.DataFrame.from_dict(
         {"data": [12, 12, 12, 12],
-         "time": [datetime.strptime('2017-01-12 14:08:06', '%Y-%m-%d %H:%M:%S'),
-                  datetime.strptime('2017-01-12 14:09:06', '%Y-%m-%d %H:%M:%S'),
-                  datetime.strptime('2017-01-12 14:10:06', '%Y-%m-%d %H:%M:%S'),
-                  datetime.strptime('2017-01-12 14:11:06', '%Y-%m-%d %H:%M:%S')]})
+         "time": [datetime.strptime('2017-01-12 14:08:06', f),
+                  datetime.strptime('2017-01-12 14:09:06', f),
+                  datetime.strptime('2017-01-12 14:10:06', f),
+                  datetime.strptime('2017-01-12 14:11:06', f)]})
 
-    frozen_data = QCInput(value=12, timestamp=now, historical_data=historical_data, future_data=None)
+    spiky_historical_data = pd.DataFrame.from_dict(
+        {"data": [3],
+         "time": [datetime.strptime('2017-01-12 14:08:06', f)]})
+
+    spiky_future_data = pd.DataFrame.from_dict({"data": [3], "time": [datetime.strptime('2017-01-12 14:31:06', f)] })
+    spiky_future_data = spiky_future_data.set_index(["time"])
+
+    frozen_historical_data = frozen_historical_data.set_index(["time"])
+    spiky_historical_data = spiky_historical_data.set_index(["time"])
+
+    frozen_data = QCInput(value=12, timestamp=now, historical_data=frozen_historical_data, future_data=None)
+    spiky_data = QCInput(value=20, timestamp=now, historical_data = spiky_historical_data,future_data = spiky_future_data) 
+
     missing_data = QCInput(value=-999, timestamp=now, historical_data=None, future_data=None)
     global_bad_salinity_data = QCInput(value=-77, timestamp=now, historical_data=None, future_data=None)
     local_bad_oxygen_concentration_data = QCInput(value=1, timestamp=now, longitude=10.7087, latitude=59.9091,
@@ -72,6 +84,12 @@ class Tests(unittest.TestCase):
         else:
             combined_flag = 1
         self.assertEqual(combined_flag, -1)
+
+    def test_argo_spike(self):
+        measurement_name = 'temperature'
+        params = common_tests[measurement_name]['argo_spike_test'][1]
+        flags = common_tests[measurement_name]['argo_spike_test'][0](self.spiky_data,**params)
+        self.assertEqual(flags,-1) 
 
     def test_final_flag_logic(self):
         from qclib.PlatformQC import PlatformQC
