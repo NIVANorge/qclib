@@ -17,7 +17,7 @@ import pandas as pd
 from .utils.qc_input import QCInput
 import functools
 import logging
-from .utils.transform_input import merge_data, validate_data_for_time_gaps
+from .utils.transform_input import merge_data_spike,merge_data, validate_data_for_time_gaps
 
 
 class QCTests(object):
@@ -144,6 +144,7 @@ class QCTests(object):
         # FIXME: get size below from decorator (if possible)
         size = 4
         df = pd.DataFrame.from_dict({"data": [qcinput.value], "time": [qcinput.timestamp]})
+        df = df.set_index(['time'])
         df_delayed = qcinput.historical_data
         data = merge_data(df, df_delayed)
         flag = 1
@@ -159,7 +160,7 @@ class QCTests(object):
         return flag
 
     @classmethod
-    @check_size(3)
+    @check_size(1,1)
     def argo_spike_test(clf, qcinput, **opts)->int:
         """
         Spike test according to MyOcean [2] for T and S parameters
@@ -167,19 +168,18 @@ class QCTests(object):
         Options:
           threshold: threshold for consecutive double 3-values differences
         """
-
         df = pd.DataFrame.from_dict({"data": [qcinput.value], "time": [qcinput.timestamp]})
-        df_delayed = qcinput.historical_data
-        data = merge_data(df, df_delayed)['data']
+        df = df.set_index(['time'])
+     
+        data = merge_data_spike(qcinput.historical_data,df,qcinput.future_data)['data']
         k_diff = np.abs(data[1] - 0.5 * (data[2] + data[0])) - 0.5 * np.abs(data[2] - data[0])
 
-        # FIXME: To check the logic and what the function should return. 
-
         if k_diff >= opts['spike_threshold']:
-            flags = [0,-1,0]
+            flag = -1
         elif k_diff < opts['spike_threshold']:
-            flags = [0,1,0]
-        return flags 
+            flag = 1
+        return flag
+
 
         # @classmethod
     # @check_size(1)
