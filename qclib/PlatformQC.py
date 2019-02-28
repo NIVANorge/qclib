@@ -10,7 +10,7 @@ import numpy as np
 from typing import Dict
 from .QCTests import QCTests
 from .utils import Thresholds
-from .utils.qc_input import QCInput
+from .utils.qc_input import QCInput_df
 import itertools
 import copy
 
@@ -26,27 +26,19 @@ common_tests = {
         {'frozen_test': [QCTests.rt_frozen_test, {}],
          'missing_value_test': [QCTests.rt_missing_value_test, {'nan': -999}
                                 ]},
-    #'temperature':
-    #    {'global_range_test': [QCTests.rt_range_test,
-    #                           Thresholds.Global_Threshold_Ranges.Temperature]},
-
     'temperature':
         {'global_range_test': [QCTests.rt_range_test,
                                Thresholds.global_range_temperature],
          'local_range_test': [QCTests.rt_range_test,
-                              Thresholds.local_range_temperature] , 
-
+                              Thresholds.local_range_temperature],
          'argo_spike_test': [QCTests.argo_spike_test,
-            {'spike_threshold':Thresholds.spike_thresholds['temperature']}
-                    ]},
-
-
+                             {'spike_threshold': Thresholds.spike_thresholds['temperature']}
+                             ]},
     'salinity':
         {'global_range_test': [QCTests.rt_range_test,
                                Thresholds.global_range_salinity],
          'local_range_test': [QCTests.rt_range_test,
                               Thresholds.local_range_oxygen]},
-
     'fluorescence':
         {'global_range_test': [QCTests.rt_range_test,
                                Thresholds.global_range_fluorescence],
@@ -65,15 +57,14 @@ class PlatformQC(QCTests):
     def __init__(self):
         self.qc_tests = copy.deepcopy(common_tests)
 
-    def applyQC(self, qcinput: QCInput, tests: Dict[str, str]) -> Dict[str, int]:
 
+    def applyQC(self, qcinput: QCInput_df, tests: Dict[str, str]) -> Dict[str, int]:
         """
       df : dataframe wih col: datetime, name (platform code), lon, lat, data
          where data is e.g. salinity or temperature, or fdom, etc.,..
      tests : dictionary with key being name (e.g. temperature, or salinity, or...)
       and with value being a list of tests =["global_range","local_range"]...
         """
-
         flags = {}
         key = list(tests.keys())[0]
         if key in ['temperature', 'oxygen_concentration', 'fluorescence', 'salinity']:
@@ -85,7 +76,6 @@ class PlatformQC(QCTests):
 
             if type(self.qc_tests[key][test][1]) is list:  # only range test
                 arr = [[test, self.qc_tests[key][test][0], x] for x in self.qc_tests[key][test][1]]
-
                 flag = []
                 for n, a in enumerate(arr):
                     flag.append(a[1](qcinput, **a[2]))
@@ -105,53 +95,14 @@ class PlatformQC(QCTests):
 
         return flags
 
-    # @classmethod
-    # def derive_overall_flag(cls, flags, system_flags):
-    #     # print ('derive_overall_flag',flags)
-    #     derived_flags = [v for k, v in flags.items()]
-    #     n_meas = len(derived_flags[0])
-    #
-    #     flgs = list(itertools.chain.from_iterable(derived_flags))
-    #
-    #     if n_meas == 1 and len(flgs) > 1:
-    #         if all([ff == -1 for ff in flgs]):
-    #             overall_flags = -1
-    #         elif all([ff == 0 for ff in flgs]):
-    #             overall_flags = 0
-    #         else:
-    #             overall_flags = 1
-    #             # print ('one meas, many tests',overall_flags)
-    #     elif (n_meas == 1 and len(flgs) == 1):
-    #         overall_flags = flgs
-    #         # print ('only one', flgs)
-    #     else:
-    #         overall_flags = []
-    #         # This loop does not take into accout
-    #         # levels and system flags
-    #         for f in np.array(derived_flags).T:
-    #             if all([ff == -1 for ff in f]):
-    #                 overall_flags.append(-1)
-    #             elif all([ff == 0 for ff in f]):
-    #                 overall_flags.append(0)
-    #             else:
-    #                 overall_flags.append(1)
-    #         # print ('long case ',n_meas,overall_flags)
-    #
-    #     return overall_flags
-
     @classmethod
-    def rt_get_overall_flag(cls, flags):
-        # print ('derive_overall_flag',flags)
+    def rt_get_overall_flag(cls, flags: Dict) -> int:
 
         overall_flag = 1
-
-        if all([flg == 0 for flg in flags]):
+        if all([flg == 0 for flg in flags.values()]):
             overall_flag = 0
-
-        for flg in flags:
+        for flg in flags.values():
             if flg == -1:
                 overall_flag = -1
 
         return overall_flag
-
-

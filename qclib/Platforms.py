@@ -3,6 +3,7 @@
 
 from . import PlatformQC
 
+
 class FerryboxQC(PlatformQC.PlatformQC):
 
     def __init__(self):
@@ -13,11 +14,14 @@ class FerryboxQC(PlatformQC.PlatformQC):
         # And extra tests can be added
         self.qc_tests.update(extra_tests)
 
+
 class SailBuoyQC(PlatformQC.PlatformQC):
     pass
 
+
 class SeaGliderQC(PlatformQC.PlatformQC):
     pass
+
 
 class WaveGliderQC(PlatformQC.PlatformQC):
     pass

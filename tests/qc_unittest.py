@@ -3,13 +3,12 @@ Created on 15. jan. 2018
 @author: ELP
 '''
 import unittest
-import pandas as pd 
+import pandas as pd
 import qclib.QC
-from qclib.utils.qc_input import QCInput
+from qclib.utils.qc_input import QCInput_df
 import qclib.utils.Thresholds
 import numpy as np
 from datetime import datetime
-
 
 platform_code = 'TF'
 common_tests = qclib.QC.init(platform_code).qc_tests
@@ -30,42 +29,42 @@ class Tests(unittest.TestCase):
         {"data": [3],
          "time": [datetime.strptime('2017-01-12 14:08:06', f)]})
 
-    spiky_future_data = pd.DataFrame.from_dict({"data": [3], "time": [datetime.strptime('2017-01-12 14:31:06', f)] })
-    spiky_future_data = spiky_future_data.set_index(["time"])
+    spiky_future_data = pd.DataFrame.from_dict({"data": [3], "time": [datetime.strptime('2017-01-12 14:31:06', f)]})
 
-    frozen_historical_data = frozen_historical_data.set_index(["time"])
-    spiky_historical_data = spiky_historical_data.set_index(["time"])
+    frozen_data = QCInput_df(current_data=pd.DataFrame.from_dict({"data": [12], "time": now}),
+                             historical_data=frozen_historical_data, future_data=None)
+    spiky_data = QCInput_df(current_data=pd.DataFrame.from_dict({"data": [20], "time": now}),
+                            historical_data=spiky_historical_data, future_data=spiky_future_data)
+    missing_data = QCInput_df(current_data=pd.DataFrame.from_dict({"data": [-999], "time": now}),
+                              historical_data=None, future_data=None)
+    global_bad_salinity_data = QCInput_df(current_data=pd.DataFrame.from_dict({"data": [77], "time": now}),
+                                          historical_data=None, future_data=None)
+    local_bad_oxygen_concentration_data = QCInput_df(current_data=pd.DataFrame.from_dict({"data": [77], "time": now}),
+                                                     longitude=10.7087, latitude=59.9091,
+                                                     historical_data=None, future_data=None)
 
-    frozen_data = QCInput(value=12, timestamp=now, historical_data=frozen_historical_data, future_data=None)
-    spiky_data = QCInput(value=20, timestamp=now, historical_data = spiky_historical_data,future_data = spiky_future_data) 
-
-    missing_data = QCInput(value=-999, timestamp=now, historical_data=None, future_data=None)
-    global_bad_salinity_data = QCInput(value=-77, timestamp=now, historical_data=None, future_data=None)
-    local_bad_oxygen_concentration_data = QCInput(value=1, timestamp=now, longitude=10.7087, latitude=59.9091,
-                                                  historical_data=None, future_data=None)
-
-    final_flag_is_plus_one = [0, 0, 1, 0, 0]
-    final_flag_is_minus_one = [0, 0, 1, 0, -1]
-    final_flag_is_zero = [0, 0, 0, 0, 0]
+    final_flag_is_plus_one = {"test1": 0, "test2": 0, "test3": 1, "test4": 0, "test5": 0}
+    final_flag_is_minus_one = {"test1": 0, "test2": 0, "test3": 1, "test4": 0, "test5": -1}
+    final_flag_is_zero = {"test1": 0, "test2": 0, "test3": 0, "test4": 0, "test5": 0}
 
     def test_rt_frozen_test(self):
         # Checks if values are frozen for 5 or more values in a row should give -1 flags for bad data '''
         flag = common_tests['*']['frozen_test'][0](self.frozen_data)
         self.assertEqual(flag, -1)
 
-    def test_missing_value(self): 
+    def test_missing_value(self):
         # Checks if values are missing with defined value should give -1 flags for bad data
         params = common_tests['*']['missing_value_test'][1]
-        flag = common_tests['*']['missing_value_test'][0](self.missing_data,**params)
+        flag = common_tests['*']['missing_value_test'][0](self.missing_data, **params)
         self.assertEqual(flag, -1)
-    
+
     def test_range_global(self):
         # Checks if values are within defined range should give -1 flags for outliers'''
         measurement_name = "salinity"
         params = common_tests[measurement_name]['global_range_test'][1]
         flag = common_tests[measurement_name]['global_range_test'][0](self.global_bad_salinity_data, **params)
         self.assertEqual(flag, -1)
-        
+
     def test_range_local(self):
         # Checks if values are within defined range for local regions and time periods should give -1 flags for outliers
         measurement_name = 'oxygen_concentration'
@@ -88,8 +87,8 @@ class Tests(unittest.TestCase):
     def test_argo_spike(self):
         measurement_name = 'temperature'
         params = common_tests[measurement_name]['argo_spike_test'][1]
-        flags = common_tests[measurement_name]['argo_spike_test'][0](self.spiky_data,**params)
-        self.assertEqual(flags,-1) 
+        flags = common_tests[measurement_name]['argo_spike_test'][0](self.spiky_data, **params)
+        self.assertEqual(flags, -1)
 
     def test_final_flag_logic(self):
         from qclib.PlatformQC import PlatformQC
@@ -99,6 +98,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(flag, -1)
         flag = PlatformQC.rt_get_overall_flag(self.final_flag_is_zero)
         self.assertEqual(flag, 0)
+
 
 if __name__ == '__main__':
     unittest.main()
