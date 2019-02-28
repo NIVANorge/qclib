@@ -9,15 +9,14 @@ Quality Control of Biogeochemical Measurements
 [2] http://www.coriolis.eu.org/content/download/4920/36075/file/Recommendations%20for%20RTQC%20procedures_V1_2.pdf
 Created on 6. feb. 2018
 '''
-
 import numpy as np
 import matplotlib as mpl
 import time
 import pandas as pd
-from .utils.qc_input import QCInput
+from .utils.qc_input import QCInput_df
 import functools
 import logging
-from .utils.transform_input import merge_data_spike,merge_data, validate_data_for_time_gaps
+from .utils.transform_input import merge_data_spike, merge_data
 
 
 class QCTests(object):
@@ -56,6 +55,7 @@ class QCTests(object):
                     elif len(args[0].future_data) < number_of_future:
                         logging.warning("Too few future data points to perform %s test" % func.__name__)
                 return func(clf, *args, **opts)
+
             func_wrapper.number_of_historical = number_of_historical
             func_wrapper.number_of_future = number_of_future
             return func_wrapper
@@ -64,7 +64,7 @@ class QCTests(object):
 
     @classmethod
     @check_size(0, 0)
-    def rt_range_test(clf, qcinput, **opts) -> int:
+    def rt_range_test(clf, qcinput: QCInput_df, **opts) -> int:
         # FIXME since this test runs now per point, its definition can be significantly simplified
         """
         4.4 Global Range Tests 
@@ -89,7 +89,7 @@ class QCTests(object):
         * area   : dictionary of polygon edges, with keys 'lat' and 'lon'. 
                    These should be listed in CW order
         """
-        df = pd.DataFrame.from_dict({"data": [qcinput.value], "time": [qcinput.timestamp]})
+        df = qcinput.current_data
         good = np.zeros(len(df["data"]), dtype=np.int8)
         mask = np.ones(len(df["data"]), dtype=np.bool)
 
@@ -124,55 +124,49 @@ class QCTests(object):
 
     @classmethod
     @check_size(0, 0)
-    def rt_missing_value_test(clf, qcinput, **opts)->int:
+    def rt_missing_value_test(clf, qcinput: QCInput_df, **opts) -> int:
         """
         Test data for a specific value defined for missing data.        
         Options:
           nan: value used for missing data
         """
         flag = 1
-        if qcinput.value == opts['nan']:
+        value = qcinput.current_data["data"]
+        if value[0] == opts['nan']:
             flag = -1
         return flag
 
     @classmethod
     @check_size(4, 0)
-    def rt_frozen_test(cls, qcinput: QCInput) -> int:
+    def rt_frozen_test(cls, qcinput: QCInput_df) -> int:
         """
         Consecutive data with exactly the same value are flagged as bad
         """
-        # FIXME: get size below from decorator (if possible)
-        size = 4
-        df = pd.DataFrame.from_dict({"data": [qcinput.value], "time": [qcinput.timestamp]})
-        #df = df.set_index(['time'])
-        df_delayed = qcinput.historical_data
-        df_delayed["time"] = df_delayed.index
-        data = merge_data(df, df_delayed)
+        size_historical = QCTests.rt_frozen_test.number_of_historical
+        if len(qcinput.historical_data) < size_historical:
+            return 0
+        data = merge_data(qcinput.current_data, qcinput.historical_data)
         flag = 1
-        if len(data["data"]) <= size:
-            flag = 0
-        elif not validate_data_for_time_gaps(data, fuzzy_seconds=1):
-            logging.warning("Gaps in historical data, skipping test")
-            flag = 0
-        else:
-            data_diff = data["data"].diff().dropna()
-            if all(data_diff[-size:]) == 0.0:
-                flag = -1
+        data_diff = data["data"].diff().dropna()
+        if all(data_diff[-size_historical:]) == 0.0:
+            flag = -1
         return flag
 
     @classmethod
-    @check_size(1,1)
-    def argo_spike_test(clf, qcinput, **opts)->int:
+    @check_size(1, 1)
+    def argo_spike_test(clf, qcinput: QCInput_df, **opts) -> int:
         """
         Spike test according to MyOcean [2] for T and S parameters
         
         Options:
           threshold: threshold for consecutive double 3-values differences
         """
-        df = pd.DataFrame.from_dict({"data": [qcinput.value], "time": [qcinput.timestamp]})
-        df = df.set_index(['time'])
-     
-        data = merge_data_spike(qcinput.historical_data,df,qcinput.future_data)['data']
+        size_historical = QCTests.argo_spike_test.number_of_historical
+        size_future = QCTests.argo_spike_test.number_of_future
+        if len(qcinput.historical_data) < size_historical or len(qcinput.future_data) < size_future:
+            return 0
+
+        data = merge_data_spike(qcinput.historical_data, qcinput.current_data, qcinput.future_data)['data']
         k_diff = np.abs(data[1] - 0.5 * (data[2] + data[0])) - 0.5 * np.abs(data[2] - data[0])
 
         if k_diff >= opts['spike_threshold']:
@@ -180,131 +174,3 @@ class QCTests(object):
         elif k_diff < opts['spike_threshold']:
             flag = 1
         return flag
-
-
-        # @classmethod
-    # @check_size(1)
-    # def aic_spike_test(clf, data, **opts):
-    #     """
-    #     Executes spike test using an estimate of
-    #     Aikake Information Criterion.
-    #     This methods requires the last 4 points prior to the
-    #     first point to test.
-    #     """
-    #     good = np.zeros(len(data), dtype=np.int8)
-    #     mask = np.zeros(len(data), dtype=np.bool)
-    #     ii = range(4, len(data))
-    #     for i in ii:
-    #         jj = range(4)
-    #         ig = i - range(1, 5)
-    #         sg = np.std(data[ig])
-    #         ib = i - range(5)
-    #         sb = np.std(data[ib])
-    #         Ug = 4 * np.log(sg)
-    #         Ub = 4 * np.log(sb) - self.COEF_SPIKE
-    #         if (Ug < Ub):
-    #             good[i] = -1
-    #         else:
-    #             good[i] = 1
-    #     return (good)
-    #
-    # @classmethod
-    # @check_size(1)
-    # def bioargo_spike_test(clf, data, **opts):
-    #     """
-    #     Spike test according to BIO ARGO
-    #
-    #     Options:
-    #       p10_min: factor for minimum 10 percentile
-    #       median difference
-    #       p10_max: factor for maximum 10 percentile
-    #       median difference
-    #       p90_min: factor for minimum 90 percentile
-    #       median difference
-    #       p90_max: factor for maximum 90 percentile
-    #       median difference
-    #     """
-    #     good = np.ones(len(data), dtype=np.int8)
-    #     diff = np.zeros(len(data), dtype=np.float64)
-    #     ii = range(2, len(data) - 2)
-    #     for i in ii:
-    #         jj = range(i - 2, i + 2)
-    #         diff[i] = data[i] - np.median(data[jj])
-    #     p10 = np.percentile(diff, 10)
-    #     p90 = np.percentile(diff, 90)
-    #     mask = np.ones(len(data), dtype=np.bool)
-    #     if 'p10_min' in opts:
-    #         mask &= (diff >= opts['p10_min'] * p10)
-    #     if 'p10_max' in opts:
-    #         mask &= (diff <= opts['p10_max'] * p10)
-    #     if 'p90_min' in opts:
-    #         mask &= (diff >= opts['p90_min'] * p90)
-    #     if 'p90_max' in opts:
-    #         mask &= (diff <= opts['p90_max'] * p90)
-    #     good[~mask] = -1
-    #     good[:2] = 0
-    #     good[-2:] = 0
-    #     return (good)
-    #
-
-    #
-    # @classmethod
-    # @check_size(1)
-    # def sensor_comparison_test(clf, data, **opts):
-    #     """
-    #     Check whether two sensors measuring the same parameter
-    #     provide a similar value.
-    #     Argument data is a tuple (s1, s2) with measurement vectors
-    #     from sensor 1 and sensor 2 respectively.
-    #     Options:
-    #       threshold: maximum difference allowed
-    #
-    #
-    #     Here the data dataframe should be changed in order
-    #     to have two dependent parameters
-    #
-    #     """
-    #     good = np.ones(data.shape[0], dtype=np.int8)
-    #     diff = np.abs(data[1] - data[0])
-    #     mask = (diff > opts['threshold'])
-    #     good[mask] = -1
-    #     return (good)
-    #
-
-    # @classmethod
-    # @check_size(1)
-    # def DM_frozen_test(cls, meta, data, **opts):  # self,
-    #     """
-    #     Consecutive data with exactly the same value are flagged as bad.
-    #     For the delayed mode we should add more datapoints
-    #     """
-    #     good = np.ones(len(data), dtype=np.int8)  # typo)?
-    #     mask = (np.diff(data[:]) == 0.0)
-    #     mask = np.concatenate((mask[0:1], mask))
-    #     good[mask] = -1
-    #     return (good)
-    #
-    # @classmethod
-    # @check_size(1)
-    # def argo_gradient_test(clf, meta, data, **opts):
-    #     """
-    #     Gradient test according to BIO ARGO
-    #
-    #     Options:
-    #       threshold: threshold for consecutive 3-values difference
-    #     """
-    #     good = np.ones(len(data), dtype=np.int8)
-    #     diff = np.zeros(len(data), dtype=np.float64)
-    #     ii = range(1, len(data) - 1)
-    #     for i in ii:
-    #         diff[i] = np.abs(data[i] - 0.5 * (data[i - 1] + data[i + 1]))
-    #     mask = (diff >= opts['threshold'])
-    #     good[mask] = -1
-    #     good[0] = 0
-    #     good[-1] = 0
-    #     return (good)
-
-
-
-
-
