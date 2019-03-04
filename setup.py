@@ -47,8 +47,8 @@ setup(
     packages=["qclib", "qclib.utils", ".", "tests"],
     install_requires=[
         'pandas==0.24.1',
-        'numpy',
-        'pydantic==0.19',
+        'numpy==1.16.1',
+        'pydantic==0.18.2',
         'matplotlib'
     ],
     extras_require={
