@@ -71,11 +71,7 @@ class Tests(unittest.TestCase):
         measurement_name = 'oxygen_concentration'
         params = common_tests[measurement_name]['local_range_test'][1]
         arr = [[common_tests[measurement_name]['local_range_test'][0], x] for x in params]
-
-        flags = np.zeros([len(arr)])
-        for i, a in enumerate(arr):
-            flag = a[0](self.local_bad_oxygen_concentration_data, **a[1])
-            flags[i] = flag
+        flags= [a[0](self.local_bad_oxygen_concentration_data, **a[1]) for a in arr]
 
         if all([flg == 0 for flg in flags]):
             combined_flag = 0
