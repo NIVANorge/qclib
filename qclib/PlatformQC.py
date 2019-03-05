@@ -26,10 +26,6 @@ common_tests = {
         {'frozen_test': [QCTests.rt_frozen_test, {}],
          'missing_value_test': [QCTests.rt_missing_value_test, {'nan': -999}
                                 ]},
-    #'temperature':
-    #    {'global_range_test': [QCTests.rt_range_test,
-    #                           Thresholds.Global_Threshold_Ranges.Temperature]},
-
     'temperature':
         {'global_range_test': [QCTests.rt_range_test,
                                Thresholds.global_range_temperature],
@@ -45,9 +41,9 @@ common_tests = {
                               Thresholds.local_range_oxygen]},
     'chla_fluorescence':
         {'global_range_test': [QCTests.rt_range_test,
-                               Thresholds.global_range_fluorescence],
+                               Thresholds.global_range_chla_fluorescence],
          'local_range_test': [QCTests.rt_range_test,
-                              Thresholds.local_range_fluorescence]},
+                              Thresholds.local_range_chla_fluorescence]},
 
     'oxygen_concentration':
         {'global_range_test': [QCTests.rt_range_test,

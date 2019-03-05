@@ -16,7 +16,7 @@ import pandas as pd
 from .utils.qc_input import QCInput_df
 import functools
 import logging
-from .utils.transform_input import merge_data_spike,merge_data #, validate_data_for_time_gaps
+from .utils.transform_input import merge_data_spike,merge_data
 
 
 class QCTests(object):
@@ -239,61 +239,4 @@ class QCTests(object):
     #     good[:2] = 0
     #     good[-2:] = 0
     #     return (good)
-    #
 
-    #
-    # @classmethod
-    # @check_size(1)
-    # def sensor_comparison_test(clf, data, **opts):
-    #     """
-    #     Check whether two sensors measuring the same parameter
-    #     provide a similar value.
-    #     Argument data is a tuple (s1, s2) with measurement vectors
-    #     from sensor 1 and sensor 2 respectively.
-    #     Options:
-    #       threshold: maximum difference allowed
-    #
-    #
-    #     Here the data dataframe should be changed in order
-    #     to have two dependent parameters
-    #
-    #     """
-    #     good = np.ones(data.shape[0], dtype=np.int8)
-    #     diff = np.abs(data[1] - data[0])
-    #     mask = (diff > opts['threshold'])
-    #     good[mask] = -1
-    #     return (good)
-    #
-
-    # @classmethod
-    # @check_size(1)
-    # def DM_frozen_test(cls, meta, data, **opts):  # self,
-    #     """
-    #     Consecutive data with exactly the same value are flagged as bad.
-    #     For the delayed mode we should add more datapoints
-    #     """
-    #     good = np.ones(len(data), dtype=np.int8)  # typo)?
-    #     mask = (np.diff(data[:]) == 0.0)
-    #     mask = np.concatenate((mask[0:1], mask))
-    #     good[mask] = -1
-    #     return (good)
-    #
-    # @classmethod
-    # @check_size(1)
-    # def argo_gradient_test(clf, meta, data, **opts):
-    #     """
-    #     Gradient test according to BIO ARGO
-    #
-    #     Options:
-    #       threshold: threshold for consecutive 3-values difference
-    #     """
-    #     good = np.ones(len(data), dtype=np.int8)
-    #     diff = np.zeros(len(data), dtype=np.float64)
-    #     ii = range(1, len(data) - 1)
-    #     for i in ii:
-    #         diff[i] = np.abs(data[i] - 0.5 * (data[i - 1] + data[i + 1]))
-    #     mask = (diff >= opts['threshold'])
-    #     good[mask] = -1
-    #     good[0] = 0
-    #     good[-1] = 0
-    #     return (good)
