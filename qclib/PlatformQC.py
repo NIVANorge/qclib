@@ -38,7 +38,7 @@ common_tests = {
         {'global_range_test': [QCTests.rt_range_test,
                                Thresholds.global_range_salinity],
          'local_range_test': [QCTests.rt_range_test,
-                              Thresholds.local_range_oxygen],
+                              Thresholds.local_range_salinity],
          'argo_spike_test': [QCTests.argo_spike_test,
         {'spike_threshold': Thresholds.spike_thresholds['salinity']}
                              ]},
