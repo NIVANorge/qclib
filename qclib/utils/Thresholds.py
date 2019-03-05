@@ -49,7 +49,7 @@ N_BalticProper = { 'lat': (58.36, 58.36, 59.62, 59.62),
 ''' from Source 1 ''' 
 global_range_temperature =  { 'min': -2.5, 'max': 40.0 }
 global_range_salinity =     { 'min':  2.0, 'max': 41.0 }
-global_range_fluorescence = { 'min': -0.1, 'max': 80.0 }
+global_range_chla_fluorescence = { 'min': -0.1, 'max': 80.0 }
 global_range_oxygen  =      { 'min':  0.0, 'max': 500.0 } # Micromoles per liter!
 #Chlorophyll = {'min': -0.1, 'max': 80.0 } #Using Fluorescence method CPHL
 global_range_temperature_ferrybox = { 'min': -2.5, 'max': 100.0 }
@@ -57,7 +57,7 @@ global_range_temperature_ferrybox = { 'min': -2.5, 'max': 100.0 }
 # Thresholds for Local Range Test: 
 ''' from Source 1 '''
 all_months = [1,2,3,4,5,6,7,8,9,10,11,12] 
-local_range_fluorescence =[ 
+local_range_chla_fluorescence =[ 
             {'min': -0.1, 'max': 2.0,  'area': Arctic ,'months': [1,2,10,11,12]},
             {'min': -0.1, 'max': 12.0, 'area': Arctic ,'months': [3,4] },  
             {'min': -0.1, 'max': 6.0,  'area': Arctic ,'months': [5,6,7,8,9]},

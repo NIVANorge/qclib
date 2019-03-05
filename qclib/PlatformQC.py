@@ -39,11 +39,11 @@ common_tests = {
                                Thresholds.global_range_salinity],
          'local_range_test': [QCTests.rt_range_test,
                               Thresholds.local_range_oxygen]},
-    'fluorescence':
+    'chla_fluorescence':
         {'global_range_test': [QCTests.rt_range_test,
-                               Thresholds.global_range_fluorescence],
+                               Thresholds.global_range_chla_fluorescence],
          'local_range_test': [QCTests.rt_range_test,
-                              Thresholds.local_range_fluorescence]},
+                              Thresholds.local_range_chla_fluorescence]},
 
     'oxygen_concentration':
         {'global_range_test': [QCTests.rt_range_test,
@@ -106,3 +106,4 @@ class PlatformQC(QCTests):
                 overall_flag = -1
 
         return overall_flag
+

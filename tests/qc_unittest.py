@@ -5,43 +5,65 @@ Created on 15. jan. 2018
 import unittest
 import pandas as pd
 import qclib.QC
-from qclib.utils.qc_input import QCInput_df
+from qclib.utils.qc_input import QCInput_df,QCInput
 import qclib.utils.Thresholds
 import numpy as np
-from datetime import datetime
+from datetime import datetime,timedelta
 
 platform_code = 'TF'
 common_tests = qclib.QC.init(platform_code).qc_tests
 
+base_time = datetime.strptime('2017-01-12 14:08:06', '%Y-%m-%d %H:%M:%S')
+d = timedelta(seconds=60)
+
+def make_spiky_data():
+    spiky_historical_data = pd.DataFrame.from_dict(
+                        {"data": [3],"time": [base_time - d]})
+    spiky_historical_data = spiky_historical_data.set_index(["time"])
+
+    spiky_future_data = pd.DataFrame.from_dict({
+                        "data": [3], "time": [base_time + d]})
+    spiky_future_data = spiky_future_data.set_index(["time"])
+
+    spiky_data = QCInput_df(
+                current_data=pd.DataFrame.from_dict(
+                {"data": [20], "time": base_time}),
+                historical_data=spiky_historical_data,
+                future_data=spiky_future_data)
+    return spiky_data
+
+def make_frozen_data(len_data):
+    frozen_historical_data = pd.DataFrame.from_dict(
+        {"data": [12]*len_data,
+         "time": [base_time + d*n for n in range(0,len_data)]})
+    frozen_historical_data = frozen_historical_data.set_index(["time"])
+    
+    frozen_data = QCInput_df(current_data=pd.DataFrame.from_dict(
+                    {"data": [12], "time": base_time}),
+                    historical_data=frozen_historical_data,
+                    future_data=None)
+    return frozen_data                         
+
+def make_test_data(value):
+    return QCInput_df(
+        current_data=pd.DataFrame.from_dict(
+        {"data": [value], "time": base_time}),
+        historical_data=None, future_data=None)
+
+def make_local_test_data(value,long,lat):
+    return QCInput_df(
+        current_data=pd.DataFrame.from_dict({"data": [value], "time": base_time}),
+        longitude=long, latitude=lat,
+        historical_data=None, future_data=None)    
 
 class Tests(unittest.TestCase):
-    f = '%Y-%m-%d %H:%M:%S'
-    now = datetime.strptime('2017-01-12 14:12:06', f)
+    
+    missing_data = make_test_data(-999) 
+    global_bad_salinity_data = make_test_data(77)
+    local_bad_oxygen_concentration_data = make_local_test_data(77,10.708,59.9)
 
-    frozen_historical_data = pd.DataFrame.from_dict(
-        {"data": [12, 12, 12, 12],
-         "time": [datetime.strptime('2017-01-12 14:08:06', f),
-                  datetime.strptime('2017-01-12 14:09:06', f),
-                  datetime.strptime('2017-01-12 14:10:06', f),
-                  datetime.strptime('2017-01-12 14:11:06', f)]})
-
-    spiky_historical_data = pd.DataFrame.from_dict(
-        {"data": [3],
-         "time": [datetime.strptime('2017-01-12 14:08:06', f)]})
-
-    spiky_future_data = pd.DataFrame.from_dict({"data": [3], "time": [datetime.strptime('2017-01-12 14:31:06', f)]})
-
-    frozen_data = QCInput_df(current_data=pd.DataFrame.from_dict({"data": [12], "time": now}),
-                             historical_data=frozen_historical_data, future_data=None)
-    spiky_data = QCInput_df(current_data=pd.DataFrame.from_dict({"data": [20], "time": now}),
-                            historical_data=spiky_historical_data, future_data=spiky_future_data)
-    missing_data = QCInput_df(current_data=pd.DataFrame.from_dict({"data": [-999], "time": now}),
-                              historical_data=None, future_data=None)
-    global_bad_salinity_data = QCInput_df(current_data=pd.DataFrame.from_dict({"data": [77], "time": now}),
-                                          historical_data=None, future_data=None)
-    local_bad_oxygen_concentration_data = QCInput_df(current_data=pd.DataFrame.from_dict({"data": [77], "time": now}),
-                                                     longitude=10.7087, latitude=59.9091,
-                                                     historical_data=None, future_data=None)
+    spiky_data = make_spiky_data()
+    frozen_data = make_frozen_data(4)
 
     final_flag_is_plus_one = {"test1": 0, "test2": 0, "test3": 1, "test4": 0, "test5": 0}
     final_flag_is_minus_one = {"test1": 0, "test2": 0, "test3": 1, "test4": 0, "test5": -1}
@@ -70,11 +92,7 @@ class Tests(unittest.TestCase):
         measurement_name = 'oxygen_concentration'
         params = common_tests[measurement_name]['local_range_test'][1]
         arr = [[common_tests[measurement_name]['local_range_test'][0], x] for x in params]
-
-        flags = np.zeros([len(arr)])
-        for i, a in enumerate(arr):
-            flag = a[0](self.local_bad_oxygen_concentration_data, **a[1])
-            flags[i] = flag
+        flags= [a[0](self.local_bad_oxygen_concentration_data, **a[1]) for a in arr]
 
         if all([flg == 0 for flg in flags]):
             combined_flag = 0
@@ -87,8 +105,8 @@ class Tests(unittest.TestCase):
     def test_argo_spike(self):
         measurement_name = 'temperature'
         params = common_tests[measurement_name]['argo_spike_test'][1]
-        flags = common_tests[measurement_name]['argo_spike_test'][0](self.spiky_data, **params)
-        self.assertEqual(flags, -1)
+        flags = common_tests[measurement_name]['argo_spike_test'][0](self.spiky_data,**params)
+        self.assertEqual(flags,-1) 
 
     def test_final_flag_logic(self):
         from qclib.PlatformQC import PlatformQC
