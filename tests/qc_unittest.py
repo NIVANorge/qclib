@@ -108,12 +108,19 @@ class Tests(unittest.TestCase):
         local_bad_data = make_local_test_data(77,61,10.708)
         self.range_local('temperature', local_bad_data)
 
-    def test_argo_spike(self):
-        measurement_name = 'oxygen_concentration'
+    def argo_spike(self,name,spiky_data):
+        measurement_name = name
         params = common_tests[measurement_name]['argo_spike_test'][1]
-        spiky_data = make_spiky_data(0,60)
         flags = common_tests[measurement_name]['argo_spike_test'][0](spiky_data,**params)
         self.assertEqual(flags,-1) 
+
+    def test_argo_spike_oxygen(self):
+        spiky_data = make_spiky_data(0,60)
+        self.range_local('oxygen_concentration', spiky_data) 
+
+    def test_argo_spike_temperature(self):
+        spiky_data = make_spiky_data(1,10)
+        self.range_local('temperature', spiky_data)    
 
     def test_final_flag_logic(self):
         from qclib.PlatformQC import PlatformQC
