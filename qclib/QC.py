@@ -1,8 +1,10 @@
 from typing import Dict
+import pandas as pd
 from .PlatformQC import PlatformQC
-from .utils.qc_input import QCInput
+from .utils.qc_input import QCInput, QCInput_df
 from . import Platforms
-
+from .utils.measurement import measurement_list_to_dataframe
+from .utils.validate_input import validate_additional_data
 # NOTE: when a new platform is added it has to be added to the array below, with "new_platform": Common.PlatformQC
 platform_dict = {'TF': Platforms.FerryboxQC,
                  'FA': Platforms.FerryboxQC,
@@ -21,7 +23,14 @@ def init(name):
 
 def execute(obj, qcinput: QCInput, tests: Dict[str, str])->Dict[str, int]:
 
-    flags = obj.applyQC(qcinput, tests)
+    historical_values_df = measurement_list_to_dataframe(qcinput.historical_data)
+    future_values_df = measurement_list_to_dataframe(qcinput.future_data)
+    current_data_df = pd.DataFrame.from_dict({"data": [qcinput.value], "time": [qcinput.timestamp]})
+    qcinput_df = QCInput_df(current_data=current_data_df, longitude=qcinput.longitude, latitude=qcinput.latitude,
+                            historical_data=historical_values_df, future_data=future_values_df)
+
+    validate_additional_data(qcinput_df)
+    flags = obj.applyQC(qcinput_df, tests)
     return flags
 
 
