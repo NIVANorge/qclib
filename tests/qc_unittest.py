@@ -116,11 +116,11 @@ class Tests(unittest.TestCase):
 
     def test_argo_spike_oxygen(self):
         spiky_data = make_spiky_data(0,60)
-        self.range_local('oxygen_concentration', spiky_data) 
+        self.argo_spike('oxygen_concentration', spiky_data) 
 
     def test_argo_spike_temperature(self):
         spiky_data = make_spiky_data(1,10)
-        self.range_local('temperature', spiky_data)    
+        self.argo_spike('temperature', spiky_data)    
 
     def test_final_flag_logic(self):
         from qclib.PlatformQC import PlatformQC
