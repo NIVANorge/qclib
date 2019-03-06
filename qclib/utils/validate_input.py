@@ -27,20 +27,37 @@ def validate_additional_data(qcinput: QCInput_df):
         no_time_gaps = all(has_timegaps(dt, first_dt) for dt in dt_list)
         return no_time_gaps
 
-    if len(qcinput.historical_data) > 1:
+    is_valid = True
+    if qcinput.historical_data is not None and len(qcinput.historical_data) > 1:
         df = merge_data(qcinput.current_data, qcinput.historical_data)
+        duplicates = df.duplicated(subset="time").any()
+        assert duplicates == False, "duplicated time stamps in historical data"
+        assert qcinput.current_data["time"].iloc[0] > qcinput.historical_data["time"].iloc[0], \
+            "future data while historical data are expected"
         if not validate_data_for_time_gaps(df):
+            is_valid = False
             qcinput.historical_data = pd.DataFrame.from_dict({})
             logging.warning("Removing historical data due to time gaps")
-    if len(qcinput.future_data) > 1:
+
+    if qcinput.future_data is not None and len(qcinput.future_data) > 1:
         df = merge_data(qcinput.current_data, qcinput.future_data)
+        duplicates = df.duplicated(subset="time").any()
+        assert duplicates == False, "duplicated time stamps in future data"
+        assert qcinput.current_data["time"].iloc[0] < qcinput.future_data["time"].iloc[0], \
+            "historical data while future data are expected"
         if not validate_data_for_time_gaps(df):
+            is_valid = False
             qcinput.future_data = pd.DataFrame.from_dict({})
             logging.warning("Removing future data due to time gaps")
 
-    if len(qcinput.future_data) == 1 and len(qcinput.historical_data) == 1:
+    if qcinput.historical_data is not None and qcinput.future_data is not None and \
+            len(qcinput.future_data) == 1 and len(qcinput.historical_data) == 1:
         df = merge_data_spike(qcinput.current_data, qcinput.future_data, qcinput.historical_data)
         if not validate_data_for_time_gaps(df):
+            is_valid = False
             qcinput.future_data = pd.DataFrame.from_dict({})
             qcinput.historical_data = pd.DataFrame.from_dict({})
             logging.warning("Removing additional data for spike test due to time gaps")
+
+    return is_valid
+

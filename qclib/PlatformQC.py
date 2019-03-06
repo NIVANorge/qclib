@@ -77,7 +77,7 @@ class PlatformQC(QCTests):
 
         return combined_flag
 
-    def applyQC(self, qcinput: QCInput_df, tests: Dict[str, str]) -> Dict[str, int]:
+    def applyQC(self, qcinput: QCInput_df, tests: Dict[str, List[str]]) -> Dict[str, int]:
         """
         """
         flags = {}
@@ -101,10 +101,9 @@ class PlatformQC(QCTests):
     def rt_get_overall_flag(cls, flags: Dict) -> int:
 
         overall_flag = 1
-        if all([flg == 0 for flg in flags.values()]):
+        if any([flg == 0 for flg in flags.values()]):
             overall_flag = 0
-        for flg in flags.values():
-            if flg == -1:
-                overall_flag = -1
+        if any([flg == -1 for flg in flags.values()]):
+            overall_flag = -1
 
         return overall_flag
