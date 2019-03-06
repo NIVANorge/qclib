@@ -7,7 +7,7 @@ Common classes and tools for platforms
 Created on 14. feb. 2018
 '''
 import numpy as np
-from typing import Dict
+from typing import Dict, List
 from .QCTests import QCTests
 from .utils import Thresholds
 from .utils.qc_input import QCInput_df
@@ -56,43 +56,31 @@ class PlatformQC(QCTests):
 
     def __init__(self):
         self.qc_tests = copy.deepcopy(common_tests)
+        for key in self.qc_tests.keys():
+            if key != "*":
+                self.qc_tests.update(self.qc_tests["*"])
 
+    def final_flag(self, flags: List) -> int:
+        combined_flag = 1
+        if all([flg == 0 for flg in flags]):
+            combined_flag = 0
+        elif any([flg == -1 for flg in flags]):
+            combined_flag = -1
+        return combined_flag
 
     def applyQC(self, qcinput: QCInput_df, tests: Dict[str, str]) -> Dict[str, int]:
-        """
-      df : dataframe wih col: datetime, name (platform code), lon, lat, data
-         where data is e.g. salinity or temperature, or fdom, etc.,..
-     tests : dictionary with key being name (e.g. temperature, or salinity, or...)
-      and with value being a list of tests =["global_range","local_range"]...
-        """
         flags = {}
-        key = list(tests.keys())[0]
-        if key in ['temperature', 'oxygen_concentration', 'fluorescence', 'salinity']:
-            self.qc_tests[key].update(self.qc_tests['*'])
-
-        for test in tests[key]:
-            if key not in self.qc_tests:
-                key = "*"
+        key = next(iter(tests))
+        for test in list(tests.values())[0].keys():
 
             if type(self.qc_tests[key][test][1]) is list:  # only range test
                 arr = [[test, self.qc_tests[key][test][0], x] for x in self.qc_tests[key][test][1]]
                 flag = []
                 for n, a in enumerate(arr):
                     flag.append(a[1](qcinput, **a[2]))
-
-                if all([flg == 0 for flg in flag]):
-                    combined_flag = 0
-                elif any([flg == -1 for flg in flag]):
-                    combined_flag = -1
-                else:
-                    combined_flag = 1
-
-                flags[test] = combined_flag
+                flags[test] = self.final_flag(flag)
             else:
-                flag = self.qc_tests[key][test][0](qcinput, **self.qc_tests[key][test][1])
-                if test not in flags:
-                    flags[test] = flag
-
+                flags[test] = self.qc_tests[key][test][0](qcinput, **self.qc_tests[key][test][1])
         return flags
 
     @classmethod
@@ -106,3 +94,6 @@ class PlatformQC(QCTests):
                 overall_flag = -1
 
         return overall_flag
+
+
+
