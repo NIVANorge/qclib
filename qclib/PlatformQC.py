@@ -38,18 +38,26 @@ common_tests = {
         {'global_range_test': [QCTests.rt_range_test,
                                Thresholds.global_range_salinity],
          'local_range_test': [QCTests.rt_range_test,
-                              Thresholds.local_range_oxygen]},
-    'fluorescence':
+                              Thresholds.local_range_salinity],
+         'argo_spike_test': [QCTests.argo_spike_test,
+                             {'spike_threshold': Thresholds.spike_thresholds['salinity']}
+                             ]},
+
+    'chla_fluorescence':
         {'global_range_test': [QCTests.rt_range_test,
-                               Thresholds.global_range_fluorescence],
+                               Thresholds.global_range_chla_fluorescence],
          'local_range_test': [QCTests.rt_range_test,
-                              Thresholds.local_range_fluorescence]},
+                              Thresholds.local_range_chla_fluorescence]},
 
     'oxygen_concentration':
         {'global_range_test': [QCTests.rt_range_test,
                                Thresholds.global_range_oxygen],
          'local_range_test': [QCTests.rt_range_test,
-                              Thresholds.local_range_oxygen]}}
+                              Thresholds.local_range_oxygen],
+         'argo_spike_test': [QCTests.argo_spike_test,
+                             {'spike_threshold': Thresholds.spike_thresholds['oxygen']}]}
+
+}
 
 
 class PlatformQC(QCTests):
@@ -58,29 +66,35 @@ class PlatformQC(QCTests):
         self.qc_tests = copy.deepcopy(common_tests)
         for key in self.qc_tests.keys():
             if key != "*":
-                self.qc_tests.update(self.qc_tests["*"])
+                self.qc_tests[key].update(self.qc_tests['*'])
 
-    def final_flag(self, flags: List) -> int:
+    def get_combined_flag(self, flags: List) -> int:
         combined_flag = 1
         if all([flg == 0 for flg in flags]):
             combined_flag = 0
         elif any([flg == -1 for flg in flags]):
             combined_flag = -1
+
         return combined_flag
 
     def applyQC(self, qcinput: QCInput_df, tests: Dict[str, str]) -> Dict[str, int]:
+        """
+        """
         flags = {}
-        key = next(iter(tests))
-        for test in list(tests.values())[0].keys():
+        key = list(tests.keys())[0]
+        if key not in self.qc_tests:
+            key = "*"
 
+        for test in tests[key]:
             if type(self.qc_tests[key][test][1]) is list:  # only range test
                 arr = [[test, self.qc_tests[key][test][0], x] for x in self.qc_tests[key][test][1]]
                 flag = []
                 for n, a in enumerate(arr):
                     flag.append(a[1](qcinput, **a[2]))
-                flags[test] = self.final_flag(flag)
+                flags[test] = self.get_combined_flag(flag)
             else:
                 flags[test] = self.qc_tests[key][test][0](qcinput, **self.qc_tests[key][test][1])
+
         return flags
 
     @classmethod
@@ -94,6 +108,3 @@ class PlatformQC(QCTests):
                 overall_flag = -1
 
         return overall_flag
-
-
-

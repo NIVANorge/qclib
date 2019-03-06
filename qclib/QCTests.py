@@ -13,7 +13,7 @@ from .utils.qc_input import QCInput_df
 from .utils.qctests_helpers import is_inside_geo_region
 import functools
 import logging
-from .utils.transform_input import merge_data_spike, merge_data
+from .utils.transform_input import merge_data_spike,merge_data
 
 
 class QCTests(object):
@@ -109,6 +109,7 @@ class QCTests(object):
         Options:
           threshold: threshold for consecutive double 3-values differences
         """
+
         size_historical = QCTests.argo_spike_test.number_of_historical
         size_future = QCTests.argo_spike_test.number_of_future
         if len(qcinput.historical_data) < size_historical or len(qcinput.future_data) < size_future:
@@ -122,3 +123,68 @@ class QCTests(object):
         elif k_diff < opts['spike_threshold']:
             flag = 1
         return flag
+
+        # @classmethod
+    # @check_size(1)
+    # def aic_spike_test(clf, data, **opts):
+    #     """
+    #     Executes spike test using an estimate of
+    #     Aikake Information Criterion.
+    #     This methods requires the last 4 points prior to the
+    #     first point to test.
+    #     """
+    #     good = np.zeros(len(data), dtype=np.int8)
+    #     mask = np.zeros(len(data), dtype=np.bool)
+    #     ii = range(4, len(data))
+    #     for i in ii:
+    #         jj = range(4)
+    #         ig = i - range(1, 5)
+    #         sg = np.std(data[ig])
+    #         ib = i - range(5)
+    #         sb = np.std(data[ib])
+    #         Ug = 4 * np.log(sg)
+    #         Ub = 4 * np.log(sb) - self.COEF_SPIKE
+    #         if (Ug < Ub):
+    #             good[i] = -1
+    #         else:
+    #             good[i] = 1
+    #     return (good)
+    #
+    # @classmethod
+    # @check_size(1)
+    # def bioargo_spike_test(clf, data, **opts):
+    #     """
+    #     Spike test according to BIO ARGO
+    #
+    #     Options:
+    #       p10_min: factor for minimum 10 percentile
+    #       median difference
+    #       p10_max: factor for maximum 10 percentile
+    #       median difference
+    #       p90_min: factor for minimum 90 percentile
+    #       median difference
+    #       p90_max: factor for maximum 90 percentile
+    #       median difference
+    #     """
+    #     good = np.ones(len(data), dtype=np.int8)
+    #     diff = np.zeros(len(data), dtype=np.float64)
+    #     ii = range(2, len(data) - 2)
+    #     for i in ii:
+    #         jj = range(i - 2, i + 2)
+    #         diff[i] = data[i] - np.median(data[jj])
+    #     p10 = np.percentile(diff, 10)
+    #     p90 = np.percentile(diff, 90)
+    #     mask = np.ones(len(data), dtype=np.bool)
+    #     if 'p10_min' in opts:
+    #         mask &= (diff >= opts['p10_min'] * p10)
+    #     if 'p10_max' in opts:
+    #         mask &= (diff <= opts['p10_max'] * p10)
+    #     if 'p90_min' in opts:
+    #         mask &= (diff >= opts['p90_min'] * p90)
+    #     if 'p90_max' in opts:
+    #         mask &= (diff <= opts['p90_max'] * p90)
+    #     good[~mask] = -1
+    #     good[:2] = 0
+    #     good[-2:] = 0
+    #     return (good)
+
