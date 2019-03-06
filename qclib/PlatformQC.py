@@ -32,13 +32,17 @@ common_tests = {
          'local_range_test': [QCTests.rt_range_test,
                               Thresholds.local_range_temperature],
          'argo_spike_test': [QCTests.argo_spike_test,
-                             {'spike_threshold': Thresholds.spike_thresholds['temperature']}
+        {'spike_threshold': Thresholds.spike_thresholds['temperature']}
                              ]},
     'salinity':
         {'global_range_test': [QCTests.rt_range_test,
                                Thresholds.global_range_salinity],
          'local_range_test': [QCTests.rt_range_test,
-                              Thresholds.local_range_oxygen]},
+                              Thresholds.local_range_salinity],
+         'argo_spike_test': [QCTests.argo_spike_test,
+        {'spike_threshold': Thresholds.spike_thresholds['salinity']}
+                             ]},
+
     'chla_fluorescence':
         {'global_range_test': [QCTests.rt_range_test,
                                Thresholds.global_range_chla_fluorescence],
@@ -49,7 +53,11 @@ common_tests = {
         {'global_range_test': [QCTests.rt_range_test,
                                Thresholds.global_range_oxygen],
          'local_range_test': [QCTests.rt_range_test,
-                              Thresholds.local_range_oxygen]}}
+                              Thresholds.local_range_oxygen],
+         'argo_spike_test': [QCTests.argo_spike_test,
+        {'spike_threshold': Thresholds.spike_thresholds['oxygen']}]}
+        
+        }
 
 
 class PlatformQC(QCTests):
