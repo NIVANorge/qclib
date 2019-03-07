@@ -1,9 +1,9 @@
 import matplotlib as mpl
+from matplotlib import path
 import numpy as np
 
 
-def is_inside_geo_region(longitude, latitude, **opts)->bool:
-
+def is_inside_geo_region(longitude, latitude, **opts) -> bool:
     lon = opts['area']['lon']
     lat = opts['area']['lat']
     number_of_points = len(lon)
@@ -14,5 +14,4 @@ def is_inside_geo_region(longitude, latitude, **opts)->bool:
     geo_region = mpl.path.Path(points_of_geo_region)
     current_geo_point = [[longitude, latitude]]
     inside = geo_region.contains_points(current_geo_point)
-    return inside
-
+    return bool(inside)

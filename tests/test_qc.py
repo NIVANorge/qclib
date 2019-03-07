@@ -10,9 +10,9 @@ from qclib.utils.validate_input import validate_additional_data
 import qclib.utils.Thresholds
 from qclib import Platforms
 from qclib.PlatformQC import PlatformQC
-import numpy as np
 from datetime import datetime, timedelta
 from qclib import QC
+
 platform_code = 'TF'
 common_tests = qclib.QC.init(platform_code).qc_tests
 
@@ -39,7 +39,7 @@ def make_spiky_data(val_base, val_spike):
 def make_frozen_data(len_data):
     frozen_historical_data = pd.DataFrame.from_dict(
         {"data": [12] * len_data,
-         "time": [base_time - d * n for n in range(1, len_data+1)]})
+         "time": [base_time - d * n for n in range(1, len_data + 1)]})
 
     frozen_data = QCInput_df(current_data=pd.DataFrame.from_dict(
         {"data": [12], "time": base_time}),
@@ -50,7 +50,6 @@ def make_frozen_data(len_data):
 
 
 def make_complete_data(len_data):
-
     historical_data = pd.DataFrame.from_dict(
         {"data": [10 + i for i in range(1, len_data)],
          "time": [base_time - d * n for n in range(1, len_data)]})
@@ -69,12 +68,11 @@ def make_complete_data(len_data):
 
 
 def make_complete_input_data(len_data):
-
     historical_data = [Measurement(value=10 + i, datetime=base_time - d * i) for i in range(1, len_data)]
     future_data = [Measurement(value=10 + i, datetime=base_time + d * i) for i in range(1, len_data)]
 
     data = QCInput(value=12, timestamp=base_time, longitude=60, latitude=10.708,
-        historical_data=historical_data, future_data=future_data)
+                   historical_data=historical_data, future_data=future_data)
 
     return data
 
@@ -91,7 +89,6 @@ def make_local_test_data(value, lat, long):
         current_data=pd.DataFrame.from_dict({"data": [value], "time": base_time}),
         longitude=long, latitude=lat,
         historical_data=None, future_data=None)
-
 
 
 class Tests(unittest.TestCase):
@@ -183,7 +180,6 @@ class Tests(unittest.TestCase):
                                  "missing_value_test"]}
         flags = QC.execute(obj, data, tests)
         self.assertEqual(PlatformQC.rt_get_overall_flag(flags), 0)
-
 
 
 if __name__ == '__main__':
