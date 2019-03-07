@@ -1,8 +1,6 @@
 '''
 .. moduleauthor: Pierre Jaccard <pja@niva.no>
-
-
-Quality control tests to be applied on data. 
+Quality control tests to be applied on data.
 Tests are implemented according to the document  
 Quality Control of Biogeochemical Measurements
 [1] http://archimer.ifremer.fr/doc/00251/36232/34792.pdf  
@@ -10,10 +8,9 @@ Quality Control of Biogeochemical Measurements
 Created on 6. feb. 2018
 '''
 import numpy as np
-import matplotlib as mpl
 import time
-import pandas as pd
 from .utils.qc_input import QCInput_df
+from .utils.qctests_helpers import is_inside_geo_region
 import functools
 import logging
 from .utils.transform_input import merge_data_spike,merge_data
@@ -22,22 +19,8 @@ from .utils.transform_input import merge_data_spike,merge_data
 class QCTests(object):
     """
     Real Time QC Tests 
-    These tests are applied to one signal
-    (data aggregated during 15 minutes and sent to the cloud 
-    
-    Specific tests are defined here. Add whatever new tests. 
-    The standard calling syntax for these tests is :    
-      obj.specific_qc_test_function(meta, data, **opts)
-    
-    where        
-      meta: a dict including any meta information required to perform the test,
-            for example position and time (see specific tests below)
-      data: normally, this is the data of the parameter to be tested. 
-            However. some tests require a data structure or aggregation.
-      opts: options specific to the test, for example threshold values
-        
-    Return value from tests is an array of np.int8
-    where 1 is PASSED, -1 is FAILED and 0 is not tested.
+    These tests are applied to one signal ( = one timestamp)
+    Return value of each test is an integer: 0= test not ran, -1=test failed, 1= test succeeded
     """
 
     def check_size(number_of_historical, number_of_future):
@@ -65,62 +48,27 @@ class QCTests(object):
     @classmethod
     @check_size(0, 0)
     def rt_range_test(clf, qcinput: QCInput_df, **opts) -> int:
-        # FIXME since this test runs now per point, its definition can be significantly simplified
         """
-        4.4 Global Range Tests 
-        4.5 Local Range Tests 
-        
-        Checks that data is within a specified range.Accepts time range 
-        and geographic range. The latter is based on minimum and maximum 
-        latitudes and longitudes values. An later improvement could be
-        to accept a geographic box.  
-        
-        Options:         
-        * min    : minimum value (inclusive)
-        * max    : maximum value (inclusive)
-        * day_min: minimum date for which the test applies,
-                   can be `py:class:datetime.date` or a decimal date
-                   relative to 1950-01-01
-        * day_max: maximum date for which the test applies (same format as `day_min`) 
-        * lat_min: minimum latitude for which the test applies
-        * lat_max: maximum latitude for which the test applies
-        * lon_min: minimum longitude for which the test applies
-        * lon_max: maximum longitude for which the test applies
-        * area   : dictionary of polygon edges, with keys 'lat' and 'lon'. 
-                   These should be listed in CW order
+
         """
         df = qcinput.current_data
-        good = np.zeros(len(df["data"]), dtype=np.int8)
-        mask = np.ones(len(df["data"]), dtype=np.bool)
 
+        valid_opts = True
         if 'months' in opts and ('time' in df.columns):
-            meta_months = pd.Series([
-                time.strptime(str(n), '%Y-%m-%d %H:%M:%S').tm_mon for n in df['time']])
-            mask &= meta_months.isin(opts['months'])
+            valid_opts = time.strptime(str(df["time"].iloc[0]), '%Y-%m-%d %H:%M:%S').tm_mon in opts['months']
 
-        if ('area' in opts):
-            lon = opts['area']['lon']
-            lat = opts['area']['lat']
-            npt = len(lon)
-            vrt = np.ones([npt + 1, 2], dtype=np.float64)
-            vrt[0:npt, 0] = lon
-            vrt[0:npt, 1] = lat
-            vrt[npt, 0:2] = [lon[0], lat[0]]
-            path = mpl.path.Path(vrt)
-            pts = np.ones([len(df), 2])
-            pts[:, 0] = qcinput.longitude
-            pts[:, 1] = qcinput.latitude
-            inside = path.contains_points(pts)
-            mask &= inside
+        if 'area' in opts:
+            valid_opts = is_inside_geo_region(qcinput.longitude, qcinput.latitude, **opts)
 
-        good[mask] = -1
-        if 'min' in opts:
-            mask &= (df["data"] >= opts['min'])
-        if 'max' in opts:
-            mask &= (df["data"] <= opts['max'])
-        good[mask] = 1
+        if not valid_opts:
+            return 0
+        flag = 1
+        if 'min' in opts and df["data"].iloc[0] < opts['min']:
+            flag = -1
+        if 'max' in opts and df["data"].iloc[0] > opts['max']:
+            flag = -1
 
-        return int(good[0])
+        return flag
 
     @classmethod
     @check_size(0, 0)
@@ -175,68 +123,3 @@ class QCTests(object):
         elif k_diff < opts['spike_threshold']:
             flag = 1
         return flag
-
-        # @classmethod
-    # @check_size(1)
-    # def aic_spike_test(clf, data, **opts):
-    #     """
-    #     Executes spike test using an estimate of
-    #     Aikake Information Criterion.
-    #     This methods requires the last 4 points prior to the
-    #     first point to test.
-    #     """
-    #     good = np.zeros(len(data), dtype=np.int8)
-    #     mask = np.zeros(len(data), dtype=np.bool)
-    #     ii = range(4, len(data))
-    #     for i in ii:
-    #         jj = range(4)
-    #         ig = i - range(1, 5)
-    #         sg = np.std(data[ig])
-    #         ib = i - range(5)
-    #         sb = np.std(data[ib])
-    #         Ug = 4 * np.log(sg)
-    #         Ub = 4 * np.log(sb) - self.COEF_SPIKE
-    #         if (Ug < Ub):
-    #             good[i] = -1
-    #         else:
-    #             good[i] = 1
-    #     return (good)
-    #
-    # @classmethod
-    # @check_size(1)
-    # def bioargo_spike_test(clf, data, **opts):
-    #     """
-    #     Spike test according to BIO ARGO
-    #
-    #     Options:
-    #       p10_min: factor for minimum 10 percentile
-    #       median difference
-    #       p10_max: factor for maximum 10 percentile
-    #       median difference
-    #       p90_min: factor for minimum 90 percentile
-    #       median difference
-    #       p90_max: factor for maximum 90 percentile
-    #       median difference
-    #     """
-    #     good = np.ones(len(data), dtype=np.int8)
-    #     diff = np.zeros(len(data), dtype=np.float64)
-    #     ii = range(2, len(data) - 2)
-    #     for i in ii:
-    #         jj = range(i - 2, i + 2)
-    #         diff[i] = data[i] - np.median(data[jj])
-    #     p10 = np.percentile(diff, 10)
-    #     p90 = np.percentile(diff, 90)
-    #     mask = np.ones(len(data), dtype=np.bool)
-    #     if 'p10_min' in opts:
-    #         mask &= (diff >= opts['p10_min'] * p10)
-    #     if 'p10_max' in opts:
-    #         mask &= (diff <= opts['p10_max'] * p10)
-    #     if 'p90_min' in opts:
-    #         mask &= (diff >= opts['p90_min'] * p90)
-    #     if 'p90_max' in opts:
-    #         mask &= (diff <= opts['p90_max'] * p90)
-    #     good[~mask] = -1
-    #     good[:2] = 0
-    #     good[-2:] = 0
-    #     return (good)
-
