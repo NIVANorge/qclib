@@ -49,7 +49,7 @@ setup(
         'pandas==0.24.1',
         'numpy==1.16.1',
         'pydantic==0.18.2',
-        'matplotlib'
+        'matplotlib==3.0.3'
     ],
     extras_require={
       "test": [
