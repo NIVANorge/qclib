@@ -157,7 +157,7 @@ class QCTests(object):
     def argo_spike_test(clf, qcinput: QCInput_df, **opts) -> int:
         """
         Spike test according to MyOcean [2] for T and S parameters
-        
+        The same test for Oxygen is defined at Bio Argo 
         Options:
           threshold: threshold for consecutive double 3-values differences
         """
