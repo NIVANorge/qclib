@@ -56,10 +56,8 @@ class QCTests(object):
         valid_opts = True
         if 'months' in opts and ('time' in df.columns):
             valid_opts = time.strptime(str(df["time"].iloc[0]), '%Y-%m-%d %H:%M:%S').tm_mon in opts['months']
-
         if 'area' in opts:
             valid_opts = is_inside_geo_region(qcinput.longitude, qcinput.latitude, **opts)
-
         if not valid_opts:
             return 0
         flag = 1

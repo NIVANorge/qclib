@@ -12,6 +12,7 @@ from qclib import Platforms
 from qclib.PlatformQC import PlatformQC
 from datetime import datetime, timedelta
 from qclib import QC
+import qclib.utils.Thresholds as th
 
 platform_code = 'TF'
 common_tests = qclib.QC.init(platform_code).qc_tests
@@ -59,7 +60,7 @@ def make_complete_data(len_data):
          "time": [base_time + d * n for n in range(1, len_data)]})
 
     data = QCInput_df(current_data=pd.DataFrame.from_dict(
-        {"data": [12], "time": base_time}), longitude=60, latitude=10.708,
+        {"data": [19.5], "time": base_time}), latitude=61, longitude=10.708,
         historical_data=historical_data,
         future_data=future_data)
 
@@ -70,8 +71,7 @@ def make_complete_data(len_data):
 def make_complete_input_data(len_data):
     historical_data = [Measurement(value=10 + i, datetime=base_time - d * i) for i in range(1, len_data)]
     future_data = [Measurement(value=10 + i, datetime=base_time + d * i) for i in range(1, len_data)]
-
-    data = QCInput(value=12, timestamp=base_time, longitude=60, latitude=10.708,
+    data = QCInput(value=20, timestamp=base_time, latitude=61, longitude=10.708,
                    historical_data=historical_data, future_data=future_data)
 
     return data
@@ -117,29 +117,18 @@ class Tests(unittest.TestCase):
         flag = common_tests[measurement_name]['global_range_test'][0](global_bad_salinity_data, **params)
         self.assertEqual(flag, -1)
 
-    def range_local(self, name, data):
-        # Checks if values are within defined range for local regions and time periods should give -1 flags for outliers
-        measurement_name = name
-        params = common_tests[measurement_name]['local_range_test'][1]
-        arr = [[common_tests[measurement_name]['local_range_test'][0], x] for x in params]
-        flags = [a[0](data, **a[1]) for a in arr]
-        if all([flg == 0 for flg in flags]):
-            combined_flag = 0
-        elif any([flg == -1 for flg in flags]):
-            combined_flag = -1
-        else:
-            combined_flag = 1
-        self.assertEqual(combined_flag, -1)
-
-    def test_oxygen_range_local(self):
-        # North Sea
-        local_bad_data = make_local_test_data(77, 59.9, 10.708)
-        self.range_local('oxygen_concentration', local_bad_data)
-
-    def test_temperature_range_local(self):
-        # Arctic
-        local_bad_data = make_local_test_data(77, 61, 10.708)
-        self.range_local('temperature', local_bad_data)
+    def test_local_range_test(self):
+        params_t = {'min': -2.0, 'max': 24.0, 'area': th.Arctic, 'months': th.all_months}
+        params_o2 = {'min': 200.0, 'max': 500.0, 'area': th.NorthSea, 'months': th.all_months}
+        local_bad_data_t = make_local_test_data(77, 61, 10.708)
+        local_good_data_t = make_local_test_data(20, 61, 10.708)
+        local_bad_data_o2 = make_local_test_data(77, 59.9, 9)
+        flag = common_tests['temperature']['local_range_test'][0](local_bad_data_t, **params_t)
+        self.assertEqual(flag, -1, "local_range_test should fail")
+        flag = common_tests['temperature']['local_range_test'][0](local_good_data_t, **params_t)
+        self.assertEqual(flag, 1)
+        flag = common_tests['oxygen_concentration']['local_range_test'][0](local_bad_data_o2, **params_o2)
+        self.assertEqual(flag, -1, "local_range_test should fail")
 
     def argo_spike(self, name, spiky_data):
         measurement_name = name
@@ -170,16 +159,15 @@ class Tests(unittest.TestCase):
         tests = {"temperature": ["local_range_test", "global_range_test", "argo_spike_test", "frozen_test",
                                  "missing_value_test"]}
         flags = obj.applyQC(data, tests)
-        self.assertEqual(PlatformQC.rt_get_overall_flag(flags), 0)
+        self.assertEqual(PlatformQC.rt_get_overall_flag(flags), 1)
 
     def test_execute_qc(self):
         obj = Platforms.FerryboxQC()
         data = make_complete_input_data(5)
-        print(data.historical_data)
         tests = {"temperature": ["local_range_test", "global_range_test", "argo_spike_test", "frozen_test",
                                  "missing_value_test"]}
         flags = QC.execute(obj, data, tests)
-        self.assertEqual(PlatformQC.rt_get_overall_flag(flags), 0)
+        self.assertEqual(PlatformQC.rt_get_overall_flag(flags), 1)
 
 
 if __name__ == '__main__':
