@@ -49,6 +49,7 @@ common_tests = {
          'local_range_test': [QCTests.rt_range_test,
                               Thresholds.local_range_chla_fluorescence]},
 
+
     'oxygen_concentration':
         {'global_range_test': [QCTests.rt_range_test,
                                Thresholds.global_range_oxygen],
@@ -85,7 +86,7 @@ class PlatformQC(QCTests):
         if key not in self.qc_tests:
             key = "*"
 
-        for test in tests[key]:
+        for test in self.qc_tests[key]:
             if type(self.qc_tests[key][test][1]) is list:  # only range test
                 arr = [[test, self.qc_tests[key][test][0], x] for x in self.qc_tests[key][test][1]]
                 flag = []
