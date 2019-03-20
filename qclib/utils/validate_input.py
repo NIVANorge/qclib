@@ -45,7 +45,7 @@ def validate_data(current_data_df: pd.DataFrame, additional_data_df: pd.DataFram
         assert has_duplicates(df) == False, "duplicated time stamps in historical data"
         assert has_time_reversed(current_data_df, additional_data_df, mode) == False, \
             "historical data are future in time or future data are historical"
-        is_valid = validate_data_for_time_gaps(df)
+        is_valid = validate_data_for_time_gaps(df, fuzzy_seconds=1)
     return is_valid
 
 
@@ -56,7 +56,7 @@ def validate_data_for_spike(current_data_df: pd.DataFrame, additional_data_df: p
             len(additional_data_df) == 1 and len(additional_data_df2) == 1:
         df = merge_data_spike(current_data_df, additional_data_df, additional_data_df2)
         assert has_duplicates(df) == False, "duplicated time stamps in historical data"
-        is_valid = validate_data_for_time_gaps(df)
+        is_valid = validate_data_for_time_gaps(df, fuzzy_seconds=1)
     return is_valid
 
 
