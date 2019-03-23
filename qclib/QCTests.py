@@ -94,7 +94,7 @@ class QCTests(object):
         data = merge_data(qcinput.current_data, qcinput.historical_data)
         flag = 1
         data_diff = data["data"].diff().dropna()
-        if all(data_diff[-size_historical:]) == 0.0:
+        if all(data_diff[-size_historical:] == 0.0):
             flag = -1
         return flag
 
