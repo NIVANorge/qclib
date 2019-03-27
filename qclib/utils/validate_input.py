@@ -68,16 +68,16 @@ def validate_additional_data(qcinput: QCInput_df):
     if not validate_data(qcinput.current_data, qcinput.historical_data, 1):
         is_valid = False
         qcinput.historical_data = pd.DataFrame.from_dict({})
-        logging.warning("Removing historical data due to time gaps")
+        logging.debug("Removing historical data due to time gaps")
 
     if not validate_data(qcinput.current_data, qcinput.future_data, 2):
         is_valid = False
         qcinput.future_data = pd.DataFrame.from_dict({})
-        logging.warning("Removing future data due to time gaps")
+        logging.debug("Removing future data due to time gaps")
 
     if not validate_data_for_spike(qcinput.current_data, qcinput.historical_data, qcinput.future_data):
         qcinput.future_data = pd.DataFrame.from_dict({})
         qcinput.historical_data = pd.DataFrame.from_dict({})
-        logging.warning("Removing additional data due to time gaps")
+        logging.debug("Removing additional data due to time gaps")
 
     return is_valid

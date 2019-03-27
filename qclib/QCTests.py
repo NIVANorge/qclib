@@ -29,14 +29,14 @@ class QCTests(object):
             def func_wrapper(clf, *args, **opts):
                 if number_of_historical > 0:
                     if args[0].historical_data is None:
-                        logging.warning("No historical data available to perform %s test" % func.__name__)
+                        logging.debug("No historical data available to perform %s test" % func.__name__)
                     elif len(args[0].historical_data) < number_of_historical:
-                        logging.warning("Too few historical data points to perform %s test" % func.__name__)
+                        logging.debug("Too few historical data points to perform %s test" % func.__name__)
                 if number_of_future > 0:
                     if args[0].future_data is None:
-                        logging.warning("No future data available to perform %s test" % func.__name__)
+                        logging.debug("No future data available to perform %s test" % func.__name__)
                     elif len(args[0].future_data) < number_of_future:
-                        logging.warning("Too few future data points to perform %s test" % func.__name__)
+                        logging.debug("Too few future data points to perform %s test" % func.__name__)
                 return func(clf, *args, **opts)
 
             func_wrapper.number_of_historical = number_of_historical
