@@ -11,7 +11,9 @@ platform_dict = {'TF': Platforms.FerryboxQC,
                  'NB': Platforms.FerryboxQC,
                  'Survey_2018_03/SeaGlider_1':  Platforms.SeaGliderQC,
                  'Survey_2018_03/SB_Echo':      Platforms.SailBuoyQC,
-                 'Survey_2018_03/Waveglider_1': Platforms.WaveGliderQC}
+                 'Survey_2018_03/Waveglider_1': Platforms.WaveGliderQC,
+                 'Survey_2019_04/Waveglider_1': Platforms.WaveGliderQC,
+                 'Survey_2019_test/Waveglider_1': Platforms.WaveGliderQC}
 
 
 def init(name):
