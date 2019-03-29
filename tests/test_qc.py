@@ -147,11 +147,17 @@ class Tests(unittest.TestCase):
     def test_final_flag_logic(self):
         from qclib.PlatformQC import PlatformQC
         flag = PlatformQC.rt_get_overall_flag(self.final_flag_is_plus_one)
+        flag_c = PlatformQC.flag2copernicus(flag)
         self.assertEqual(flag, 1)
+        self.assertEqual(flag_c, 1)
         flag = PlatformQC.rt_get_overall_flag(self.final_flag_is_minus_one)
+        flag_c = PlatformQC.flag2copernicus(flag)
         self.assertEqual(flag, -1)
+        self.assertEqual(flag_c, 4)
         flag = PlatformQC.rt_get_overall_flag(self.final_flag_is_zero)
+        flag_c = PlatformQC.flag2copernicus(flag)
         self.assertEqual(flag, 0)
+        self.assertEqual(flag_c, 0)
 
     def test_applyQC(self):
         obj = Platforms.FerryboxQC()

@@ -108,3 +108,12 @@ class PlatformQC(QCTests):
             overall_flag = -1
 
         return overall_flag
+
+    # https://github.com/NIVANorge/k8s-jobs/blob/master/pyFerry/Platforms/Common.py
+    @classmethod
+    def flag2copernicus(cls, flag: int) -> int:
+        " This function translates between -1,0,1 convention to copernicus convention 0,1,4 "
+        flag_c = flag
+        if flag == -1:
+            flag_c = 4
+        return flag_c
