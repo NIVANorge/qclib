@@ -45,7 +45,7 @@ def validate_data(current_data_df: pd.DataFrame, additional_data_df: pd.DataFram
         assert has_duplicates(df) == False, "duplicated time stamps in historical data"
         assert has_time_reversed(current_data_df, additional_data_df, mode) == False, \
             "historical data are future in time or future data are historical"
-        is_valid = validate_data_for_time_gaps(df)
+        is_valid = validate_data_for_time_gaps(df, fuzzy_seconds=1)
     return is_valid
 
 
@@ -56,7 +56,7 @@ def validate_data_for_spike(current_data_df: pd.DataFrame, additional_data_df: p
             len(additional_data_df) == 1 and len(additional_data_df2) == 1:
         df = merge_data_spike(current_data_df, additional_data_df, additional_data_df2)
         assert has_duplicates(df) == False, "duplicated time stamps in historical data"
-        is_valid = validate_data_for_time_gaps(df)
+        is_valid = validate_data_for_time_gaps(df, fuzzy_seconds=1)
     return is_valid
 
 
@@ -68,16 +68,16 @@ def validate_additional_data(qcinput: QCInput_df):
     if not validate_data(qcinput.current_data, qcinput.historical_data, 1):
         is_valid = False
         qcinput.historical_data = pd.DataFrame.from_dict({})
-        logging.warning("Removing historical data due to time gaps")
+        logging.debug("Removing historical data due to time gaps")
 
     if not validate_data(qcinput.current_data, qcinput.future_data, 2):
         is_valid = False
         qcinput.future_data = pd.DataFrame.from_dict({})
-        logging.warning("Removing future data due to time gaps")
+        logging.debug("Removing future data due to time gaps")
 
     if not validate_data_for_spike(qcinput.current_data, qcinput.historical_data, qcinput.future_data):
         qcinput.future_data = pd.DataFrame.from_dict({})
         qcinput.historical_data = pd.DataFrame.from_dict({})
-        logging.warning("Removing additional data due to time gaps")
+        logging.debug("Removing additional data due to time gaps")
 
     return is_valid

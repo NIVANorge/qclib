@@ -2,7 +2,7 @@
 """A setuptools based module for the NIVA tsb module/application.
 """
 
-from setuptools import setup, find_packages
+from setuptools import setup
 import qclib
 
 setup(
@@ -38,7 +38,7 @@ setup(
 
         # Pick your license as you wish (should match "license" above)
         'License :: Owned by NIVA http://www.niva.no/',
-
+        
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],

@@ -29,14 +29,14 @@ class QCTests(object):
             def func_wrapper(clf, *args, **opts):
                 if number_of_historical > 0:
                     if args[0].historical_data is None:
-                        logging.warning("No historical data available to perform %s test" % func.__name__)
+                        logging.debug("No historical data available to perform %s test" % func.__name__)
                     elif len(args[0].historical_data) < number_of_historical:
-                        logging.warning("Too few historical data points to perform %s test" % func.__name__)
+                        logging.debug("Too few historical data points to perform %s test" % func.__name__)
                 if number_of_future > 0:
                     if args[0].future_data is None:
-                        logging.warning("No future data available to perform %s test" % func.__name__)
+                        logging.debug("No future data available to perform %s test" % func.__name__)
                     elif len(args[0].future_data) < number_of_future:
-                        logging.warning("Too few future data points to perform %s test" % func.__name__)
+                        logging.debug("Too few future data points to perform %s test" % func.__name__)
                 return func(clf, *args, **opts)
 
             func_wrapper.number_of_historical = number_of_historical
@@ -56,10 +56,8 @@ class QCTests(object):
         valid_opts = True
         if 'months' in opts and ('time' in df.columns):
             valid_opts = time.strptime(str(df["time"].iloc[0]), '%Y-%m-%d %H:%M:%S').tm_mon in opts['months']
-
         if 'area' in opts:
             valid_opts = is_inside_geo_region(qcinput.longitude, qcinput.latitude, **opts)
-
         if not valid_opts:
             return 0
         flag = 1
@@ -96,7 +94,7 @@ class QCTests(object):
         data = merge_data(qcinput.current_data, qcinput.historical_data)
         flag = 1
         data_diff = data["data"].diff().dropna()
-        if all(data_diff[-size_historical:]) == 0.0:
+        if all(data_diff[-size_historical:] == 0.0):
             flag = -1
         return flag
 
