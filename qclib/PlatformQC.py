@@ -63,6 +63,9 @@ common_tests = {
 
 class PlatformQC(QCTests):
 
+    sampling_interval = 60
+    accept_time_difference = 3
+
     def __init__(self):
         self.qc_tests = copy.deepcopy(common_tests)
         for key in self.qc_tests.keys():
