@@ -24,4 +24,5 @@ class SeaGliderQC(PlatformQC.PlatformQC):
 
 
 class WaveGliderQC(PlatformQC.PlatformQC):
-    pass
+    sampling_interval = 600
+    accept_time_difference = 30

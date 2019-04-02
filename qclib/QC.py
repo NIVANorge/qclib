@@ -26,7 +26,7 @@ def init(name):
 def execute(obj, qcinput: QCInput, tests: Dict[str, str])->Dict[str, int]:
 
     qcinput_df = transform_input_to_df(qcinput)
-    validate_additional_data(qcinput_df)
+    validate_additional_data(obj, qcinput_df)
     flags = obj.applyQC(qcinput_df, tests)
     return flags
 

@@ -19,7 +19,7 @@ common_tests = qclib.QC.init(platform_code).qc_tests
 
 base_time = datetime.strptime('2017-01-12 14:08:06', '%Y-%m-%d %H:%M:%S')
 d = timedelta(seconds=60)
-
+qc_method = qclib.Platforms.FerryboxQC
 
 def make_spiky_data(val_base, val_spike):
     spiky_historical_data = pd.DataFrame.from_dict(
@@ -33,7 +33,7 @@ def make_spiky_data(val_base, val_spike):
             {"data": [val_spike], "time": base_time}),
         historical_data=spiky_historical_data,
         future_data=spiky_future_data)
-    validate_additional_data(spiky_data)
+    validate_additional_data(qc_method, spiky_data)
     return spiky_data
 
 
@@ -46,7 +46,7 @@ def make_frozen_data(len_data):
         {"data": [12], "time": base_time}),
         historical_data=frozen_historical_data,
         future_data=None)
-    validate_additional_data(frozen_data)
+    validate_additional_data(qc_method,frozen_data)
     return frozen_data
 
 
@@ -64,7 +64,7 @@ def make_complete_data(len_data):
         historical_data=historical_data,
         future_data=future_data)
 
-    validate_additional_data(data)
+    validate_additional_data(qc_method, data)
     return data
 
 

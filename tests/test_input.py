@@ -3,6 +3,7 @@ from datetime import datetime
 from qclib.utils.qc_input import QCInput_df, QCInput, Measurement
 from qclib.utils.validate_input import validate_additional_data, has_duplicates
 from qclib.utils.transform_input import transform_input_to_df
+import qclib.Platforms
 import pandas as pd
 
 from qclib.utils.validate_input import validate_additional_data
@@ -42,11 +43,11 @@ class ValidateInput(unittest.TestCase):
 
     def test_should_work_with_arbitrary_sort_order(self):
         qcinput_df = transform_input_to_df(self.qcinput)
-        self.assertEqual(validate_additional_data(qcinput_df), True)
+        self.assertEqual(validate_additional_data(qclib.Platforms.FerryboxQC, qcinput_df), True)
 
     def test_should_detect_time_gaps(self):
         qcinput_df = transform_input_to_df(self.qcinput_gaps)
-        self.assertEqual(validate_additional_data(qcinput_df), False)
+        self.assertEqual(validate_additional_data(qclib.Platforms.FerryboxQC, qcinput_df), False)
         self.assertEqual(len(qcinput_df.historical_data), 0)
 
     def test_should_detect_duplicates(self):
