@@ -13,7 +13,7 @@ from .utils.qc_input import QCInput_df
 from .utils.qctests_helpers import is_inside_geo_region
 import functools
 import logging
-from .utils.transform_input import merge_data_spike,merge_data
+from .utils.transform_input import merge_data_spike, merge_data
 
 
 class QCTests(object):
