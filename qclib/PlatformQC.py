@@ -90,7 +90,7 @@ class PlatformQC(QCTests):
             key = "*"
 
         for test in self.qc_tests[key]:
-            if test not in tests[key]:
+            if test not in tests[list(tests.keys())[0]]:
                 continue
             if type(self.qc_tests[key][test][1]) is list:  # only range test
                 arr = [[test, self.qc_tests[key][test][0], x] for x in self.qc_tests[key][test][1]]
