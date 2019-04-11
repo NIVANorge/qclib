@@ -16,7 +16,8 @@ class FerryboxQC(PlatformQC.PlatformQC):
 
 
 class SailBuoyQC(PlatformQC.PlatformQC):
-    pass
+    sampling_interval = 9000
+    accept_time_difference = sampling_interval
 
 
 class SeaGliderQC(PlatformQC.PlatformQC):
