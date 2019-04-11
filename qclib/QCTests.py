@@ -83,7 +83,7 @@ class QCTests(object):
         return flag
 
     @classmethod
-    @check_size(2, 0)
+    @check_size(4, 0)
     def rt_frozen_test(cls, qcinput: QCInput_df) -> int:
         """
         Consecutive data with exactly the same value are flagged as bad
