@@ -14,6 +14,10 @@ class FerryboxQC(PlatformQC.PlatformQC):
         # And extra tests can be added
         self.qc_tests.update(extra_tests)
 
+# Glider have in general unstable sampling interval.
+# NUmber below are given as an upper limit for sampling interval and the accept_time difference
+# is used to assess weather we had a gap in data taking or not.
+
 
 class SailBuoyQC(PlatformQC.PlatformQC):
     sampling_interval = 9000
@@ -21,6 +25,8 @@ class SailBuoyQC(PlatformQC.PlatformQC):
 
 
 class SeaGliderQC(PlatformQC.PlatformQC):
+    sampling_interval = 60
+    accept_time_difference = 60*sampling_interval
     pass
 
 
