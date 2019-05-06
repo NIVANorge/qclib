@@ -75,10 +75,10 @@ local_range_chla_fluorescence = [
 ]
 
 local_range_oxygen = [
-    {'min': 200.0, 'max': 500.0, 'area': Arctic, 'months': all_months},
-    {'min': 200.0, 'max': 500.0, 'area': NorthSea, 'months': all_months},
-    {'min': 200.0, 'max': 500.0, 'area': Baltic, 'months': all_months},
-    {'min': 200.0, 'max': 500.0, 'area': NW_Shelf, 'months': all_months},
+    {'min': 0.0, 'max': 500.0, 'area': Arctic, 'months': all_months},
+    {'min': 0.0, 'max': 500.0, 'area': NorthSea, 'months': all_months},
+    {'min': 0.0, 'max': 500.0, 'area': Baltic, 'months': all_months},
+    {'min': 0.0, 'max': 500.0, 'area': NW_Shelf, 'months': all_months},
 ]
 
 local_range_temperature = [
