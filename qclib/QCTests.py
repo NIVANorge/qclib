@@ -13,7 +13,7 @@ from .utils.qc_input import QCInput_df
 from .utils.qctests_helpers import is_inside_geo_region
 import functools
 import logging
-from .utils.transform_input import merge_data_spike,merge_data
+from .utils.transform_input import merge_data_spike, merge_data
 
 
 class QCTests(object):
@@ -55,7 +55,13 @@ class QCTests(object):
 
         valid_opts = True
         if 'months' in opts and ('time' in df.columns):
-            valid_opts = time.strptime(str(df["time"].iloc[0]), '%Y-%m-%d %H:%M:%S').tm_mon in opts['months']
+            measurement_time = str(df["time"].iloc[0])
+            if len(measurement_time.split('.')) == 1:
+                valid_opts = time.strptime(measurement_time, '%Y-%m-%d %H:%M:%S').tm_mon in opts['months']
+            elif len(measurement_time.split('.')) == 2:
+                valid_opts = time.strptime(measurement_time, '%Y-%m-%d %H:%M:%S.%f').tm_mon in opts['months']
+            else:
+                logging.error("Invalid datetime string format")
         if 'area' in opts:
             valid_opts = is_inside_geo_region(qcinput.longitude, qcinput.latitude, **opts)
         if not valid_opts:

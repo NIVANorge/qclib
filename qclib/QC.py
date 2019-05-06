@@ -10,7 +10,11 @@ platform_dict = {'TF': Platforms.FerryboxQC,
                  'FA': Platforms.FerryboxQC,
                  'NB': Platforms.FerryboxQC,
                  'Survey_2018_03/SeaGlider_1':  Platforms.SeaGliderQC,
+                 'Survey_2019_04/SeaGlider_1':  Platforms.SeaGliderQC,
+                 'Survey_2019_04_test/SeaGlider_1':  Platforms.SeaGliderQC,
                  'Survey_2018_03/SB_Echo':      Platforms.SailBuoyQC,
+                 'Survey_2019_04/SB_Echo':      Platforms.SailBuoyQC,
+                 'Survey_2019_04_test/SB_Echo':      Platforms.SailBuoyQC,
                  'Survey_2018_03/Waveglider_1': Platforms.WaveGliderQC,
                  'Survey_2019_04/Waveglider_1': Platforms.WaveGliderQC,
                  'Survey_2019_test/Waveglider_1': Platforms.WaveGliderQC}
@@ -26,7 +30,7 @@ def init(name):
 def execute(obj, qcinput: QCInput, tests: Dict[str, str])->Dict[str, int]:
 
     qcinput_df = transform_input_to_df(qcinput)
-    validate_additional_data(qcinput_df)
+    validate_additional_data(obj, qcinput_df)
     flags = obj.applyQC(qcinput_df, tests)
     return flags
 
