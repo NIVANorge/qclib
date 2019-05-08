@@ -21,7 +21,6 @@ base_time = datetime.strptime('2017-01-12 14:08:06', '%Y-%m-%d %H:%M:%S')
 d = timedelta(seconds=60)
 qc_method = qclib.Platforms.FerryboxQC
 
-
 def make_spiky_data(val_base, val_spike):
     spiky_historical_data = pd.DataFrame.from_dict(
         {"data": [val_base], "time": [base_time - d]})
@@ -34,7 +33,6 @@ def make_spiky_data(val_base, val_spike):
             {"data": [val_spike], "time": base_time}),
         historical_data=spiky_historical_data,
         future_data=spiky_future_data)
-
     validate_additional_data(qc_method, spiky_data)
     return spiky_data
 
@@ -48,7 +46,7 @@ def make_frozen_data(len_data):
         {"data": [12], "time": base_time}),
         historical_data=frozen_historical_data,
         future_data=None)
-    validate_additional_data(qc_method, frozen_data)
+    validate_additional_data(qc_method,frozen_data)
     return frozen_data
 
 
@@ -99,7 +97,7 @@ class Tests(unittest.TestCase):
     final_flag_is_zero = {"test1": 0, "test2": 0, "test3": 0, "test4": 0, "test5": 0}
 
     def test_rt_frozen_test(self):
-        # Checks if values are frozen for 5 or more values in a row should give -1 flags for bad data
+        # Checks if values are frozen for 5 or more values in a row should give -1 flags for bad data 
         frozen_data = make_frozen_data(4)
         flag = common_tests['*']['frozen_test'][0](frozen_data)
         self.assertEqual(flag, -1)
