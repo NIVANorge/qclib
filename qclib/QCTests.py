@@ -117,14 +117,9 @@ class QCTests(object):
         size_future = QCTests.argo_spike_test.number_of_future
         if len(qcinput.historical_data) < size_historical or len(qcinput.future_data) < size_future:
             return 0
-        if len(qcinput.historical_data) > size_historical:  
-            n = size_historical      
-        else: 
-            n = 0  
-        data = merge_data_spike(qcinput.historical_data[-n:], qcinput.current_data, qcinput.future_data)['data']
 
+        data = merge_data_spike(qcinput.historical_data[-1:], qcinput.current_data, qcinput.future_data[0:1])['data']
         k_diff = np.abs(data[1] - 0.5 * (data[2] + data[0])) - 0.5 * np.abs(data[2] - data[0])
-
         if k_diff >= opts['spike_threshold']:
             flag = -1
         elif k_diff < opts['spike_threshold']:
