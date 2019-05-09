@@ -163,7 +163,7 @@ class Tests(unittest.TestCase):
                                  "missing_value_test"]}
         flags = obj.applyQC(data, tests)
         # spike test should fail
-        self.assertEqual(PlatformQC.rt_get_overall_flag(flags), 0)
+        self.assertEqual(PlatformQC.rt_get_overall_flag(flags), -1)
 
     def test_execute_qc(self):
         obj = Platforms.FerryboxQC()
