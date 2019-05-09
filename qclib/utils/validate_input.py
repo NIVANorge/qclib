@@ -11,11 +11,11 @@ def has_duplicates(df: pd.DataFrame) -> bool:
 
 def has_time_reversed(current_data_df: pd.DataFrame, additional_data_df: pd.DataFrame, mode: int) -> datetime:
     if mode == 1:
-        reversed = current_data_df["time"].iloc[0] < additional_data_df["time"].iloc[0]
+        had_wrong_sort = current_data_df["time"].iloc[0] < additional_data_df["time"].iloc[0]
     else:
-        reversed = current_data_df["time"].iloc[0] > additional_data_df["time"].iloc[0]
+        had_wrong_sort = current_data_df["time"].iloc[0] > additional_data_df["time"].iloc[0]
 
-    return reversed
+    return had_wrong_sort
 
 
 def remove_data_after_time_gap(df: pd.DataFrame, time_error: int = 0) -> int:
@@ -26,8 +26,7 @@ def remove_data_after_time_gap(df: pd.DataFrame, time_error: int = 0) -> int:
     first_dt = dt_list.iloc[0]
     no_time_gaps = [_has_timegaps(dt, first_dt) for dt in dt_list]
     if not all(no_time_gaps):
-        gen = (i for i, v in enumerate(no_time_gaps) if v is False)
-        first_gap_index = next(gen)
+        first_gap_index = next(i for i, v in enumerate(no_time_gaps) if v is False)
         df.drop(df.index[first_gap_index + 1:], inplace=True)
     return first_dt
 
