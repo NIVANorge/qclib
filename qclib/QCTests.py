@@ -109,19 +109,21 @@ class QCTests(object):
     def argo_spike_test(clf, qcinput: QCInput_df, **opts) -> int:
         """
         Spike test according to MyOcean [2] for T and S parameters
-        
+        The same test for Oxygen is defined at Bio Argo 
         Options:
           threshold: threshold for consecutive double 3-values differences
         """
-
         size_historical = QCTests.argo_spike_test.number_of_historical
         size_future = QCTests.argo_spike_test.number_of_future
-        if len(qcinput.historical_data) < size_historical or len(qcinput.future_data) < size_future:
+        n_historical = len(qcinput.historical_data)
+        n_future = len(qcinput.future_data)
+        if n_historical < size_historical or n_future < size_future:
             return 0
-
         data = merge_data_spike(qcinput.historical_data, qcinput.current_data, qcinput.future_data)['data']
-        k_diff = np.abs(data[1] - 0.5 * (data[2] + data[0])) - 0.5 * np.abs(data[2] - data[0])
-
+        current_data_index = n_historical
+        k_diff = np.abs(data.iloc[current_data_index]
+                        - 0.5 * (data.iloc[current_data_index+1] + data.iloc[current_data_index-1])) \
+                        - 0.5 * np.abs(data.iloc[current_data_index+1] - data.iloc[current_data_index-1])
         if k_diff >= opts['spike_threshold']:
             flag = -1
         elif k_diff < opts['spike_threshold']:

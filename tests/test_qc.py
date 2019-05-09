@@ -67,16 +67,13 @@ def make_complete_data(len_data):
     validate_additional_data(qc_method, data)
     return data
 
-
 def make_complete_input_data(len_data):
     historical_data = [Measurement(value=10 + i, datetime=base_time - d * i) for i in range(1, len_data)]
     future_data = [Measurement(value=10 + i, datetime=base_time + d * i) for i in range(1, len_data)]
-    data = QCInput(value=20, timestamp=base_time, latitude=61, longitude=10.708,
+    data = QCInput(value=15, timestamp=base_time, latitude=61, longitude=10.708,
                    historical_data=historical_data, future_data=future_data)
-
     return data
-
-
+    
 def make_test_data(value):
     return QCInput_df(
         current_data=pd.DataFrame.from_dict(
@@ -165,7 +162,8 @@ class Tests(unittest.TestCase):
         tests = {"temperature": ["local_range_test", "global_range_test", "argo_spike_test", "frozen_test",
                                  "missing_value_test"]}
         flags = obj.applyQC(data, tests)
-        self.assertEqual(PlatformQC.rt_get_overall_flag(flags), 1)
+        # spike test should fail
+        self.assertEqual(PlatformQC.rt_get_overall_flag(flags), -1)
 
     def test_execute_qc(self):
         obj = Platforms.FerryboxQC()
