@@ -162,7 +162,8 @@ class Tests(unittest.TestCase):
         tests = {"temperature": ["local_range_test", "global_range_test", "argo_spike_test", "frozen_test",
                                  "missing_value_test"]}
         flags = obj.applyQC(data, tests)
-        self.assertEqual(PlatformQC.rt_get_overall_flag(flags), 1)
+        # spike test should fail
+        self.assertEqual(PlatformQC.rt_get_overall_flag(flags), -1)
 
     def test_execute_qc(self):
         obj = Platforms.FerryboxQC()
