@@ -44,7 +44,7 @@ def validate_additional_data(qcplatform, qcinput: QCInput_df):
     # Validate future data
     if qcinput.future_data is not None and len(qcinput.future_data) > 0:
         df = merge_data(qcinput.current_data, qcinput.future_data)
-        assert has_duplicates(df) == False, "duplicated time stamps in historical data"
+        assert has_duplicates(df) == False, "duplicated time stamps in future data"
         assert has_time_reversed(qcinput.current_data, qcinput.future_data, 2) == False, \
             "future data are historical in time"
         sampling_int_future = remove_data_after_time_gap(df, time_error=qcplatform.accept_time_difference)
@@ -52,8 +52,8 @@ def validate_additional_data(qcplatform, qcinput: QCInput_df):
         qcinput.future_data = df
     # Special case: we have just 1 historical and 1 future samples, we need to check weather
     # data are valid for spike test
-    if qcinput.future_data is not None and len(qcinput.future_data) == 1 and \
-            qcinput.historical_data is not None and len(qcinput.historical_data) == 1:
+    if (qcinput.future_data is not None and len(qcinput.future_data) == 1) or \
+            (qcinput.historical_data is not None and len(qcinput.historical_data) == 1):
         if abs(sampling_int_hist - sampling_int_future) \
                 > datetime.timedelta(seconds=qcplatform.accept_time_difference):
             qcinput.future_data = pd.DataFrame.from_dict({})

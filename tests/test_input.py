@@ -27,9 +27,9 @@ class ValidateInput(unittest.TestCase):
                                         Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 15, 6))])
         self.qcinput_gaps1 = QCInput(value=10, timestamp=datetime(2017, 1, 12, 14, 10, 6), longitude=61, latitude=10,
                                      historical_data=[Measurement(value=11.0, datetime=datetime(2017, 1, 12, 14, 9, 6)),
-                                                      Measurement(value=12.0, datetime=datetime(2017, 1, 12, 12, 8, 6)),
-                                                      Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 7, 6)),
-                                                      Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 6, 6))],
+                                                      Measurement(value=12.0, datetime=datetime(2017, 1, 12, 14, 8, 6)),
+                                                      Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 6, 6)),
+                                                      Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 5, 6))],
                                      future_data=[
                                          Measurement(value=11.0, datetime=datetime(2017, 1, 12, 14, 11, 6)),
                                          Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 12, 6)),
