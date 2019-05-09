@@ -52,9 +52,10 @@ def validate_additional_data(qcplatform, qcinput: QCInput_df):
         qcinput.future_data = df
     # Special case: we have just 1 historical and 1 future samples, we need to check weather
     # data are valid for spike test
-    if (qcinput.future_data is not None and len(qcinput.future_data) == 1) or \
-            (qcinput.historical_data is not None and len(qcinput.historical_data) == 1):
-        if abs(sampling_int_hist - sampling_int_future) \
-                > datetime.timedelta(seconds=qcplatform.accept_time_difference):
-            qcinput.future_data = pd.DataFrame.from_dict({})
-            qcinput.historical_data = pd.DataFrame.from_dict({})
+    if qcinput.future_data is not None and len(qcinput.future_data) > 0 and \
+            qcinput.historical_data is not None and len(qcinput.historical_data) > 0:
+        if len(qcinput.future_data) == 1 or len(qcinput.historical_data)==1:
+            if abs(sampling_int_hist - sampling_int_future)>\
+                    datetime.timedelta(seconds=qcplatform.accept_time_difference):
+                qcinput.future_data = pd.DataFrame.from_dict({})
+                qcinput.historical_data = pd.DataFrame.from_dict({})
