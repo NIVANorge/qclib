@@ -33,7 +33,7 @@ def remove_data_after_time_gap(df: pd.DataFrame, time_error: int = 0) -> int:
 
 def validate_additional_data(qcplatform, qcinput: QCInput_df):
     # Validate historical data
-    if qcinput.historical_data is not None:
+    if qcinput.historical_data is not None and len(qcinput.historical_data) > 0:
         df = merge_data(qcinput.current_data, qcinput.historical_data)
         assert has_duplicates(df) == False, "duplicated time stamps in historical data"
         assert has_time_reversed(qcinput.current_data, qcinput.historical_data, 1) == False, \
@@ -42,7 +42,7 @@ def validate_additional_data(qcplatform, qcinput: QCInput_df):
         df.drop(df.index[[-1]], inplace=True)
         qcinput.historical_data = df
     # Validate future data
-    if qcinput.future_data is not None:
+    if qcinput.future_data is not None and len(qcinput.future_data) > 0:
         df = merge_data(qcinput.current_data, qcinput.future_data)
         assert has_duplicates(df) == False, "duplicated time stamps in historical data"
         assert has_time_reversed(qcinput.current_data, qcinput.future_data, 2) == False, \
