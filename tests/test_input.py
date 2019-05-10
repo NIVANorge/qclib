@@ -14,22 +14,22 @@ class ValidateInput(unittest.TestCase):
     def setUp(self):
         self.qcinput = QCInput(value=10, timestamp=datetime(2017, 1, 12, 14, 10, 6), longitude=61, latitude=10,
                                historical_data=[Measurement(value=11.0, datetime=datetime(2017, 1, 12, 14, 6, 6)),
-                                                Measurement(value=12.0, datetime=datetime(2017, 1, 12, 14, 8, 6)),
-                                                Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 7, 6)),
+                                                Measurement(value=12.0, datetime=datetime(2017, 1, 12, 14, 7, 6)),
+                                                Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 8, 6)),
                                                 Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 9, 6))],
                                future_data=[
-                                   Measurement(value=11.0, datetime=datetime(2017, 1, 12, 14, 12, 6)),
-                                   Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 11, 6))])
+                                   Measurement(value=11.0, datetime=datetime(2017, 1, 12, 14, 11, 6)),
+                                   Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 12, 6))])
 
         self.qcinput_gaps = QCInput(value=10, timestamp=datetime(2017, 1, 12, 14, 10, 6), longitude=61, latitude=10,
                                     historical_data=[Measurement(value=11.0, datetime=datetime(2017, 1, 12, 14, 9, 6))],
                                     future_data=[
                                         Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 15, 6))])
         self.qcinput_gaps1 = QCInput(value=10, timestamp=datetime(2017, 1, 12, 14, 10, 6), longitude=61, latitude=10,
-                                     historical_data=[Measurement(value=11.0, datetime=datetime(2017, 1, 12, 14, 9, 6)),
-                                                      Measurement(value=12.0, datetime=datetime(2017, 1, 12, 14, 8, 6)),
-                                                      Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 6, 6)),
-                                                      Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 5, 6))],
+                                     historical_data=[Measurement(value=11.0, datetime=datetime(2017, 1, 12, 14, 5, 6)),
+                                                      Measurement(value=12.0, datetime=datetime(2017, 1, 12, 14, 6, 6)),
+                                                      Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 8, 6)),
+                                                      Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 9, 6))],
                                      future_data=[
                                          Measurement(value=11.0, datetime=datetime(2017, 1, 12, 14, 11, 6)),
                                          Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 12, 6)),
@@ -55,13 +55,13 @@ class ValidateInput(unittest.TestCase):
 
         self.qcinput_wg_gaps = QCInput(value=10, timestamp=datetime(2017, 1, 12, 14, 10, 6), longitude=61, latitude=10,
                                        historical_data=[
-                                           Measurement(value=11.0, datetime=datetime(2017, 1, 12, 14, 6, 6)),
-                                           Measurement(value=12.0, datetime=datetime(2017, 1, 12, 14, 36, 6)),
-                                           Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 36, 16)),
-                                           Measurement(value=13.0, datetime=datetime(2017, 1, 12, 15, 7, 6))],
+                                           Measurement(value=11.0, datetime=datetime(2017, 1, 12, 13, 36, 6)),
+                                           Measurement(value=12.0, datetime=datetime(2017, 1, 12, 14, 6, 6)),
+                                           Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 7, 16)),
+                                           Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 9, 6))],
                                        future_data=[
-                                           Measurement(value=11.0, datetime=datetime(2017, 1, 12, 14, 12, 6)),
-                                           Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 11, 6))])
+                                           Measurement(value=11.0, datetime=datetime(2017, 1, 12, 14, 11, 6)),
+                                           Measurement(value=13.0, datetime=datetime(2017, 1, 12, 14, 12, 6))])
 
         self.qc_fb = qclib.Platforms.FerryboxQC
         self.qc_wg = qclib.Platforms.WaveGliderQC
@@ -81,7 +81,7 @@ class ValidateInput(unittest.TestCase):
     def test_should_detect_time_gaps(self):
         qcinput_df = transform_input_to_df(self.qcinput_gaps1)
         validate_additional_data(self.qc_fb, qcinput_df)
-        self.assertEqual(len(qcinput_df.historical_data), 1)
+        self.assertEqual(len(qcinput_df.historical_data), 2)
         self.assertEqual(len(qcinput_df.future_data), 2)
 
     def test_should_detect_duplicates(self):
