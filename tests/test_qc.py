@@ -70,7 +70,7 @@ def make_complete_data(len_data):
 
 
 def make_complete_input_data(len_data):
-    historical_data = [Measurement(value=10 + i, datetime=base_time - (len_data-i)*d) for i in range(1, len_data)]
+    historical_data = [Measurement(value=10 + i, datetime=base_time - i * d) for i in range(len_data - 1, 0, -1)]
     historical_data.pop(5)
     future_data = [Measurement(value=10 + i, datetime=base_time + d * i) for i in range(1, len_data)]
     future_data.pop(1)
