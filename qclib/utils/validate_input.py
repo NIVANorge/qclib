@@ -24,13 +24,12 @@ def check_sort_asc(df: pd.DataFrame):
 
 
 def remove_data_after_time_gap(df: pd.DataFrame, time_error: int = 0, mode: int = 1) -> int:
-    def _has_timegaps(dt, first_dt):
+    def _has_no_timegap(dt, first_dt):
         return abs(dt - first_dt) <= time_error
 
-    sampling_interval_list = df['time'].diff().dropna()
-    sampling_interval_list_sec = [d.total_seconds() for d in sampling_interval_list]
+    sampling_interval_list_sec = [diff.total_seconds() for diff in df['time'].diff().dropna()]
     sampling_interval = np.median(sampling_interval_list_sec)
-    no_time_gaps = [_has_timegaps(dt, sampling_interval) for dt in sampling_interval_list_sec]
+    no_time_gaps = [_has_no_timegap(dt, sampling_interval) for dt in sampling_interval_list_sec]
     if not all(no_time_gaps):
         first_gap_index = next(i for i, v in enumerate(no_time_gaps) if v==False)
         if mode == 1:
@@ -66,7 +65,13 @@ def validate_additional_data(qcplatform, qcinput: QCInput_df):
     # data are valid for spike test
     if qcinput.future_data is not None and len(qcinput.future_data) > 0 and \
             qcinput.historical_data is not None and len(qcinput.historical_data) > 0:
-        if len(qcinput.future_data) == 1 or len(qcinput.historical_data) == 1:
+        if len(qcinput.future_data) == 1 and len(qcinput.historical_data) == 1:
             if abs(sampling_int_hist - sampling_int_future) > qcplatform.accept_time_difference:
                 qcinput.future_data = pd.DataFrame.from_dict({})
+                qcinput.historical_data = pd.DataFrame.from_dict({})
+        elif len(qcinput.future_data) == 1:
+            if abs(sampling_int_hist - sampling_int_future) > qcplatform.accept_time_difference:
+                qcinput.future_data = pd.DataFrame.from_dict({})
+        elif len(qcinput.historical_data) == 1:
+            if abs(sampling_int_hist - sampling_int_future) > qcplatform.accept_time_difference:
                 qcinput.historical_data = pd.DataFrame.from_dict({})

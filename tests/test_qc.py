@@ -41,7 +41,7 @@ def make_spiky_data(val_base, val_spike):
 def make_frozen_data(len_data):
     frozen_historical_data = pd.DataFrame.from_dict(
         {"data": [12] * (len_data),
-         "time": [base_time - (len_data+1 -n) *d for n in range(1, len_data+1)]})
+         "time": [base_time - (n + 1) * d for n in reversed(range(len_data))]})
 
     frozen_data = QCInput_df(current_data=pd.DataFrame.from_dict(
         {"data": [12], "time": base_time}),
