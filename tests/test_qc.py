@@ -41,7 +41,7 @@ def make_spiky_data(val_base, val_spike):
 def make_frozen_data(len_data):
     frozen_historical_data = pd.DataFrame.from_dict(
         {"data": [12] * (len_data),
-         "time": [base_time - (n + 1) * d for n in reversed(range(len_data))]})
+         "time": [base_time - n * d for n in range(len_data, 0, -1)]})
 
     frozen_data = QCInput_df(current_data=pd.DataFrame.from_dict(
         {"data": [12], "time": base_time}),
@@ -54,19 +54,17 @@ def make_frozen_data(len_data):
 def make_complete_data(len_data):
     historical_data = pd.DataFrame.from_dict(
         {"data": [10 + i for i in range(1, len_data)],
-         "time": [base_time - (len_data - n) * d for n in range(1, len_data)]})
+         "time": [base_time - n * d for n in range(len_data - 1, 0, -1)]})
 
     future_data = pd.DataFrame.from_dict(
         {"data": [11 + i for i in range(1, len_data)],
-         "time": [base_time + d * (n +1) for n in range(1, len_data)]})
+         "time": [base_time + n * d for n in range(2, len_data + 1)]})
 
     data = QCInput_df(current_data=pd.DataFrame.from_dict(
         {"data": [19.5], "time": base_time}), latitude=61, longitude=10.708,
         historical_data=historical_data,
         future_data=future_data)
 
-    print(f"make_complete_data\nhistorical\n{data.historical_data}\nfuture\n{data.future_data}\n"
-         f"current{data.current_data}\n ")
     validate_additional_data(qc_method, data)
     return data
 
