@@ -21,6 +21,7 @@ base_time = datetime.strptime('2017-01-12 14:08:06', '%Y-%m-%d %H:%M:%S')
 d = timedelta(seconds=60)
 qc_method = qclib.Platforms.FerryboxQC
 
+
 def make_spiky_data(val_base, val_spike):
     spiky_historical_data = pd.DataFrame.from_dict(
         {"data": [val_base], "time": [base_time - d]})
@@ -39,25 +40,25 @@ def make_spiky_data(val_base, val_spike):
 
 def make_frozen_data(len_data):
     frozen_historical_data = pd.DataFrame.from_dict(
-        {"data": [12] * len_data,
-         "time": [base_time - d * n for n in range(1, len_data + 1)]})
+        {"data": [12] * (len_data),
+         "time": [base_time - n * d for n in range(len_data, 0, -1)]})
 
     frozen_data = QCInput_df(current_data=pd.DataFrame.from_dict(
         {"data": [12], "time": base_time}),
         historical_data=frozen_historical_data,
         future_data=None)
-    validate_additional_data(qc_method,frozen_data)
+    validate_additional_data(qc_method, frozen_data)
     return frozen_data
 
 
 def make_complete_data(len_data):
     historical_data = pd.DataFrame.from_dict(
         {"data": [10 + i for i in range(1, len_data)],
-         "time": [base_time - d * n for n in range(1, len_data)]})
+         "time": [base_time - n * d for n in range(len_data - 1, 0, -1)]})
 
     future_data = pd.DataFrame.from_dict(
         {"data": [11 + i for i in range(1, len_data)],
-         "time": [base_time + d * n for n in range(1, len_data)]})
+         "time": [base_time + n * d for n in range(2, len_data + 1)]})
 
     data = QCInput_df(current_data=pd.DataFrame.from_dict(
         {"data": [19.5], "time": base_time}), latitude=61, longitude=10.708,
@@ -67,13 +68,17 @@ def make_complete_data(len_data):
     validate_additional_data(qc_method, data)
     return data
 
+
 def make_complete_input_data(len_data):
-    historical_data = [Measurement(value=10 + i, datetime=base_time - d * i) for i in range(1, len_data)]
+    historical_data = [Measurement(value=10 + i, datetime=base_time - i * d) for i in range(len_data - 1, 0, -1)]
+    historical_data.pop(5)
     future_data = [Measurement(value=10 + i, datetime=base_time + d * i) for i in range(1, len_data)]
+    future_data.pop(1)
     data = QCInput(value=15, timestamp=base_time, latitude=61, longitude=10.708,
                    historical_data=historical_data, future_data=future_data)
     return data
-    
+
+
 def make_test_data(value):
     return QCInput_df(
         current_data=pd.DataFrame.from_dict(
@@ -162,16 +167,25 @@ class Tests(unittest.TestCase):
         tests = {"temperature": ["local_range_test", "global_range_test", "argo_spike_test", "frozen_test",
                                  "missing_value_test"]}
         flags = obj.applyQC(data, tests)
-        # spike test should fail
-        self.assertEqual(PlatformQC.rt_get_overall_flag(flags), -1)
+        self.assertEqual(flags["global_range_test"], 1)
+        self.assertEqual(flags["local_range_test"], 1)
+        self.assertEqual(flags["argo_spike_test"], 0)
+        self.assertEqual(flags["frozen_test"], 1)
+        self.assertEqual(flags["missing_value_test"], 1)
+        self.assertEqual(PlatformQC.rt_get_overall_flag(flags), 0)
 
     def test_execute_qc(self):
         obj = Platforms.FerryboxQC()
-        data = make_complete_input_data(5)
+        data = make_complete_input_data(8)
         tests = {"temperature": ["local_range_test", "global_range_test", "argo_spike_test", "frozen_test",
                                  "missing_value_test"]}
         flags = QC.execute(obj, data, tests)
-        self.assertEqual(PlatformQC.rt_get_overall_flag(flags), 1)
+        self.assertEqual(flags["global_range_test"], 1)
+        self.assertEqual(flags["local_range_test"], 1)
+        self.assertEqual(flags["argo_spike_test"], 1)
+        self.assertEqual(flags["frozen_test"], 0)
+        self.assertEqual(flags["missing_value_test"], 1)
+        self.assertEqual(PlatformQC.rt_get_overall_flag(flags), 0)
 
 
 if __name__ == '__main__':
