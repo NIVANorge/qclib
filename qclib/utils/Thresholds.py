@@ -90,7 +90,7 @@ local_range_temperature = [
 local_range_salinity = [
     {'min': 0.0, 'max': 37.0, 'area': NW_Shelf, 'months': all_months},
     {'min': 0.0, 'max': 38.0, 'area': SW_Shelf, 'months': all_months},
-    {'min': -2.0, 'max': 24.0, 'area': Arctic, 'months': all_months},
+    {'min': 2.0, 'max': 40.0, 'area': Arctic, 'months': all_months},
 ]
 
 spike_thresholds = {'temperature': 6, 'salinity': 0.9, 'oxygen': 50}  # Surface only oxygen in micromol/kg
