@@ -1,11 +1,18 @@
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from pydantic import BaseModel
+import numpy as np
 
 
 class Measurement(BaseModel):
-    value: float
     datetime: datetime
+    value: float
+
+
+class Location(BaseModel):
+    datetime: datetime
+    lon: float
+    lat: float
 
 
 class QCInput(BaseModel):
@@ -25,4 +32,6 @@ class QCInput_df(BaseModel):
     future_data: Any
 
 
-
+class qcinput(BaseModel):
+    values: List
+    locations: List

@@ -5,7 +5,7 @@ Created on 15. jan. 2018
 import unittest
 import pandas as pd
 import qclib.QC
-from qclib.utils.qc_input import QCInput_df, QCInput, Measurement
+from qclib.utils.qc_input import QCInput_df, QCInput, Measurement, qcinput, Location
 from qclib.utils.validate_input import validate_additional_data
 import qclib.utils.Thresholds
 from qclib import Platforms
@@ -13,6 +13,9 @@ from qclib.PlatformQC import PlatformQC
 from datetime import datetime, timedelta
 from qclib import QC
 import qclib.utils.Thresholds as th
+from qclib.QCTests import QCTests
+import time
+import numpy as np
 
 platform_code = 'TF'
 common_tests = qclib.QC.init(platform_code).qc_tests
@@ -91,6 +94,12 @@ def make_local_test_data(value, lat, long):
         current_data=pd.DataFrame.from_dict({"data": [value], "time": base_time}),
         longitude=long, latitude=lat,
         historical_data=None, future_data=None)
+
+
+def make_local_range_test_data(size):
+    values = [[base_time + d * i, i] for i in range(0, size)]
+    location = [[base_time + d * i, 10.708 + i * 0.01, 61 + i * 0.01] for i in range(0, size)]
+    return qcinput(values=values, locations=location)
 
 
 class Tests(unittest.TestCase):
@@ -187,6 +196,13 @@ class Tests(unittest.TestCase):
         self.assertEqual(flags["missing_value_test"], 1)
         self.assertEqual(PlatformQC.rt_get_overall_flag(flags), 0)
 
+    def test_local_range_test_for_list(self):
+        data = make_local_range_test_data(2500)
+        params_t = {'min': -2.0, 'max': 24.0, 'area': th.Arctic, 'months': th.all_months}
+        start = time.time()
+        flag = QCTests.range_test(data, **params_t)
+        end = time.time()
+        print(f"time {end-start}")
 
 if __name__ == '__main__':
     unittest.main()

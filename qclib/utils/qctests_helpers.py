@@ -3,7 +3,8 @@ from matplotlib import path
 import numpy as np
 
 
-def is_inside_geo_region(longitude, latitude, **opts) -> bool:
+def is_inside_geo_region(location, **opts) -> [bool]:
+    " location is an object of Location : [(timestamp, longitude, latitude),()...]"
     lon = opts['area']['lon']
     lat = opts['area']['lat']
     number_of_points = len(lon)
@@ -12,6 +13,8 @@ def is_inside_geo_region(longitude, latitude, **opts) -> bool:
     points_of_geo_region[0:number_of_points, 1] = lat
     points_of_geo_region[number_of_points, 0:2] = [lon[0], lat[0]]
     geo_region = mpl.path.Path(points_of_geo_region)
-    current_geo_point = [[longitude, latitude]]
-    inside = geo_region.contains_points(current_geo_point)
-    return bool(inside)
+    pts = np.ones([len(location), 2])
+    pts[:, 0] = np.array(location)[:,1]
+    pts[:, 1] = np.array(location)[:,2]
+    inside = geo_region.contains_points(pts)
+    return inside.astype(bool)

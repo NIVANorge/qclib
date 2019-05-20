@@ -9,7 +9,7 @@ Created on 6. feb. 2018
 '''
 import numpy as np
 import time
-from .utils.qc_input import QCInput_df
+from .utils.qc_input import QCInput_df, qcinput
 from .utils.qctests_helpers import is_inside_geo_region
 import functools
 import logging
@@ -128,4 +128,34 @@ class QCTests(object):
             flag = -1
         elif k_diff < opts['spike_threshold']:
             flag = 1
+        return flag
+
+    @classmethod
+    @check_size(0, 0)
+    def range_test(clf, data: qcinput, **opts) -> [int]:
+        """
+
+        """
+
+        if 'area' in opts and 'months' in opts:
+            assert len(data.values) == len(data.locations), "Invalid geographical coordinates:" \
+                                                            "Location and values list have different length."
+
+        flag = np.zeros(len(data.values), dtype=np.int8)
+        is_valid = np.ones(len(data.values), dtype=np.bool)
+        values = np.array(data.values)
+
+        if 'months' in opts:
+            is_valid &= [values[i][0].month in opts['months'] for i in range(0, len(values))]
+
+        flag[is_valid] = -1
+        if 'area' in opts:
+              is_valid = is_inside_geo_region(data.locations, **opts)
+
+        if 'min' in opts:
+            is_valid &= (values[:, 1] >= opts['min'])
+        if 'max' in opts:
+            is_valid &= (values[:, 1] <= opts['max'])
+
+        flag[is_valid] = 1
         return flag
