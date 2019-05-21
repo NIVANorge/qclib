@@ -8,34 +8,34 @@ import copy
 common_tests = {
 
     '*':
-        {'frozen_test': [QCTests.rt_frozen_test, {}]},
+        {'frozen_test': [QCTests.frozen_test, {}]},
     'temperature':
-        {'global_range_test': [QCTests.rt_range_test,
+        {'global_range_test': [QCTests.range_test,
                                Thresholds.global_range_temperature],
-         'local_range_test': [QCTests.rt_range_test,
+         'local_range_test': [QCTests.range_test,
                               Thresholds.local_range_temperature],
          'argo_spike_test': [QCTests.argo_spike_test,
                              {'spike_threshold': Thresholds.spike_thresholds['temperature']}
                              ]},
     'salinity':
-        {'global_range_test': [QCTests.rt_range_test,
+        {'global_range_test': [QCTests.range_test,
                                Thresholds.global_range_salinity],
-         'local_range_test': [QCTests.rt_range_test,
+         'local_range_test': [QCTests.range_test,
                               Thresholds.local_range_salinity],
          'argo_spike_test': [QCTests.argo_spike_test,
                              {'spike_threshold': Thresholds.spike_thresholds['salinity']}
                              ]},
 
     'chla_fluorescence':
-        {'global_range_test': [QCTests.rt_range_test,
+        {'global_range_test': [QCTests.range_test,
                                Thresholds.global_range_chla_fluorescence],
-         'local_range_test': [QCTests.rt_range_test,
+         'local_range_test': [QCTests.range_test,
                               Thresholds.local_range_chla_fluorescence]},
 
     'oxygen_concentration':
-        {'global_range_test': [QCTests.rt_range_test,
+        {'global_range_test': [QCTests.range_test,
                                Thresholds.global_range_oxygen],
-         'local_range_test': [QCTests.rt_range_test,
+         'local_range_test': [QCTests.range_test,
                               Thresholds.local_range_oxygen],
          'argo_spike_test': [QCTests.argo_spike_test,
                              {'spike_threshold': Thresholds.spike_thresholds['oxygen']}]}
@@ -81,7 +81,6 @@ class PlatformQC(QCTests):
                 flags[test] = self.get_combined_flag(flag)
             else:
                 flags[test] = self.qc_tests[key][test][0](data, **self.qc_tests[key][test][1])
-
         return flags
 
     @classmethod

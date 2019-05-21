@@ -1,12 +1,14 @@
 import unittest
 import qclib.utils.Thresholds as th
 from qclib.utils.qctests_helpers import is_inside_geo_region
+from datetime import datetime
 
 
 class ValidateQCHelpers(unittest.TestCase):
 
     def setUp(self):
-        self.location1 = {"lon": 12, "lat": 45}
+        base_time = datetime.strptime('2017-01-12 14:08:06', '%Y-%m-%d %H:%M:%S')
+        self.location = [[base_time, 12, 45]]
         self.true_geo_regions_location1 = {"Baltic": False, "NW_Shelf": False, "SW_Shelf": False, "NorthSea": False,
                                            "Arctic": False, "Iberic": False, "MedSea": True, "BlackSea": False,
                                            "Biscay": False, "W_GulfFinland": False, "S_BalticProper": False,
@@ -22,7 +24,7 @@ class ValidateQCHelpers(unittest.TestCase):
         opts = {"area": {}}
         for region, threshold in geo_regions.items():
             opts["area"] = threshold
-            result_geo_region[region] = is_inside_geo_region(self.location1["lon"], self.location1["lat"], **opts)
+            result_geo_region[region] = is_inside_geo_region(self.location, **opts)
 
         self.assertEqual(result_geo_region, self.true_geo_regions_location1, "Wrong location")
 

@@ -23,16 +23,6 @@ class QCTests(object):
         def check_data_size(func):
             @functools.wraps(func)
             def func_wrapper(clf, *args, **opts):
-                if number_of_historical > 0:
-                    if args[0].historical_data is None:
-                        logging.debug("No historical data available to perform %s test" % func.__name__)
-                    elif len(args[0].historical_data) < number_of_historical:
-                        logging.debug("Too few historical data points to perform %s test" % func.__name__)
-                if number_of_future > 0:
-                    if args[0].future_data is None:
-                        logging.debug("No future data available to perform %s test" % func.__name__)
-                    elif len(args[0].future_data) < number_of_future:
-                        logging.debug("Too few future data points to perform %s test" % func.__name__)
                 return func(clf, *args, **opts)
 
             func_wrapper.number_of_historical = number_of_historical
@@ -64,7 +54,8 @@ class QCTests(object):
                 return np.abs(val[index] - 0.5 * (val[index + 1] + val[index - 1])) \
                        - 0.5 * np.abs(val[index + 1] - val[index - 1])
 
-        k_diff_list = [k_diff(data.values[:, 1], index) for index in range(0, len(data.values))]
+        values = np.array(data.values)[:, 1]
+        k_diff_list = [k_diff(values, index) for index in range(0, len(data.values))]
         k_diff_array = np.array(k_diff_list)
 
         flag[is_valid] = -1
