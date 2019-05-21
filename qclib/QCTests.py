@@ -1,19 +1,15 @@
 '''
-.. moduleauthor: Pierre Jaccard <pja@niva.no>
-Quality control tests to be applied on data.
-Tests are implemented according to the document  
+Tests are implemented according to the document
 Quality Control of Biogeochemical Measurements
 [1] http://archimer.ifremer.fr/doc/00251/36232/34792.pdf  
 [2] http://www.coriolis.eu.org/content/download/4920/36075/file/Recommendations%20for%20RTQC%20procedures_V1_2.pdf
-Created on 6. feb. 2018
 '''
 import numpy as np
-import time
-from .utils.qc_input import QCInput_df, qcinput
+from .utils.qc_input import qcinput
 from .utils.qctests_helpers import is_inside_geo_region
 import functools
 import logging
-from .utils.transform_input import merge_data_spike, merge_data
+from .utils.validate_input import validate_data_for_argo_spike_test, validate_data_for_frozen_test
 
 
 class QCTests(object):
@@ -46,88 +42,34 @@ class QCTests(object):
         return check_data_size
 
     @classmethod
-    @check_size(0, 0)
-    def rt_range_test(clf, qcinput: QCInput_df, **opts) -> int:
-        """
-
-        """
-        df = qcinput.current_data
-
-        valid_opts = True
-        if 'months' in opts and ('time' in df.columns):
-            measurement_time = str(df["time"].iloc[0])
-            if len(measurement_time.split('.')) == 1:
-                valid_opts = time.strptime(measurement_time, '%Y-%m-%d %H:%M:%S').tm_mon in opts['months']
-            elif len(measurement_time.split('.')) == 2:
-                valid_opts = time.strptime(measurement_time, '%Y-%m-%d %H:%M:%S.%f').tm_mon in opts['months']
-            else:
-                logging.error("Invalid datetime string format")
-        if 'area' in opts:
-            valid_opts = is_inside_geo_region(qcinput.longitude, qcinput.latitude, **opts)
-        if not valid_opts:
-            return 0
-        flag = 1
-        if 'min' in opts and df["data"].iloc[0] < opts['min']:
-            flag = -1
-        if 'max' in opts and df["data"].iloc[0] > opts['max']:
-            flag = -1
-
-        return flag
-
-    @classmethod
-    @check_size(0, 0)
-    def rt_missing_value_test(clf, qcinput: QCInput_df, **opts) -> int:
-        """
-        Test data for a specific value defined for missing data.        
-        Options:
-          nan: value used for missing data
-        """
-        flag = 1
-        value = qcinput.current_data["data"]
-        if value[0] == opts['nan']:
-            flag = -1
-        return flag
-
-    @classmethod
-    @check_size(4, 0)
-    def rt_frozen_test(cls, qcinput: QCInput_df) -> int:
-        """
-        Consecutive data with exactly the same value are flagged as bad
-        """
-        size_historical = QCTests.rt_frozen_test.number_of_historical
-        if len(qcinput.historical_data) < size_historical:
-            return 0
-        data = merge_data(qcinput.current_data, qcinput.historical_data)
-        flag = 1
-        data_diff = data["data"].diff().dropna()
-        if all(data_diff[-size_historical:] == 0.0):
-            flag = -1
-        return flag
-
-    @classmethod
     @check_size(1, 1)
-    def argo_spike_test(clf, qcinput: QCInput_df, **opts) -> int:
+    def argo_spike_test(clf, data: qcinput, **opts) -> int:
         """
         Spike test according to MyOcean [2] for T and S parameters
-        The same test for Oxygen is defined at Bio Argo 
+        The same test for Oxygen is defined at Bio Argo
         Options:
           threshold: threshold for consecutive double 3-values differences
         """
-        size_historical = QCTests.argo_spike_test.number_of_historical
-        size_future = QCTests.argo_spike_test.number_of_future
-        n_historical = len(qcinput.historical_data)
-        n_future = len(qcinput.future_data)
-        if n_historical < size_historical or n_future < size_future:
-            return 0
-        data = merge_data_spike(qcinput.historical_data, qcinput.current_data, qcinput.future_data)['data']
-        current_data_index = n_historical
-        k_diff = np.abs(data.iloc[current_data_index]
-                        - 0.5 * (data.iloc[current_data_index+1] + data.iloc[current_data_index-1])) \
-                        - 0.5 * np.abs(data.iloc[current_data_index+1] - data.iloc[current_data_index-1])
-        if k_diff >= opts['spike_threshold']:
-            flag = -1
-        elif k_diff < opts['spike_threshold']:
-            flag = 1
+
+        flag = np.zeros(len(data.values), dtype=np.int)
+        is_valid = np.ones(len(data.values), dtype=np.bool)
+        is_valid &= validate_data_for_argo_spike_test(data)
+
+        # is_valid is an array with boolean describing weather current point has valid historical and future point.
+
+        def k_diff(val, index):
+            if index == 0 or index == len(val) - 1:
+                return 0
+            else:
+                return np.abs(val[index] - 0.5 * (val[index + 1] + val[index - 1])) \
+                       - 0.5 * np.abs(val[index + 1] - val[index - 1])
+
+        k_diff_list = [k_diff(data.values[:, 1], index) for index in range(0, len(data.values))]
+        k_diff_array = np.array(k_diff_list)
+
+        flag[is_valid] = -1
+        is_valid &= (k_diff_array < opts['spike_threshold'])
+        flag[is_valid] = 1
         return flag
 
     @classmethod
@@ -148,14 +90,35 @@ class QCTests(object):
         if 'months' in opts:
             is_valid &= [values[i][0].month in opts['months'] for i in range(0, len(values))]
 
-        flag[is_valid] = -1
         if 'area' in opts:
-              is_valid = is_inside_geo_region(data.locations, **opts)
+            is_valid &= is_inside_geo_region(data.locations, **opts)
 
+        flag[is_valid] = -1
         if 'min' in opts:
             is_valid &= (values[:, 1] >= opts['min'])
         if 'max' in opts:
             is_valid &= (values[:, 1] <= opts['max'])
 
+        flag[is_valid] = 1
+        return flag
+
+    @classmethod
+    @check_size(4, 0)
+    def frozen_test(cls, data: qcinput) -> int:
+        """
+        Consecutive data with exactly the same value are flagged as bad
+        """
+        flag = np.zeros(len(data.values), dtype=np.int)
+        is_valid = np.ones(len(data.values), dtype=np.bool)
+        size_historical = QCTests.frozen_test.number_of_historical
+        is_valid &= validate_data_for_frozen_test(data, size_historical)
+        # is_valid is an array with boolean describing weather current point has valid historical and future point.
+
+        flag[is_valid] = -1
+        data_diff = np.diff(np.array(data.values)[:, 1])
+        is_frozen = [True for i in range(0, size_historical)] + \
+                    [all(data_diff[-size_historical + i:i] != 0.0) for i in range(size_historical, len(data.values))]
+
+        is_valid &= np.array(is_frozen)
         flag[is_valid] = 1
         return flag
