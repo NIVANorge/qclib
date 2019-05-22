@@ -22,8 +22,8 @@ def validate_data_for_frozen_test(data: qcinput, size) -> List[bool]:
         if index < size:
             return False
         else:
-            val_diff = np.diff(np.array(val[-size + index:index])[:, 0])
-            return all((val_diff < 2 * np.median(val_diff)) == True)
+            val_diff = np.diff(np.array(val[-size + index: index+1])[:, 0])
+            return all((val_diff < 1.5 * np.median(val_diff)) == True)
 
     return [is_valid(data.values, i) for i in range(0, len(data.values))]
 

@@ -8,7 +8,6 @@ import numpy as np
 from .utils.qc_input import qcinput
 from .utils.qctests_helpers import is_inside_geo_region
 import functools
-import logging
 from .utils.validate_input import validate_data_for_argo_spike_test, validate_data_for_frozen_test
 
 
@@ -61,7 +60,7 @@ class QCTests(object):
         flag[is_valid] = -1
         is_valid &= (k_diff_array < opts['spike_threshold'])
         flag[is_valid] = 1
-        return flag
+        return flag.tolist()
 
     @classmethod
     @check_size(0, 0)
@@ -74,7 +73,7 @@ class QCTests(object):
             assert len(data.values) == len(data.locations), "Invalid geographical coordinates:" \
                                                             "Location and values list have different length."
 
-        flag = np.zeros(len(data.values), dtype=np.int8)
+        flag = np.zeros(len(data.values), dtype=np.int)
         is_valid = np.ones(len(data.values), dtype=np.bool)
         values = np.array(data.values)
 
@@ -86,12 +85,12 @@ class QCTests(object):
 
         flag[is_valid] = -1
         if 'min' in opts:
-            is_valid &= (values[:, 1] >= opts['min'])
+            is_valid &= (values[:, 1].astype(float) >= opts['min'])
         if 'max' in opts:
-            is_valid &= (values[:, 1] <= opts['max'])
+            is_valid &= (values[:, 1].astype(float) <= opts['max'])
 
         flag[is_valid] = 1
-        return flag
+        return flag.tolist()
 
     @classmethod
     @check_size(4, 0)
@@ -105,11 +104,11 @@ class QCTests(object):
         is_valid &= validate_data_for_frozen_test(data, size_historical)
         # is_valid is an array with boolean describing weather current point has valid historical and future point.
 
-        flag[is_valid] = -1
+        flag[is_valid] = 1
         data_diff = np.diff(np.array(data.values)[:, 1])
         is_frozen = [True for i in range(0, size_historical)] + \
-                    [all(data_diff[-size_historical + i:i] != 0.0) for i in range(size_historical, len(data.values))]
+                    [all(data_diff[-size_historical + i: i] == 0.0) for i in range(size_historical, len(data.values))]
 
         is_valid &= np.array(is_frozen)
-        flag[is_valid] = 1
-        return flag
+        flag[is_valid] = -1
+        return flag.tolist()

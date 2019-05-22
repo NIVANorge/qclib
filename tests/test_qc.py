@@ -5,6 +5,7 @@ import qclib.utils.Thresholds
 from datetime import datetime, timedelta
 from qclib import QC
 import time
+import csv
 
 platform_code = 'TF'
 common_tests = qclib.QC.init(platform_code).qc_tests
@@ -18,16 +19,43 @@ def make_toy_data(size):
     return qcinput(values=values, locations=location)
 
 
+def read_testdata(filename):
+    with open(filename, mode='r') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter='\t')
+        line_count = 0
+        input_data = []
+        for row in csv_reader:
+            if line_count > 0:
+                input_data.append(row)
+            line_count += 1
+    return input_data
+
+
 class Tests(unittest.TestCase):
 
-    def test_local_range_test_for_list(self):
+    def test_qc_logic(self):
+        filename = 'testdata/ferrybox_data.csv'
+        input_data = read_testdata(filename)
+        values = [[datetime.strptime(item[0].split('.')[0], '%Y-%m-%dT%H:%M:%S'), float(item[1])] for item in
+                  input_data]
+        ref_frozen_test = [int(item[2]) for item in input_data]
+        ref_global_range_test = [int(item[3]) for item in input_data]
+        ref_argo_spike_test = [int(item[4]) for item in input_data]
+        locations = None
+        flags = QC.execute(qclib.QC.init(platform_code), qcinput(values=values, locations=locations),
+                           tests={"salinity": ["global_range_test", "frozen_test", "argo_spike_test"]})
+
+        assert flags["frozen_test"] == ref_frozen_test, "Frozen test failed"
+        assert flags["global_range_test"] == ref_global_range_test, "Global range test failed"
+        assert flags["argo_spike_test"] == ref_argo_spike_test, "Argo spike test failed"
+
+    def test_exucution_time_with_toy_data(self):
         data = make_toy_data(1500)
-        tests = {"temperature": ["local_range_test", "global_range_test", "argo_spike_test", "frozen_test",
-                                 "missing_value_test"]}
+        tests = {"temperature": ["local_range_test", "global_range_test", "argo_spike_test", "frozen_test"]}
         start = time.time()
-        flags = QC.execute(qclib.QC.init(platform_code), data, tests)
+        QC.execute(qclib.QC.init(platform_code), data, tests)
         end = time.time()
-        print(f"time {end - start}")
+        assert (end - start) < 0.2, "Execution time on 1500 is slow"
 
 
 if __name__ == '__main__':
