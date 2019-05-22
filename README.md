@@ -4,6 +4,7 @@ Input to the libary is a qcinput stucture which contains two lists:
 
 1. Values: it is a list of lists [[],[],[],...], where inner list is [datetime, value]
 2. Locations: is it a list of lists [[],[],[],...], where inner list is [datetime, lon, lat] and it is optional
+
 Data *has to* be sorted ascending in time (first element in the list is the oldest, last element is the newest)
 
 and a dictionary `tests`, where key is the measurement name 
