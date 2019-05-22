@@ -1,19 +1,15 @@
 # Standalone module containing quality tests
 
-Input to the libary is a `dataframe` with the following column names:
-1. name (platform code)
-2. longitude
-3. latitude
-4. data, where data is one measurement e.g. salinity or temperature, or fdom, etc.,..
+Input to the libary is a qcinput stucture which contains two lists:
+
+1. Values: it is a list of lists [[],[],[],...], where inner list is [datetime, value]
+2. Locations: is it a list of lists [[],[],[],...], where inner list is [datetime, lon, lat] and it is optional
+Data *has to* be sorted ascending in time (first element in the list is the oldest, last element is the newest)
 
 and a dictionary `tests`, where key is the measurement name 
 (e.g. temperature, or salinity, or...) and the value is a 
 list of tests =["global_range","local_range"]...
 
-The `dataframe` is indexed with timestamps. 
-QC should be performed for the latest timestamp (the first in the `dataframe`),
-the remaining data points are provided if they are required by any of the tests.
-Number of extra data points is as an argument to a decorator for each test in QCTests.
 
 # QC.py
 
