@@ -78,7 +78,7 @@ class QCTests(object):
         values = np.array(data.values)
 
         if 'months' in opts:
-            is_valid &= [values[i][0].month in opts['months'] for i in range(0, len(values))]
+            is_valid &= [value[0].month in opts['months'] for value in values]
 
         if 'area' in opts:
             is_valid &= is_inside_geo_region(data.locations, **opts)
