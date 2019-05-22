@@ -1,14 +1,15 @@
-import unittest
-import qclib.QC
-from qclib.utils.qc_input import qcinput
-import qclib.utils.Thresholds
+import os
 from datetime import datetime, timedelta
-from qclib import QC
 import time
 import csv
+import unittest
+from qclib.utils.qc_input import qcinput
+import qclib.utils.Thresholds
+from qclib import QC
+
 
 platform_code = 'TF'
-common_tests = qclib.QC.init(platform_code).qc_tests
+common_tests = QC.init(platform_code).qc_tests
 base_time = datetime.strptime('2017-01-12 14:08:06', '%Y-%m-%d %H:%M:%S')
 d = timedelta(seconds=60)
 
@@ -34,7 +35,8 @@ def read_testdata(filename):
 class Tests(unittest.TestCase):
 
     def test_qc_logic(self):
-        filename = 'testdata/ferrybox_data.csv'
+        origin_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "testdata")
+        filename = os.path.join(origin_dir, "ferrybox_data.csv")
         input_data = read_testdata(filename)
         values = [[datetime.strptime(item[0].split('.')[0], '%Y-%m-%dT%H:%M:%S'), float(item[1])] for item in
                   input_data]
