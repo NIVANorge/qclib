@@ -1,38 +1,46 @@
-'''
+"""
 Tests are implemented according to the document
 Quality Control of Biogeochemical Measurements
-[1] http://archimer.ifremer.fr/doc/00251/36232/34792.pdf  
+[1] http://archimer.ifremer.fr/doc/00251/36232/34792.pdf
 [2] http://www.coriolis.eu.org/content/download/4920/36075/file/Recommendations%20for%20RTQC%20procedures_V1_2.pdf
-'''
-import numpy as np
-from .utils.qc_input import qcinput
-from .utils.qctests_helpers import is_inside_geo_region
+"""
 import functools
+from typing import List
+
+import numpy as np
+
+from .utils.qc_input import QCInput
+from .utils.qctests_helpers import is_inside_geo_region
 from .utils.validate_input import validate_data_for_argo_spike_test, validate_data_for_frozen_test
 
 
-class QCTests(object):
+def qctest_method(number_of_historical=0, number_of_future=0):
     """
-    Real Time QC Tests 
+    Decorator. Adds parameters to the decorated function/method.
+    """
+
+    def set_parameters(func):
+        @functools.wraps(func)
+        def func_wrapper(cls, *args, **opts):
+            return func(cls, *args, **opts)
+
+        func_wrapper.number_of_historical = number_of_historical
+        func_wrapper.number_of_future = number_of_future
+        return func_wrapper
+
+    return set_parameters
+
+
+class QCTests:
+    """
+    Real Time QC Tests
     These tests are applied to one signal ( = one timestamp)
     Return value of each test is an integer: 0= test not ran, -1=test failed, 1= test succeeded
     """
 
-    def check_size(number_of_historical, number_of_future):
-        def check_data_size(func):
-            @functools.wraps(func)
-            def func_wrapper(clf, *args, **opts):
-                return func(clf, *args, **opts)
-
-            func_wrapper.number_of_historical = number_of_historical
-            func_wrapper.number_of_future = number_of_future
-            return func_wrapper
-
-        return check_data_size
-
     @classmethod
-    @check_size(1, 1)
-    def argo_spike_test(clf, data: qcinput, **opts) -> int:
+    @qctest_method(number_of_historical=1, number_of_future=1)
+    def argo_spike_test(cls, data: QCInput, **opts) -> List[int]:
         """
         Spike test according to MyOcean [2] for T and S parameters
         The same test for Oxygen is defined at Bio Argo
@@ -44,27 +52,26 @@ class QCTests(object):
         is_valid = np.ones(len(data.values), dtype=np.bool)
         is_valid &= validate_data_for_argo_spike_test(data)
 
-        # is_valid is an array with boolean describing weather current point has valid historical and future point.
+        # is_valid is an array of booleans describing whether current point has valid historical and future points.
 
         def k_diff(val, index):
-            if index == 0 or index == len(val) - 1:
-                return 0
-            else:
-                return np.abs(val[index] - 0.5 * (val[index + 1] + val[index - 1])) \
-                       - 0.5 * np.abs(val[index + 1] - val[index - 1])
+            return abs(val[index] - 0.5 * (val[index + 1] + val[index - 1])) \
+                   - 0.5 * abs(val[index + 1] - val[index - 1])
 
         values = np.array(data.values)[:, 1]
-        k_diff_list = [k_diff(values, index) for index in range(0, len(data.values))]
-        k_diff_array = np.array(k_diff_list)
+        k_diffs = np.zeros(len(data.values))
+        k_diffs[1:-1] = [k_diff(values, i) for i in range(1, len(values) - 1)]
 
         flag[is_valid] = -1
-        is_valid &= (k_diff_array < opts['spike_threshold'])
+        is_valid &= (k_diffs < opts['spike_threshold'])
         flag[is_valid] = 1
+
+        # noinspection PyTypeChecker
         return flag.tolist()
 
     @classmethod
-    @check_size(0, 0)
-    def range_test(clf, data: qcinput, **opts) -> [int]:
+    @qctest_method()
+    def range_test(cls, data: QCInput, **opts) -> List[int]:
         """
 
         """
@@ -78,10 +85,11 @@ class QCTests(object):
         values = np.array(data.values)
 
         if 'months' in opts:
-            is_valid &= [value[0].month in opts['months'] for value in values]
+            months = set(opts['months'])
+            is_valid &= [value[0].month in months for value in values]
 
         if 'area' in opts:
-            is_valid &= is_inside_geo_region(data.locations, **opts)
+            is_valid &= is_inside_geo_region(data.locations, opts['area'])
 
         flag[is_valid] = -1
         if 'min' in opts:
@@ -90,11 +98,13 @@ class QCTests(object):
             is_valid &= (values[:, 1].astype(float) <= opts['max'])
 
         flag[is_valid] = 1
+
+        # noinspection PyTypeChecker
         return flag.tolist()
 
     @classmethod
-    @check_size(4, 0)
-    def frozen_test(cls, data: qcinput) -> int:
+    @qctest_method(number_of_historical=4)
+    def frozen_test(cls, data: QCInput) -> List[int]:
         """
         Consecutive data with exactly the same value are flagged as bad
         """
@@ -111,4 +121,6 @@ class QCTests(object):
 
         is_valid &= np.array(is_frozen)
         flag[is_valid] = -1
+
+        # noinspection PyTypeChecker
         return flag.tolist()
