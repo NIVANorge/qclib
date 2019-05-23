@@ -103,6 +103,22 @@ class QCTests:
         return flag.tolist()
 
     @classmethod
+    @qctest_additional_data_size()
+    def missing_value_test(cls, data: QCInput, **opts) -> List[int]:
+        """
+
+        """
+        flag = np.zeros(len(data.values), dtype=np.int)
+        is_valid = np.ones(len(data.values), dtype=np.bool)
+        values = np.array(data.values)
+        flag[is_valid] = -1
+        is_valid &= (values[:, 1].astype(float) != opts['nan'])
+        flag[is_valid] = 1
+
+        # noinspection PyTypeChecker
+        return flag.tolist()
+
+    @classmethod
     @qctest_additional_data_size(number_of_historical=4)
     def frozen_test(cls, data: QCInput) -> List[int]:
         """
