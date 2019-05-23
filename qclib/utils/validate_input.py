@@ -30,6 +30,6 @@ def validate_data_for_frozen_test(data: QCInput, size) -> List[bool]:
 
 def is_sorted(data: QCInput) -> bool:
     is_valid = data.values[0] <= data.values[-1]
-    if data.locations is not None:
+    if data.locations is not None and len(data.locations):
         is_valid &= data.locations[0] <= data.locations[-1]
     return is_valid
