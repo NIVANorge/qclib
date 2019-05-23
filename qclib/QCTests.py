@@ -14,7 +14,7 @@ from .utils.qctests_helpers import is_inside_geo_region
 from .utils.validate_input import validate_data_for_argo_spike_test, validate_data_for_frozen_test
 
 
-def qctest_method(number_of_historical=0, number_of_future=0):
+def qctest_additional_data_size(number_of_historical=0, number_of_future=0):
     """
     Decorator. Adds parameters to the decorated function/method.
     """
@@ -39,7 +39,7 @@ class QCTests:
     """
 
     @classmethod
-    @qctest_method(number_of_historical=1, number_of_future=1)
+    @qctest_additional_data_size(number_of_historical=1, number_of_future=1)
     def argo_spike_test(cls, data: QCInput, **opts) -> List[int]:
         """
         Spike test according to MyOcean [2] for T and S parameters
@@ -70,7 +70,7 @@ class QCTests:
         return flag.tolist()
 
     @classmethod
-    @qctest_method()
+    @qctest_additional_data_size()
     def range_test(cls, data: QCInput, **opts) -> List[int]:
         """
 
@@ -103,7 +103,7 @@ class QCTests:
         return flag.tolist()
 
     @classmethod
-    @qctest_method(number_of_historical=4)
+    @qctest_additional_data_size(number_of_historical=4)
     def frozen_test(cls, data: QCInput) -> List[int]:
         """
         Consecutive data with exactly the same value are flagged as bad
