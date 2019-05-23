@@ -106,13 +106,12 @@ class QCTests:
     @qctest_additional_data_size()
     def missing_value_test(cls, data: QCInput, **opts) -> List[int]:
         """
-
+        Flag values that have the given magic ('nan') value
         """
-        flag = np.zeros(len(data.values), dtype=np.int)
-        is_valid = np.ones(len(data.values), dtype=np.bool)
+        flag = np.full(len(data.values), -1, dtype=np.int)
         values = np.array(data.values)
-        flag[is_valid] = -1
-        is_valid &= (values[:, 1].astype(float) != opts['nan'])
+
+        is_valid = values[:, 1].astype(float) != opts['nan']
         flag[is_valid] = 1
 
         # noinspection PyTypeChecker
