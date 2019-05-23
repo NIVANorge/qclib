@@ -2,7 +2,7 @@ import numpy as np
 from typing import Dict, List
 from .QCTests import QCTests
 from .utils import Thresholds
-from .utils.qc_input import qcinput
+from .utils.qc_input import QCInput
 import copy
 
 common_tests = {
@@ -53,16 +53,17 @@ class PlatformQC(QCTests):
             if key != "*":
                 self.qc_tests[key].update(self.qc_tests['*'])
 
-    def get_combined_flag(self, flags: List) -> List[int]:
-        flags_list_T = np.array(flags).T
-        flag_0 = np.any(flags_list_T == 0, axis=1)
-        flag_1 = np.any(flags_list_T == -1, axis=1)
-        combined_flag = np.ones(len(flags_list_T), dtype=np.int)
+    @staticmethod
+    def get_combined_flag(flags: List[List[int]]) -> np.ndarray:
+        transposed_flags = np.array(flags).T
+        flag_0 = np.any(transposed_flags == 0, axis=1)
+        flag_1 = np.any(transposed_flags == -1, axis=1)
+        combined_flag = np.ones(len(transposed_flags), dtype=np.int)
         combined_flag[flag_1] = -1
         combined_flag[flag_0] = 0
         return combined_flag
 
-    def applyQC(self, data: qcinput, tests: Dict[str, List[str]]) -> Dict[str, List[int]]:
+    def applyQC(self, data: QCInput, tests: Dict[str, List[str]]) -> Dict[str, List[int]]:
         """
         """
         flags = {}
