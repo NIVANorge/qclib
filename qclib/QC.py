@@ -26,7 +26,7 @@ def init(name):
         return platform_dict[name]()
 
 
-def execute(obj, data: qcinput, tests: Dict[str, str])->Dict[str, List[int]]:
+def execute(obj, data: qcinput, tests: Dict[str, Dict[str, bool]])->Dict[str, List[int]]:
 
     assert check_sort(data) == True, "Input data has to be sorted ascending in time"
     flags = obj.applyQC(data, tests)

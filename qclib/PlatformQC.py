@@ -93,7 +93,7 @@ class PlatformQC(QCTests):
         overall_flag = np.ones(len(flags_list_T), dtype=np.int)
         overall_flag[flag_1] = -1
         overall_flag[flag_0] = 0
-        return overall_flag
+        return overall_flag.tolist()
 
     @classmethod
     def flag2copernicus(cls, flag: List[int]) -> List[int]:
