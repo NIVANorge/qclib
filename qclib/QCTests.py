@@ -106,13 +106,12 @@ class QCTests:
     @qctest_additional_data_size()
     def missing_value_test(cls, data: QCInput, **opts) -> List[int]:
         """
-
+        Flag values that have the given magic ('nan') value
         """
-        flag = np.zeros(len(data.values), dtype=np.int)
-        is_valid = np.ones(len(data.values), dtype=np.bool)
+        flag = np.full(len(data.values), -1, dtype=np.int)
         values = np.array(data.values)
-        flag[is_valid] = -1
-        is_valid &= (values[:, 1].astype(float) != opts['nan'])
+
+        is_valid = values[:, 1].astype(float) != opts['nan']
         flag[is_valid] = 1
 
         # noinspection PyTypeChecker
@@ -128,11 +127,11 @@ class QCTests:
         is_valid = np.ones(len(data.values), dtype=np.bool)
         size_historical = QCTests.frozen_test.number_of_historical
         is_valid &= validate_data_for_frozen_test(data, size_historical)
-        # is_valid is an array with boolean describing weather current point has valid historical and future point.
+        # is_valid is an array with boolean describing whether current point has valid historical and future points.
 
         flag[is_valid] = 1
         data_diff = np.diff(np.array(data.values)[:, 1])
-        is_frozen = [True for i in range(0, size_historical)] + \
+        is_frozen = [True] * size_historical + \
                     [all(data_diff[-size_historical + i: i] == 0.0) for i in range(size_historical, len(data.values))]
 
         is_valid &= np.array(is_frozen)
