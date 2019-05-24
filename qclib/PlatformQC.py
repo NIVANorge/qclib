@@ -62,7 +62,7 @@ class PlatformQC(QCTests):
         combined_flag = np.ones(len(transposed_flags), dtype=np.int)
         combined_flag[flag_1] = -1
         combined_flag[flag_0] = 0
-        return combined_flag
+        return combined_flag.tolist()
 
     def applyQC(self, data: QCInput, tests: Dict[str, List[str]]) -> Dict[str, List[int]]:
         """
