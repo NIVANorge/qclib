@@ -85,9 +85,8 @@ class PlatformQC(QCTests):
                 flags[test] = self.qc_tests[key][test][0](data, **self.qc_tests[key][test][1])
         return flags
 
-    @classmethod
-    def get_overall_flag(cls, flags: Dict[str, List[int]]) -> List[int]:
-
+    @staticmethod
+    def get_overall_flag(flags: Dict[str, List[int]]) -> List[int]:
         flags_list = list(flags.values())
         flags_list_T = np.array(flags_list).T
         flag_0 = np.any(flags_list_T == 0, axis=1)

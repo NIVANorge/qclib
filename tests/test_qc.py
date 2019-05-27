@@ -39,7 +39,8 @@ class Tests(unittest.TestCase):
         ref_argo_spike_test = [int(item[4]) for item in input_data]
         locations = None
         flags = QC.execute(qclib.QC.init(platform_code), QCInput(values=values, locations=locations),
-                           tests={"salinity": ["global_range_test", "frozen_test", "argo_spike_test"]})
+                           tests={"salinity": {"global_range_test": False, "frozen_test": False,
+                                               "argo_spike_test": False}})
 
         assert flags["frozen_test"] == ref_frozen_test, "Frozen test failed"
         assert flags["global_range_test"] == ref_global_range_test, "Global range test failed"
