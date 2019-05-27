@@ -86,7 +86,7 @@ class PlatformQC(QCTests):
         return flags
 
     @classmethod
-    def get_overall_flag(cls, flags: Dict) -> List[int]:
+    def get_overall_flag(cls, flags: Dict[str, List[int]]) -> List[int]:
 
         flags_list = list(flags.values())
         flags_list_T = np.array(flags_list).T
