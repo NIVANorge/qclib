@@ -57,7 +57,7 @@ class PlatformQC(QCTests):
     @staticmethod
     def get_combined_flag(flags: List[List[int]]) -> np.ndarray:
         transposed_flags = np.array(flags).T
-        flag_0 = np.any(transposed_flags == 0, axis=1)
+        flag_0 = np.all(transposed_flags == 0, axis=1)
         flag_1 = np.any(transposed_flags == -1, axis=1)
         combined_flag = np.ones(len(transposed_flags), dtype=np.int)
         combined_flag[flag_1] = -1

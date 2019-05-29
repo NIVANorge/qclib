@@ -37,6 +37,8 @@ class Tests(unittest.TestCase):
         ref_frozen_test = [int(item[2]) for item in input_data]
         ref_global_range_test = [int(item[3]) for item in input_data]
         ref_argo_spike_test = [int(item[4]) for item in input_data]
+        # locations = [[datetime.strptime(item[0].split('.')[0], '%Y-%m-%dT%H:%M:%S'), 10+0.01*i, 59.9+0.01*i]
+        #              for i, item in enumerate(input_data)]
         locations = None
         flags = QC.execute(qclib.QC.init(platform_code), QCInput(values=values, locations=locations),
                            tests={"salinity": {"global_range_test": False, "frozen_test": False,
