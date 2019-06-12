@@ -34,6 +34,13 @@ def write_testdata(filename, header, data):
         csv_writer.writerows(data)
 
 
+def make_toy_data_with_nan(size):
+    values = [(base_time + d * i, i) for i in range(1, size)]
+    values.insert(0, (base_time, None))
+    location = [(base_time + d * i, 10.708 + i * 0.01, 61 + i * 0.01) for i in range(0, size)]
+    return QCInput(values=values, locations=location)
+
+
 class Tests(unittest.TestCase):
 
     def test_qc_logic(self):
@@ -71,6 +78,18 @@ class Tests(unittest.TestCase):
         QC.execute(qclib.QC.init(platform_code), data, tests)
         end = time.time()
         assert (end - start) < 0.2, "Execution time on 1500 signals in the list takes more than 0.2 s."
+
+    def test_data_with_nan(self):
+        data = make_toy_data_with_nan(6)
+        print(f"data with nans {data}")
+        tests = {"temperature": ["local_range_test", "global_range_test", "argo_spike_test", "frozen_test"]}
+        flags = QC.execute(qclib.QC.init(platform_code), data, tests)
+        assert flags['global_range_test'] == [-1, 1, 1, 1, 1, 1], "Global range test failed"
+        assert flags['local_range_test'] == [-1, 1, 1, 1, 1, 1], "Local range test failed"
+        assert flags['argo_spike_test'] == [0, -1, 1, 1, 1, 0], "Argo spike test failed"
+        assert flags['frozen_test'] == [0, 0, 0, 0, 1, 1], "Frozen test failed"
+        final_flag = PlatformQC.get_overall_flag(flags)
+        assert final_flag == [0, 0, 0, 0, 1, 0], "Final flag calculation failed"
 
 
 if __name__ == '__main__':

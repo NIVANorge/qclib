@@ -1,5 +1,7 @@
 from datetime import datetime
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Union
 
-Measurement = Tuple[datetime, float]
-Location = Tuple[datetime, float, float]
+
+Value = Union[float, None]
+Measurement = Tuple[datetime, Value]
+Location = Tuple[datetime, Value, Value]
