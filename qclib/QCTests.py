@@ -55,7 +55,7 @@ class QCTests:
         # is_valid is an array of booleans describing whether current point has valid historical and future points.
 
         def k_diff(val, index):
-            if val[index] is None or val[index + 1] is None or val[index - 1] is None:
+            if None in val[index - 1:index + 2]:
                 return np.nan
             else:
                 return abs(val[index] - 0.5 * (val[index + 1] + val[index - 1])) \
@@ -66,7 +66,8 @@ class QCTests:
         k_diffs[1:-1] = [k_diff(values, i) for i in range(1, len(values) - 1)]
 
         flag[is_valid] = -1
-        is_valid &= np.array([e < opts['spike_threshold'] if ~np.isnan(e) else False for e in k_diffs], dtype=bool)
+        with np.errstate(invalid='ignore'):
+            is_valid &= k_diffs < opts['spike_threshold']
         flag[is_valid] = 1
 
         # noinspection PyTypeChecker
@@ -96,11 +97,11 @@ class QCTests:
 
         flag[is_valid] = -1
         if 'min' in opts:
-            is_valid &= np.array([e >= opts['min'] if ~np.isnan(e) else False for e in values[:, 1].astype(float)],
-                                 dtype=bool)
+            with np.errstate(invalid='ignore'):
+                is_valid &= values[:, 1].astype(float) >= opts['min']
         if 'max' in opts:
-            is_valid &= np.array([e <= opts['max'] if ~np.isnan(e) else False for e in values[:, 1].astype(float)],
-                                 dtype=bool)
+            with np.errstate(invalid='ignore'):
+                is_valid &= values[:, 1].astype(float) <= opts['max']
 
         flag[is_valid] = 1
 
