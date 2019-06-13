@@ -1,73 +1,59 @@
 '''
 Reference: MATLAB script based on American Practical Navigator, Vol II, 1975 Edition, p 5
-Based on python script from Anna Birgitta Ledang
+Modification of python script from Anna Birgitta Ledang
 '''
-import datetime
 import numpy as np
-
 KNOT2MPS = 1852.0 / 3600.0
 
 
-def latitude2meters(dlat=None, alat=None, lat=None):
-    if dlat is None:
-        dlat = np.diff(lat)
-    if alat is None:
-        i1 = np.arange(1, len(lat))
+def latitude2meters(delta_latitude=None, average_latitude=None, latitude=None):
+    if delta_latitude is None:
+        delta_latitude = np.diff(latitude)
+    if average_latitude is None:
+        i1 = np.arange(1, len(latitude))
         i0 = i1 - 1
-        alat = 0.5 * (lat[i0] + lat[i1])
-    rlat = np.deg2rad(alat)
-    m = 111132.09 - 566.05 * np.cos(2 * rlat) + 1.2 * np.cos(4 * rlat)
-    dy = m * dlat
-    return dy
+        average_latitude = 0.5 * (latitude[i0] + latitude[i1])
+    average_latitude_radians = np.deg2rad(average_latitude)
+    # length_of_degree at in meters, of a degree of the meridian
+    length_of_degree = \
+        111132.09 - 566.05 * np.cos(2 * average_latitude_radians) + 1.2 * np.cos(4 * average_latitude_radians)
+    distance_y = length_of_degree * delta_latitude
+    return distance_y
 
 
-def longitude2meters(dlon=None, alat=None, lon=None, lat=None):
-    if dlon is None:
-        dlon = np.diff(lon)
-    if alat is None:
-        i1 = np.arange(1, len(lat))
+def longitude2meters(delta_longitude=None, average_latitude=None, longitude=None, latitude=None):
+    if delta_longitude is None:
+        delta_longitude = np.diff(longitude)
+    if average_latitude is None:
+        i1 = np.arange(1, len(latitude))
         i0 = i1 - 1
-        alat = 0.5 * (lat[i0] + lat[i1])
-    rlat = np.deg2rad(alat)
-    p = 111415.13 * np.cos(rlat) - 94.55 * np.cos(3 * rlat)
-    dx = p * dlon
-    return dx
+        average_latitude = 0.5 * (latitude[i0] + latitude[i1])
+    average_latitude_radians = np.deg2rad(average_latitude)
+    # length of degree depends on latitude
+    length_of_degree = 111415.13 * np.cos(average_latitude_radians) - 94.55 * np.cos(3 * average_latitude_radians)
+    distance_x = length_of_degree * delta_longitude
+    return distance_x
 
 
-def lonlat2meters(lon, lat):
-    dx = longitude2meters(lon=lon, lat=lat)
-    dy = latitude2meters(lat=lat)
-    m = np.sqrt(dx * dx + dy * dy)
-    return m
+def lonlat2meters(longitude, latitude):
+    dx = longitude2meters(longitude=longitude, latitude=latitude)
+    dy = latitude2meters(latitude=latitude)
+    distance = np.sqrt(dx * dx + dy * dy)
+    return distance
 
 
-def dt2seconds(dt):
-    test = False
-    if isinstance(dt, np.ndarray) and (dt.dtype == datetime.timedelta):
-        test = True
-    elif isinstance(dt, list) and isinstance(dt[0], datetime.timedelta):
-        test = True
-    elif isinstance(dt, datetime.timedelta):
-        test = True
-    if test:
-        s = map(lambda x: x.total_seconds(), dt)
-    else:
-        s = dt
-    return s
+def dt2seconds(time):
+    delta_time = np.diff(time)
+    seconds = [x.total_seconds() for x in delta_time]
+    return seconds
 
 
 def velocity(time, lon, lat):
-    dt = dt2seconds(np.diff(time))
+    " Finite difference , forward scheme "
+    dt = dt2seconds(time)
     ds = lonlat2meters(lon, lat)
-    mps = ds / dt
-    i1 = np.arange(1, len(mps))
-    i0 = i1 - 1
-    mps = 0.5 * (mps[i1] + mps[i0])
-    mps = np.insert(mps, 0, np.nan)
-    mps = np.append(mps, np.nan)
-    return mps
+    vel = ds / dt
+    return vel
 
 
-def knot2mps(spd):
-    return spd * KNOT2MPS
 
