@@ -23,7 +23,7 @@ def validate_data_for_frozen_test(data: QCInput, size) -> List[bool]:
             return False
         else:
             val_diff = np.diff(np.array(val[-size + index: index+1])[:, 0])
-            return all(val_diff < 1.5 * np.median(val_diff))
+            return all(val_diff < 2.1 * np.median(val_diff))
 
     return [is_valid(data.values, i) for i in range(0, len(data.values))]
 
