@@ -28,8 +28,7 @@ def validate_data_for_frozen_test(data: QCInput, size) -> List[bool]:
     return [is_valid(data.values, i) for i in range(0, len(data.values))]
 
 
-def is_sorted(data: QCInput) -> bool:
-    is_valid = data.values[0][0] <= data.values[-1][0]
-    if data.locations is not None and len(data.locations):
-        is_valid &= data.locations[0][0] <= data.locations[-1][0]
-    return is_valid
+def assert_is_sorted(data: QCInput):
+    assert data.values[0][0] <= data.values[-1][0], f"Input data has to be sorted ascending: {data.values}"
+    if data.locations is not None and len(data.locations) > 1:
+        assert data.locations[0][0] <= data.locations[-1][0], f"Input data has to be sorted ascending: {data.locations}"
