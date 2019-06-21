@@ -154,7 +154,7 @@ class QCTests:
         """
         flag = np.zeros(len(data.values), dtype=np.int)
         is_valid = np.ones(len(data.values), dtype=np.bool)
-        size = QCTests.frozen_test.number_of_historical
+        size = QCTests.flatness_test.number_of_historical
         data = np.array(data.values)[:, 1].astype(float)
         is_flat = [False] * size + \
                   [data[-size + i: i].var() < 1e-5 for i in range(size, len(data))]
