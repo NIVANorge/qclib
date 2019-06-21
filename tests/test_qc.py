@@ -2,12 +2,14 @@ import csv
 import os
 import time
 import unittest
+import pandas as pd
 from datetime import datetime, timedelta
 
 import qclib.utils.Thresholds
 from qclib import QC
 from qclib.utils.qc_input import QCInput
 from qclib.PlatformQC import PlatformQC
+from qclib.QCTests import QCTests
 
 platform_code = 'TF'
 common_tests = QC.init(platform_code).qc_tests
@@ -44,7 +46,6 @@ def make_toy_data_with_nan(size):
 class Tests(unittest.TestCase):
 
     def test_qc_logic(self):
-
         origin_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "testdata")
         filename = os.path.join(origin_dir, "ferrybox_data.csv")
         input_data = read_testdata(filename)
@@ -90,6 +91,16 @@ class Tests(unittest.TestCase):
         assert flags['frozen_test'] == [0, 0, 0, 0, 1, 1], "Frozen test failed"
         final_flag = PlatformQC.get_overall_flag(flags)
         assert final_flag == [0, 0, 0, 0, 1, 0], "Final flag calculation failed"
+
+    def test_flatness_test(self):
+        origin_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "testdata")
+        filename = os.path.join(origin_dir, "depth_SG.csv")
+        input_data = read_testdata(filename)
+        values = [(datetime.strptime(item[0].split('.')[0], '%Y-%m-%dT%H:%M:%S'), float(item[1])) for item in
+                  input_data]
+        input = QCInput(values=values, locations=None)
+        flags = QCTests.flatness_test(input)
+        assert flags == [1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
 
 
 if __name__ == '__main__':
