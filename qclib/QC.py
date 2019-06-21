@@ -1,7 +1,7 @@
 from typing import Dict, List
 from .PlatformQC import PlatformQC
 from .utils.qc_input import QCInput
-from .utils.validate_input import is_sorted
+from .utils.validate_input import assert_is_sorted
 from . import Platforms
 
 # NOTE: when a new platform is added it has to be added to the array below, with "new_platform": Common.PlatformQC
@@ -27,8 +27,7 @@ def init(name):
 
 
 def execute(obj, data: QCInput, tests: Dict[str, Dict[str, bool]]) -> Dict[str, List[int]]:
-
-    assert is_sorted(data), "Input data has to be sorted ascending in time"
+    assert_is_sorted(data)
     flags = obj.applyQC(data, tests)
     return flags
 
