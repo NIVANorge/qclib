@@ -145,3 +145,21 @@ class QCTests:
 
         # noinspection PyTypeChecker
         return flag.tolist()
+
+    @classmethod
+    @qctest_additional_data_size(number_of_historical=4)
+    def flatness_test(cls, data: QCInput) -> List[int]:
+        """
+        Consecutive data with variance below 1e-5 are flagged as bad
+        """
+        flag = np.zeros(len(data.values), dtype=np.int)
+        is_valid = np.ones(len(data.values), dtype=np.bool)
+        size = QCTests.frozen_test.number_of_historical
+        data = np.array(data.values)[:, 1].astype(float)
+        is_flat = [False] * size + \
+                  [data[-size + i: i].var() < 1e-5 for i in range(size, len(data))]
+        flag[is_valid] = 1
+        is_valid &= np.array(is_flat)
+        flag[is_valid] = -1
+        # noinspection PyTypeChecker
+        return flag.tolist()

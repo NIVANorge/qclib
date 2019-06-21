@@ -10,6 +10,8 @@ common_tests = {
     '*':
         {'frozen_test': [QCTests.frozen_test, {}],
          'missing_value_test': [QCTests.missing_value_test, {'nan': -999}]},
+    'depth':
+        {'frozen_test': [QCTests.flatness_test, {}],
     'temperature':
         {'global_range_test': [QCTests.range_test,
                                Thresholds.global_range_temperature],
