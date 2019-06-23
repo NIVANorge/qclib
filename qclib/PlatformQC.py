@@ -93,9 +93,11 @@ class PlatformQC(QCTests):
         flags_list_T = np.array(flags_list).T
         flag_0 = np.any(flags_list_T == 0, axis=1)
         flag_1 = np.any(flags_list_T == -1, axis=1)
+        flag_None = np.any(flags_list_T == None, axis=1)
         overall_flag = np.ones(len(flags_list_T), dtype=np.int)
         overall_flag[flag_1] = -1
         overall_flag[flag_0] = 0
+        overall_flag[flag_None] = -1
         return overall_flag.tolist()
 
     @classmethod
