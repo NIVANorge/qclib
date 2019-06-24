@@ -78,7 +78,7 @@ class Tests(unittest.TestCase):
         start = time.time()
         QC.execute(qclib.QC.init(platform_code), data, tests)
         end = time.time()
-        assert (end - start) < 0.2, "Execution time on 1500 signals in the list takes more than 0.2 s."
+        assert (end - start) < 0.25, "Execution time on 1500 signals in the list takes more than 0.25 s."
 
     def test_data_with_nan(self):
         data = make_toy_data_with_nan(6)
