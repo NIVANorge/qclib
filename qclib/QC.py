@@ -1,8 +1,10 @@
 from typing import Dict, List
 from .PlatformQC import PlatformQC
 from .utils.qc_input import QCInput
+from .utils.qc_input_helpers import remove_nans, flags_resized_to_include_values_for_nan
 from .utils.validate_input import assert_is_sorted
 from . import Platforms
+import logging
 
 # NOTE: when a new platform is added it has to be added to the array below, with "new_platform": Common.PlatformQC
 platform_dict = {'TF': Platforms.FerryboxQC,
@@ -28,8 +30,14 @@ def init(name):
 
 def execute(obj, data: QCInput, tests: Dict[str, Dict[str, bool]]) -> Dict[str, List[int]]:
     assert_is_sorted(data)
-    flags = obj.applyQC(data, tests)
-    return flags
+    data_without_nan_values = remove_nans(data)
+    flags = obj.applyQC(data_without_nan_values, tests)
+    if len(data.values) == len(data_without_nan_values.values):
+        return flags
+    elif len(data.values) > len(data_without_nan_values.values):
+        return flags_resized_to_include_values_for_nan(flags, data)
+    else:
+        logging.error(f"inconsistent input data")
 
 
 def finalize():
