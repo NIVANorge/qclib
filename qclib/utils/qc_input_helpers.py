@@ -11,7 +11,7 @@ def remove_nans(data: QCInput) -> QCInput:
     for i, val in enumerate(data.values):
         if None not in val:
             new_values.append(val)
-            if data.locations is not None:
+            if data.locations is not None and len(data.locations) > 0:
                 new_locations.append(data.locations[i])
     return QCInput(values=new_values, locations=new_locations)
 
