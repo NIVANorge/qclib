@@ -134,9 +134,10 @@ class QCTests:
         size_historical = QCTests.frozen_test.number_of_historical
         is_valid &= validate_data_for_frozen_test(data, size_historical)
         # is_valid is an array with boolean describing whether current point has valid historical and future points.
-
         flag[is_valid] = 1
         data_diff = np.diff(np.array(data.values)[:, 1].astype(float))
+        if len(data.values) < size_historical:
+            size_historical = len(data.values) - 1
         is_frozen = [True] * size_historical + \
                     [all(data_diff[-size_historical + i: i] == 0.0) for i in range(size_historical, len(data.values))]
 
@@ -156,6 +157,8 @@ class QCTests:
         is_valid = np.ones(len(data.values), dtype=np.bool)
         size = QCTests.flatness_test.number_of_historical
         data = np.array(data.values)[:, 1].astype(float)
+        if len(data) < size:
+            size = len(data) - 1
         is_flat = [False] * size + \
                   [data[-size + i: i].var() < 1e-5 for i in range(size, len(data))]
         flag[is_valid] = 1

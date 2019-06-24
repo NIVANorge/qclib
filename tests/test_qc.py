@@ -38,7 +38,7 @@ def write_testdata(filename, header, data):
 
 def make_toy_data_with_nan(size):
     values = [(base_time + d * i, i) for i in range(1, size)]
-    values.insert(2, (base_time, None))
+    values.insert(2, (base_time+d*3, None))
     location = [(base_time + d * i, 10.708 + i * 0.01, 61 + i * 0.01) for i in range(0, size)]
     return QCInput(values=values, locations=location)
 
@@ -82,7 +82,6 @@ class Tests(unittest.TestCase):
 
     def test_data_with_nan(self):
         data = make_toy_data_with_nan(6)
-        print(f"data with nans {data}")
         tests = {"temperature": ["local_range_test", "global_range_test", "argo_spike_test", "frozen_test"]}
         flags = QC.execute(qclib.QC.init(platform_code), data, tests)
         assert flags['global_range_test'] == [1, 1, None, 1, 1, 1], "Global range test failed"
