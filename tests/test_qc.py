@@ -90,7 +90,7 @@ class Tests(unittest.TestCase):
         assert flags['argo_spike_test'] == [0, 1, None, 1, 1, 0], "Argo spike test failed"
         assert flags['frozen_test'] == [0, 0, None, 0, 0, 1], "Frozen test failed"
         final_flag = PlatformQC.get_overall_flag(flags)
-        assert final_flag == [0, 0, -1, 0, 0, 0], "Final flag calculation failed"
+        assert final_flag == [0, 0, None, 0, 0, 0], "Final flag calculation failed"
 
     def test_flatness_test(self):
         origin_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "testdata")
