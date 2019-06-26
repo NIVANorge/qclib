@@ -160,7 +160,7 @@ class QCTests:
         if len(data) < size:
             size = len(data) - 1
         is_flat = [False] * size + \
-                  [data[-size + i: i].var() < 1e-5 for i in range(size, len(data))]
+                  [data[-size + i: i].var() < 0.04 for i in range(size, len(data))]
         flag[is_valid] = 1
         is_valid &= np.array(is_flat)
         flag[is_valid] = -1
