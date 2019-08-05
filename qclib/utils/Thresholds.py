@@ -94,3 +94,4 @@ local_range_salinity = [
 ]
 
 spike_thresholds = {'temperature': 6, 'salinity': 0.9, 'oxygen': 50}  # Surface only oxygen in micromol/kg
+flatness_max_variance = 0.04

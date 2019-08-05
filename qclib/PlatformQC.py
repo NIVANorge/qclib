@@ -11,7 +11,7 @@ common_tests = {
         {'frozen_test': [QCTests.frozen_test, {}],
          'missing_value_test': [QCTests.missing_value_test, {'nan': -999}]},
     'depth':
-        {'flatness_test': [QCTests.flatness_test, {}]},
+        {'flatness_test': [QCTests.flatness_test, {'max_variance': Thresholds.flatness_max_variance}]},
     'temperature':
         {'global_range_test': [QCTests.range_test,
                                Thresholds.global_range_temperature],

@@ -149,9 +149,9 @@ class QCTests:
 
     @classmethod
     @qctest_additional_data_size(number_of_historical=4)
-    def flatness_test(cls, data: QCInput) -> List[int]:
+    def flatness_test(cls, data: QCInput, **opts) -> List[int]:
         """
-        Consecutive data with variance below 1e-5 are flagged as bad
+        Consecutive data with variance above 0.04 (sigma = 0.2) are flagged as bad
         """
         flag = np.zeros(len(data.values), dtype=np.int)
         is_valid = np.ones(len(data.values), dtype=np.bool)
@@ -160,7 +160,7 @@ class QCTests:
         if len(data) < size:
             size = len(data) - 1
         is_flat = [False] * size + \
-                  [data[-size + i: i].var() < 0.04 for i in range(size, len(data))]
+                  [data[-size + i: i].var() < opts['max_variance'] for i in range(size, len(data))]
         flag[is_valid] = 1
         is_valid &= np.array(is_flat)
         flag[is_valid] = -1
