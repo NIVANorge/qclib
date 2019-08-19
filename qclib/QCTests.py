@@ -166,3 +166,27 @@ class QCTests:
         flag[is_valid] = -1
         # noinspection PyTypeChecker
         return flag.tolist()
+
+    @classmethod
+    @qctest_additional_data_size(number_of_historical=9)
+    def pump_history_test(cls, data: QCInput) -> List[int]:
+        """
+        Pump is on for at least 10 minutes, which is equivalent to 10 consecutive points
+        with sampling interval 60s
+        """
+        flag = np.negative(np.ones(len(data.values), dtype=np.int))
+        is_valid = np.ones(len(data.values), dtype=np.bool)
+        size_historical = QCTests.pump_history_test.number_of_historical
+        is_valid &= validate_data_for_frozen_test(data, size_historical)
+        # is_valid is an array with boolean describing whether current point has valid historical and future points.
+        flag[is_valid] = 1
+        data = np.array(data.values)[:, 1].astype(int)
+        if len(data) < size_historical:
+            assert all(flag == -1)
+            return flag.tolist()
+        is_frozen = [True] * size_historical + \
+                    [any(data[-size_historical + i: i+1] == 0) for i in range(size_historical, len(data))]
+        is_valid &= np.array(is_frozen)
+        flag[is_valid] = -1
+        # noinspection PyTypeChecker
+        return flag.tolist()
