@@ -101,6 +101,16 @@ class Tests(unittest.TestCase):
         flags = QCTests.flatness_test(input, **{'max_variance': qclib.utils.Thresholds.flatness_max_variance})
         assert flags == [1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
 
+    def test_pump_history_test(self):
+        origin_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "testdata")
+        filename = os.path.join(origin_dir, "ferrybox_pump_data.csv")
+        input_data = read_testdata(filename)
+        values = [(datetime.strptime(item[0].split('.')[0], '%Y-%m-%dT%H:%M:%S'), float(item[1])) for item in
+                  input_data]
+        input = QCInput(values=values, locations=None)
+        flags = QCTests.pump_history_test(input)
+        assert flags == [-1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1]
+
 
 if __name__ == '__main__':
     unittest.main()
