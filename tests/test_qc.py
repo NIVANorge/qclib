@@ -109,7 +109,7 @@ class Tests(unittest.TestCase):
                   input_data]
         input = QCInput(values=values, locations=None)
         flags = QCTests.pump_history_test(input)
-        print(flags)
+        assert flags == [-1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1]
 
 
 if __name__ == '__main__':
