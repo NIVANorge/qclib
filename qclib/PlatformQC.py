@@ -88,8 +88,12 @@ class PlatformQC(QCTests):
         return flags
 
     @staticmethod
-    def get_overall_flag(flags: Dict[str, List[int]]) -> List[int]:
+    def get_overall_flag(flags: Dict[str, List[int]], *extra_flags) -> List[int]:
         flags_list = list(flags.values())
+        if extra_flags is not None:
+            for flags in extra_flags:
+                assert len(flags) == len(flags_list[0])
+                flags_list.append(flags)
         flags_list_T = np.array(flags_list).T
         flag_0 = np.any(flags_list_T == 0, axis=1)
         flag_1 = np.any(flags_list_T == -1, axis=1)
@@ -101,6 +105,7 @@ class PlatformQC(QCTests):
         overall_flag[flag_None] = None
         final_flag = [flag if flag in [-1, 0, 1] else None for flag in overall_flag.tolist()]
         return final_flag
+
 
     @classmethod
     def flag2copernicus(cls, flag: List[int]) -> List[int]:
