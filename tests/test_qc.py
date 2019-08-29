@@ -64,7 +64,10 @@ class Tests(unittest.TestCase):
                            tests={"salinity": {"global_range_test": False, "frozen_test": False,
                                                "argo_spike_test": False, "local_range_test": False}})
 
-        final_flag = PlatformQC.get_overall_flag(flags)
+        pump_flag = [1]*len(values)
+        pump_flag[0] = -1
+        pump_flag[49] = -1
+        final_flag = PlatformQC.get_overall_flag(flags, pump_flag)
 
         assert flags["frozen_test"] == ref_frozen_test, "Frozen test failed"
         assert flags["global_range_test"] == ref_global_range_test, "Global range test failed"
