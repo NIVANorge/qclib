@@ -90,7 +90,8 @@ class PlatformQC(QCTests):
     @staticmethod
     def get_overall_flag(flags: Dict[str, List[int]], *extra_flags) -> List[int]:
         flags_list = list(flags.values())
-        if extra_flags is not None:
+        # I'm not sure if extra_flags is None or a tuple with None in it
+        if extra_flags not in [None, (None,)]:
             for flags in extra_flags:
                 assert len(flags) == len(flags_list[0])
                 flags_list.append(flags)
