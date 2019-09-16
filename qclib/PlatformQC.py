@@ -91,6 +91,7 @@ class PlatformQC(QCTests):
     def get_overall_flag(flags: Dict[str, List[int]], *extra_flags) -> List[int]:
         # check if None values appear consistently for all flags for a given measurement
         flags_list = list(flags.values())
+        flags_list_T = np.array(flags_list).T
         flag_None = np.any(flags_list_T == None, axis=1)
         assert all(flag_None == np.all(flags_list_T == None, axis=1))
         # I'm not sure if extra_flags is None or a tuple with None in it
