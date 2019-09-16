@@ -89,8 +89,13 @@ class PlatformQC(QCTests):
 
     @staticmethod
     def get_overall_flag(flags: Dict[str, List[int]], *extra_flags) -> List[int]:
+        # check if None values appear consistently for all flags for a given measurement
         flags_list = list(flags.values())
+        flags_list_T = np.array(flags_list).T
+        flag_None = np.any(flags_list_T == None, axis=1)
+        assert all(flag_None == np.all(flags_list_T == None, axis=1))
         # I'm not sure if extra_flags is None or a tuple with None in it
+        # check if flags and extra flags are equal length
         if extra_flags not in [None, (None,)]:
             for flags in extra_flags:
                 assert len(flags) == len(flags_list[0])
@@ -99,14 +104,12 @@ class PlatformQC(QCTests):
         flag_0 = np.any(flags_list_T == 0, axis=1)
         flag_1 = np.any(flags_list_T == -1, axis=1)
         flag_None = np.any(flags_list_T == None, axis=1)
-        assert all(flag_None == np.all(flags_list_T == None, axis=1))
         overall_flag = np.ones(len(flags_list_T))
         overall_flag[flag_0] = 0
         overall_flag[flag_1] = -1
         overall_flag[flag_None] = None
         final_flag = [flag if flag in [-1, 0, 1] else None for flag in overall_flag.tolist()]
         return final_flag
-
 
     @classmethod
     def flag2copernicus(cls, flag: List[int]) -> List[int]:
