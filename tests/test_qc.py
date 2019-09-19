@@ -114,6 +114,25 @@ class Tests(unittest.TestCase):
         flags = QCTests.pump_history_test(input)
         assert flags == [-1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1]
 
+    def test_pump_history_test_should_handle_nones(self):
+        time = datetime(2018, 4, 10, 17, 45)
+        values = [(time + timedelta(seconds=i), 1) for i in range(0, 15)]
+        input = QCInput(values=values, locations=None)
+        flags = QCTests.pump_history_test(input)
+
+        # we expect the 10th flag and the following flags == 1 as the previous 9 pump values are 1
+        expected = [-1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1]
+        assert flags == expected
+
+        # setting the second value to None
+        input.values[1] = (input.values[1][0], None)
+
+        flags2 = QCTests.pump_history_test(input)
+
+        # expect the 12th flags and following to be 1, as the second pump value is None
+        expected2 = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1]
+        assert flags2 == expected2
+
 
 if __name__ == '__main__':
     unittest.main()

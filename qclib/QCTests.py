@@ -180,12 +180,14 @@ class QCTests:
         is_valid &= validate_data_for_frozen_test(data, size_historical)
         # is_valid is an array with boolean describing whether current point has valid historical and future points.
         flag[is_valid] = 1
-        data = np.array(data.values)[:, 1].astype(int)
-        if len(data) < size_historical:
+        temp = np.array(data.values)[:, 1]
+        temp[temp==None] = 0
+        pump_values = temp.astype(int)
+        if len(pump_values) < size_historical:
             assert all(flag == -1)
             return flag.tolist()
         is_frozen = [True] * size_historical + \
-                    [any(data[-size_historical + i: i+1] == 0) for i in range(size_historical, len(data))]
+                    [any(pump_values[-size_historical + i: i+1] == 0) for i in range(size_historical, len(pump_values))]
         is_valid &= np.array(is_frozen)
         flag[is_valid] = -1
         # noinspection PyTypeChecker
