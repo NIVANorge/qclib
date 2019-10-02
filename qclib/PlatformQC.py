@@ -41,7 +41,10 @@ common_tests = {
          'local_range_test': [QCTests.range_test,
                               Thresholds.local_range_oxygen],
          'argo_spike_test': [QCTests.argo_spike_test,
-                             {'spike_threshold': Thresholds.spike_thresholds['oxygen']}]}
+                             {'spike_threshold': Thresholds.spike_thresholds['oxygen']}]},
+
+    'pump':
+        {'pump_history_test': [QCTests.pump_history_test, {}]}
 
 }
 

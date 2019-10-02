@@ -38,7 +38,7 @@ def write_testdata(filename, header, data):
 
 def make_toy_data_with_nan(size):
     values = [(base_time + d * i, i) for i in range(1, size)]
-    values.insert(2, (base_time+d*3, None))
+    values.insert(2, (base_time + d * 3, None))
     location = [(base_time + d * i, 10.708 + i * 0.01, 61 + i * 0.01) for i in range(0, size)]
     return QCInput(values=values, locations=location)
 
@@ -64,7 +64,7 @@ class Tests(unittest.TestCase):
                            tests={"salinity": {"global_range_test": False, "frozen_test": False,
                                                "argo_spike_test": False, "local_range_test": False}})
 
-        pump_flag = [1]*len(values)
+        pump_flag = [1] * len(values)
         pump_flag[0] = -1
         pump_flag[49] = -1
         final_flag = PlatformQC.get_overall_flag(flags, pump_flag)
@@ -102,7 +102,14 @@ class Tests(unittest.TestCase):
                   input_data]
         input = QCInput(values=values, locations=None)
         flags = QCTests.flatness_test(input, **{'max_variance': qclib.utils.Thresholds.flatness_max_variance})
-        assert flags == [1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+        assert flags == [1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
 
     def test_pump_history_test(self):
         origin_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "testdata")
@@ -132,6 +139,16 @@ class Tests(unittest.TestCase):
         # expect the 12th flags and following to be 1, as the second pump value is None
         expected2 = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1]
         assert flags2 == expected2
+
+    def test_executing_qc_for_pump_should_strip_nones(self):
+        time = datetime(2018, 4, 10, 17, 45)
+        values = [(time + timedelta(seconds=i), 1) if i % 2 == 0 else (time + timedelta(seconds=i), None) for i in
+                  range(0, 25)]
+        input = QCInput(values=values, locations=None)
+        tests = {"pump": {"pump_history_test": False}}
+        flags = QC.execute(qclib.QC.init(platform_code), input, tests)
+        assert flags["pump_history_test"] == [-1, None, -1, None, -1, None, -1, None, -1, None, -1, None, -1, None, -1,
+                                              None, -1, None, 1, None, 1, None, 1, None, 1], "pump_history_test_failed"
 
 
 if __name__ == '__main__':
