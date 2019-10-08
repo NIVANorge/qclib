@@ -44,7 +44,11 @@ common_tests = {
                              {'spike_threshold': Thresholds.spike_thresholds['oxygen']}]},
 
     'pump':
-        {'pump_history_test': [QCTests.pump_history_test, {}]}
+        {'pump_history_test': [QCTests.pump_history_test, {}]},
+
+    'velocity':
+        {'global_range_test': [QCTests.range_test,
+                               Thresholds.global_range_velocity_ferrybox]}
 
 }
 
