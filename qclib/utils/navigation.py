@@ -3,6 +3,11 @@ Reference: MATLAB script based on American Practical Navigator, Vol II, 1975 Edi
 Modification of python script from Anna Birgitta Ledang
 '''
 import numpy as np
+import datetime as dt
+from typing import Union, List, Optional
+
+from qclib.utils.measurement import Location
+
 KNOT2MPS = 1852.0 / 3600.0
 
 
@@ -48,12 +53,19 @@ def dt2seconds(time):
     return seconds
 
 
-def velocity(time, lon, lat):
-    " Finite difference , forward scheme "
-    dt = dt2seconds(time)
-    ds = lonlat2meters(lon, lat)
-    vel = ds / dt
-    return vel
+def velocity(time: Union[List, np.array], longitude: Union[List, np.array], latitude: Union[List, np.array]):
+    """Finite difference , forward scheme"""
+    longitude = longitude if type(longitude) == np.array else np.array(longitude)
+    latitude = latitude if type(latitude) == np.array else np.array(latitude)
+
+    delta_time = dt2seconds(time)
+    delta_distance = lonlat2meters(longitude, latitude)
+    return delta_distance / delta_time
 
 
-
+def velocity_from_location_list(locations: List[Optional[Location]]):
+    time = np.array([el[0] if el else dt.datetime.today() for el in locations])
+    lon = np.array([el[1] if el else np.nan for el in locations]).astype(float)
+    lat = np.array([el[2] if el else np.nan for el in locations]).astype(float)
+    velocities = velocity(time, lon, lat)
+    return np.where(np.isnan(velocities), None, velocities).tolist()
