@@ -95,16 +95,10 @@ class PlatformQC(QCTests):
         return flags
 
     @staticmethod
-    def verify_if_any_none_all_none(list_of_flags_lists: List[List[int]]):
-        list_of_flags_lists_T = np.array(list_of_flags_lists).T
-        flag_none = np.any(list_of_flags_lists_T == None, axis=1)
-        if not all(flag_none == np.all(list_of_flags_lists_T == None, axis=1)):
-            raise Exception('If there is any None in a flag array they should all be None')
-
-    def get_overall_flag(self, flags: Dict[str, List[int]], *extra_flag_lists: Optional[List[int]]) -> List[int]:
+    def get_overall_flag(flags: Dict[str, List[int]], *extra_flag_lists: Optional[List[int]]) -> List[int]:
         # check if None values appear consistently for all flags for a given measurement
         list_of_flags_lists = list(flags.values())
-        self.verify_if_any_none_all_none(list_of_flags_lists)
+        verify_if_any_none_all_none(list_of_flags_lists)
 
         for extra_flag_list in extra_flag_lists:
             if extra_flag_list is not None:
@@ -128,3 +122,10 @@ class PlatformQC(QCTests):
     def flag2copernicus(cls, flag: List[int]) -> List[int]:
         " This function translates between -1,0,1 convention to copernicus convention 0,1,4 "
         return [fl if fl != -1 else 4 for fl in flag]
+
+
+def verify_if_any_none_all_none(list_of_flags_lists: List[List[int]]):
+    list_of_flags_lists_T = np.array(list_of_flags_lists).T
+    flag_none = np.any(list_of_flags_lists_T == None, axis=1)
+    if not all(flag_none == np.all(list_of_flags_lists_T == None, axis=1)):
+        raise Exception('If there is any None in a flag array they should all be None')
