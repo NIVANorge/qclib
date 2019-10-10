@@ -3,8 +3,7 @@ Reference: MATLAB script based on American Practical Navigator, Vol II, 1975 Edi
 Modification of python script from Anna Birgitta Ledang
 '''
 import numpy as np
-import datetime as dt
-from typing import Union, List, Optional
+from typing import Union, List
 
 from qclib.utils.measurement import Location
 
@@ -63,9 +62,9 @@ def velocity(time: Union[List, np.array], longitude: Union[List, np.array], lati
     return delta_distance / delta_time
 
 
-def velocity_from_location_list(locations: List[Optional[Location]]):
-    time = np.array([el[0] if el else dt.datetime.today() for el in locations])
-    lon = np.array([el[1] if el else np.nan for el in locations]).astype(float)
-    lat = np.array([el[2] if el else np.nan for el in locations]).astype(float)
+def velocity_from_location_list(locations: List[Location]):
+    time = np.array([el[0] for el in locations])
+    lon = np.array([el[1] for el in locations]).astype(float)
+    lat = np.array([el[2] for el in locations]).astype(float)
     velocities = velocity(time, lon, lat)
     return np.where(np.isnan(velocities), None, velocities).tolist()
