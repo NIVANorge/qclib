@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Dict, List
+from typing import Dict, List, Optional
 from .QCTests import QCTests
 from .utils import Thresholds
 from .utils.qc_input import QCInput
@@ -95,23 +95,31 @@ class PlatformQC(QCTests):
         return flags
 
     @staticmethod
-    def get_overall_flag(flags: Dict[str, List[int]], *extra_flag_lists) -> List[int]:
+    def verify_if_any_none_all_none(list_of_flags_lists: List[List[int]]):
+        list_of_flags_lists_T = np.array(list_of_flags_lists).T
+        flag_none = np.any(list_of_flags_lists_T == None, axis=1)
+        if not all(flag_none == np.all(list_of_flags_lists_T == None, axis=1)):
+            raise Exception('If there is any None in a flag array they should all be None')
+
+    def get_overall_flag(self, flags: Dict[str, List[int]], *extra_flag_lists: Optional[List[int]]) -> List[int]:
         # check if None values appear consistently for all flags for a given measurement
         list_of_flags_lists = list(flags.values())
+        self.verify_if_any_none_all_none(list_of_flags_lists)
+
         for extra_flag_list in extra_flag_lists:
             if extra_flag_list is not None:
                 assert len(extra_flag_list) == len(list_of_flags_lists[0])
                 list_of_flags_lists.append(extra_flag_list)
         list_of_flags_lists_T = np.array(list_of_flags_lists).T
 
-        flag_0 = np.any(list_of_flags_lists_T == 0, axis=1)
-        flag_1 = np.any(list_of_flags_lists_T == -1, axis=1)
-        flag_None = np.all(list_of_flags_lists_T == None, axis=1)
+        flags_have_zeroes = np.any(list_of_flags_lists_T == 0, axis=1)
+        flags_have_negative_one = np.any(list_of_flags_lists_T == -1, axis=1)
+        flags_have_nones = np.any(list_of_flags_lists_T == None, axis=1)
 
         overall_flag = np.ones(len(list_of_flags_lists_T))
-        overall_flag[flag_0] = 0
-        overall_flag[flag_1] = -1
-        overall_flag[flag_None] = None
+        overall_flag[flags_have_zeroes] = 0
+        overall_flag[flags_have_negative_one] = -1
+        overall_flag[flags_have_nones] = None
 
         final_flag = [flag if flag in [-1, 0, 1] else None for flag in overall_flag.tolist()]
         return final_flag
