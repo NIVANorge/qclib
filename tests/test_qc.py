@@ -61,8 +61,9 @@ class Tests(unittest.TestCase):
         ref_local_range_test = [int(item[7]) for item in input_data]
         ref_final_flag = [int(item[8]) for item in input_data]
         flags = QC.execute(qclib.QC.init(platform_code), QCInput(values=values, locations=locations),
-                           tests={"salinity": {"global_range_test": False, "frozen_test": False,
-                                               "argo_spike_test": False, "local_range_test": False}})
+                           measurement_name="salinity",
+                           tests={"global_range_test": False, "frozen_test": False,
+                                  "argo_spike_test": False, "local_range_test": False})
 
         pump_flag = [1] * len(values)
         pump_flag[0] = -1
@@ -77,16 +78,27 @@ class Tests(unittest.TestCase):
 
     def test_execution_time_with_toy_data(self):
         data = make_toy_data(1500)
-        tests = {"temperature": ["local_range_test", "global_range_test", "argo_spike_test", "frozen_test"]}
+        tests = {
+            "local_range_test": False,
+            "global_range_test": False,
+            "argo_spike_test": True,
+            "frozen_test": True,
+        }
         start = time.time()
-        QC.execute(qclib.QC.init(platform_code), data, tests)
+        QC.execute(platform=qclib.QC.init(platform_code), qc_input=data, measurement_name="temperature", tests=tests)
         end = time.time()
         assert (end - start) < 0.25, "Execution time on 1500 signals in the list takes more than 0.25 s."
 
     def test_data_with_nan(self):
         data = make_toy_data_with_nan(6)
-        tests = {"temperature": ["local_range_test", "global_range_test", "argo_spike_test", "frozen_test"]}
-        flags = QC.execute(qclib.QC.init(platform_code), data, tests)
+        tests = {
+            "local_range_test": False,
+            "global_range_test": False,
+            "argo_spike_test": True,
+            "frozen_test": True,
+        }
+        flags = QC.execute(platform=qclib.QC.init(platform_code), qc_input=data, measurement_name="temperature",
+                           tests=tests)
         assert flags['global_range_test'] == [1, 1, None, 1, 1, 1], "Global range test failed"
         assert flags['local_range_test'] == [1, 1, None, 1, 1, 1], "Local range test failed"
         assert flags['argo_spike_test'] == [0, 1, None, 1, 1, 0], "Argo spike test failed"
@@ -145,8 +157,8 @@ class Tests(unittest.TestCase):
         values = [(time + timedelta(seconds=i), 1) if i % 2 == 0 else (time + timedelta(seconds=i), None) for i in
                   range(0, 25)]
         input = QCInput(values=values, locations=None)
-        tests = {"pump": {"pump_history_test": False}}
-        flags = QC.execute(qclib.QC.init(platform_code), input, tests)
+        tests = {"pump_history_test": False}
+        flags = QC.execute(platform=qclib.QC.init(platform_code), qc_input=input, measurement_name="pump", tests=tests)
         assert flags["pump_history_test"] == [-1, None, -1, None, -1, None, -1, None, -1, None, -1, None, -1, None, -1,
                                               None, -1, None, 1, None, 1, None, 1, None, 1], "pump_history_test_failed"
 

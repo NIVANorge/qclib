@@ -19,6 +19,46 @@ Example:
 
 - removed parameter x from some_test
 
+## [4.0.0]
+
+### Breaking change
+
+Changed the function signature of QC.execute. Split the tests dict into:
+
+- measurement_name: str
+- tests: Dict[str, bool]
+
+Before:
+ ```
+    tests = {"temperature" : {
+                "local_range_test": False,
+                "global_range_test": False,
+                "argo_spike_test": True,
+                "frozen_test": True,
+            }
+    }
+
+    QC.execute(platform=qclib.QC.init(platform_code), qc_input=data, tests=tests)
+```
+
+After 
+```    
+    tests = {
+        "local_range_test": False,
+        "global_range_test": False,
+        "argo_spike_test": True,
+        "frozen_test": True,
+    }
+
+    # in addition we introduced a new param measurement_name. example:
+    QC.execute(platform=qclib.QC.init(platform_code), qc_input=data,
+    measurement_name="temperature", tests=tests)
+```
+
+## [3.0.0]
+
+- made locations required in velocity_from_location_list function
+
 ## [2.4.4]
 ### Bug Fixes
 

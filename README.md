@@ -18,7 +18,7 @@ A simple interface to facilitate execution of QC tests during ingest phase.
 It contains a platform_dict to relate platform_code to the relevant QC class and
 the three functions:
 1. init(platform_code) instatiates (creates obj of) a relevant platform class. If platform_code is not found in platform_dict a PlatformQC is instatiated.
-2. execute(obj, df, tests) calls applyQC function defined in PlatformsQC.
+2. execute(platform, qc_input, measurement_name, tests) calls applyQC function defined in PlatformsQC.
 3. finalize() prints success. 
 
 

@@ -73,25 +73,25 @@ class PlatformQC(QCTests):
         combined_flag[flag_0] = 0
         return combined_flag.tolist()
 
-    def applyQC(self, data: QCInput, tests: Dict[str, List[str]]) -> Dict[str, List[int]]:
+    def applyQC(self, qc_input: QCInput, measurement_name: str, tests: List[str]) -> Dict[str, List[int]]:
         """
         """
         flags = {}
-        key = list(tests.keys())[0]
-        if key not in self.qc_tests:
-            key = "*"
+        if measurement_name not in self.qc_tests:
+            measurement_name = "*"
 
-        for test in self.qc_tests[key]:
-            if test not in tests[list(tests.keys())[0]]:
+        for test in self.qc_tests[measurement_name]:
+            if test not in tests:
                 continue
-            if type(self.qc_tests[key][test][1]) is list:  # only local range test
-                arr = [[test, self.qc_tests[key][test][0], x] for x in self.qc_tests[key][test][1]]
+            if type(self.qc_tests[measurement_name][test][1]) is list:  # only local range test
+                arr = [[test, self.qc_tests[measurement_name][test][0], x] for x in
+                       self.qc_tests[measurement_name][test][1]]
                 flag = []
                 for n, a in enumerate(arr):
-                    flag.append(a[1](data, **a[2]))
+                    flag.append(a[1](qc_input, **a[2]))
                 flags[test] = self.get_combined_flag(flag)
             else:
-                flags[test] = self.qc_tests[key][test][0](data, **self.qc_tests[key][test][1])
+                flags[test] = self.qc_tests[measurement_name][test][0](qc_input, **self.qc_tests[measurement_name][test][1])
         return flags
 
     @staticmethod
