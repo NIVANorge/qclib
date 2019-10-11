@@ -31,7 +31,10 @@ def init(name):
 def execute(obj, data: QCInput, tests: Dict[str, Dict[str, bool]]) -> Dict[str, List[int]]:
     assert_is_sorted(data)
     data_without_nan_values = remove_nans(data)
-    flags = obj.applyQC(data_without_nan_values, tests)
+    if data_without_nan_values.values:
+        flags = obj.applyQC(data_without_nan_values, tests)
+    else:
+        flags = {test: [] for test in next(iter(tests.values())).keys()}
     if len(data.values) == len(data_without_nan_values.values):
         return flags
     elif len(data.values) > len(data_without_nan_values.values):
