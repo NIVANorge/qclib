@@ -28,17 +28,17 @@ def init(name):
         return platform_dict[name]()
 
 
-def execute(obj, data: QCInput, tests: Dict[str, Dict[str, bool]]) -> Dict[str, List[int]]:
-    assert_is_sorted(data)
-    data_without_nan_values = remove_nans(data)
-    if data_without_nan_values.values:
-        flags = obj.applyQC(data_without_nan_values, tests)
+def execute(platform: PlatformQC, qc_input: QCInput, measurement_name: str, tests: Dict[str, bool]) -> Dict[str, List[int]]:
+    assert_is_sorted(qc_input)
+    qc_input_without_none_values = remove_nans(qc_input)
+    if qc_input_without_none_values.values:
+        flags = platform.applyQC(qc_input=qc_input_without_none_values, measurement_name=measurement_name, tests=tests)
     else:
-        flags = {test: [] for test in next(iter(tests.values())).keys()}
-    if len(data.values) == len(data_without_nan_values.values):
+        flags = {test: [] for test in tests.keys()}
+    if len(qc_input.values) == len(qc_input_without_none_values.values):
         return flags
-    elif len(data.values) > len(data_without_nan_values.values):
-        return flags_resized_to_include_values_for_nan(flags, data)
+    elif len(qc_input.values) > len(qc_input_without_none_values.values):
+        return flags_resized_to_include_values_for_nan(flags, qc_input)
     else:
         logging.error(f"inconsistent input data")
 
