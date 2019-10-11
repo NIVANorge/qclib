@@ -34,7 +34,7 @@ def execute(platform: PlatformQC, qc_input: QCInput, measurement_name: str, test
     if qc_input_without_none_values.values:
         flags = platform.applyQC(qc_input=qc_input_without_none_values, measurement_name=measurement_name, tests=tests)
     else:
-        flags = {test: [] for test in tests.keys()}
+        return {test: [None] * len(qc_input.values) for test in tests.keys()}
     if len(qc_input.values) == len(qc_input_without_none_values.values):
         return flags
     elif len(qc_input.values) > len(qc_input_without_none_values.values):
