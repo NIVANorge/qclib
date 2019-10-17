@@ -28,13 +28,13 @@ def init(name):
         return platform_dict[name]()
 
 
-def execute(platform: PlatformQC, qc_input: QCInput, measurement_name: str, tests: Dict[str, bool]) -> Dict[str, List[int]]:
+def execute(platform: PlatformQC, qc_input: QCInput, measurement_name: str, tests: List[str]) -> Dict[str, List[int]]:
     assert_is_sorted(qc_input)
     qc_input_without_none_values = remove_nans(qc_input)
     if qc_input_without_none_values.values:
         flags = platform.applyQC(qc_input=qc_input_without_none_values, measurement_name=measurement_name, tests=tests)
     else:
-        return {test: [None] * len(qc_input.values) for test in tests.keys()}
+        return {test: [None] * len(qc_input.values) for test in tests}
     if len(qc_input.values) == len(qc_input_without_none_values.values):
         return flags
     elif len(qc_input.values) > len(qc_input_without_none_values.values):
