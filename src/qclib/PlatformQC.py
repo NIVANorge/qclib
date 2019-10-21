@@ -50,7 +50,10 @@ common_tests = {
 
     'velocity':
         {'global_range_test': [QCTests.range_test,
-                               Thresholds.global_range_velocity_ferrybox]}
+                               Thresholds.global_range_velocity_ferrybox],
+         'bounded_variance_test': [QCTests.bounded_variance_test,
+                                   {'max_variance': Thresholds.velocity_max_variance}]
+         }
 }
 
 
@@ -79,7 +82,7 @@ class PlatformQC(QCTests):
         """
         flags = {}
         if measurement_name not in self.qc_tests:
-            logging.info(f"'{measurement_name}' is not defined in qc_tests, using default tests instead")
+            logging.debug(f"'{measurement_name}' is not defined in qc_tests, using default tests instead")
             measurement_name = "*"
 
         for test in tests:
