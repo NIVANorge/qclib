@@ -1,12 +1,14 @@
+import copy
 import numpy as np
+import logging
 from typing import Dict, List, Optional
+import warnings
+
 from qclib.QCTests import QCTests
 from qclib.utils import Thresholds
 from qclib.utils.qc_input import QCInput
-import copy
 
 common_tests = {
-
     '*':
         {'frozen_test': [QCTests.frozen_test, {}],
          'missing_value_test': [QCTests.missing_value_test, {'nan': -999}]},
@@ -49,7 +51,6 @@ common_tests = {
     'velocity':
         {'global_range_test': [QCTests.range_test,
                                Thresholds.global_range_velocity_ferrybox]}
-
 }
 
 
@@ -80,6 +81,12 @@ class PlatformQC(QCTests):
         if measurement_name not in self.qc_tests:
             measurement_name = "*"
 
+        for test in tests:
+            if test not in self.qc_tests[measurement_name]:
+                warnings.warn(f"This test: '{test}' is not available for this measurement '{measurement_name}'")
+                logging.warning(f"This test: '{test}' is not available for this measurement '{measurement_name}'",
+                                extra={'test': test, 'measurement_name': measurement_name,
+                                       'available_tests': self.qc_tests[measurement_name]})
         for test in self.qc_tests[measurement_name]:
             if test not in tests:
                 continue
