@@ -79,17 +79,12 @@ class PlatformQC(QCTests):
         """
         flags = {}
         if measurement_name not in self.qc_tests:
+            logging.info(f"'{measurement_name}' is not defined in qc_tests, using default tests instead")
             measurement_name = "*"
 
         for test in tests:
             if test not in self.qc_tests[measurement_name]:
-                warnings.warn(f"This test: '{test}' is not available for this measurement '{measurement_name}'")
-                logging.warning(f"This test: '{test}' is not available for this measurement '{measurement_name}'",
-                                extra={'test': test, 'measurement_name': measurement_name,
-                                       'available_tests': self.qc_tests[measurement_name]})
-        for test in self.qc_tests[measurement_name]:
-            if test not in tests:
-                continue
+                raise Exception(f"This test: '{test}' is not available for this measurement '{measurement_name}'")
             if type(self.qc_tests[measurement_name][test][1]) is list:  # only local range test
                 arr = [[test, self.qc_tests[measurement_name][test][0], x] for x in
                        self.qc_tests[measurement_name][test][1]]

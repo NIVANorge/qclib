@@ -76,11 +76,9 @@ class Tests(unittest.TestCase):
         assert final_flag == ref_final_flag, "Final flag calculation failed"
 
     def test_warning_on_undefined_qc_test(self):
-        with pytest.warns(UserWarning) as record:
+        with pytest.raises(Exception):
             QC.execute(qclib.QC.init(platform_code), QCInput(values=[(datetime(2018, 1, 1), 1)], locations=None),
                        measurement_name="salinity", tests=['non_existing_test'])
-        expected_warning = "This test: 'non_existing_test' is not available for this measurement 'salinity'"
-        assert record[0].message.args[0] == expected_warning
 
     def test_execution_time_with_toy_data(self):
         data = make_toy_data(1500)
