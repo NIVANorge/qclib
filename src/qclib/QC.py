@@ -1,10 +1,11 @@
-from typing import Dict, List
-from .PlatformQC import PlatformQC
-from .utils.qc_input import QCInput
-from .utils.qc_input_helpers import remove_nans, flags_resized_to_include_values_for_nan
-from .utils.validate_input import assert_is_sorted
-from . import Platforms
 import logging
+from typing import Dict, List
+
+from qclib import Platforms
+from qclib.PlatformQC import PlatformQC
+from qclib.utils.qc_input import QCInput
+from qclib.utils.qc_input_helpers import remove_nans, flags_resized_to_include_values_for_nan
+from qclib.utils.validate_input import assert_is_sorted
 
 # NOTE: when a new platform is added it has to be added to the array below, with "new_platform": Common.PlatformQC
 platform_dict = {'TF': Platforms.FerryboxQC,

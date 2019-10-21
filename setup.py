@@ -2,8 +2,20 @@
 """A setuptools based module for the NIVA tsb module/application.
 """
 
-from setuptools import setup
-import qclib
+from setuptools import setup, find_packages
+from codecs import open
+from os import path
+
+here = path.abspath(path.dirname(__file__))
+
+# get the version from the __version__.py file
+version_dict = {}
+with open(path.join(here, 'src', 'qclib', '__version__.py')) as f:
+    exec(f.read(), version_dict)
+
+# Get the long description from the README.md file
+with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 setup(
     name='qclib',
@@ -11,8 +23,9 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version=qclib.__version__,
+    version=version_dict['__version__'],
     description="Module containing QC tests",
+    long_description=long_description,
 
     # The project's main homepage.
     url='https://github.com/NIVANorge/qclib',
@@ -44,7 +57,8 @@ setup(
     ],
 
     keywords='data quality tests',
-    packages=["qclib", "qclib.utils", ".", "tests"],
+    packages=find_packages(where="src"),
+    package_dir={'': 'src'},
     install_requires=[
         'pandas>=0.24,<1.0',
         'numpy>=1.16,<2.0',

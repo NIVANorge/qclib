@@ -1,7 +1,7 @@
-'''
+"""
 Reference: MATLAB script based on American Practical Navigator, Vol II, 1975 Edition, p 5
 Modification of python script from Anna Birgitta Ledang
-'''
+"""
 import numpy as np
 from typing import Union, List
 
