@@ -9,16 +9,13 @@ from typing import List
 
 import numpy as np
 
-from .utils.qc_input import QCInput
-from .utils.qctests_helpers import is_inside_geo_region
-from .utils.validate_input import validate_data_for_argo_spike_test, validate_data_for_frozen_test
+from qclib.utils.qc_input import QCInput
+from qclib.utils.qctests_helpers import is_inside_geo_region
+from qclib.utils.validate_input import validate_data_for_argo_spike_test, validate_data_for_frozen_test
 
 
 def qctest_additional_data_size(number_of_historical=0, number_of_future=0):
-    """
-    Decorator. Adds parameters to the decorated function/method.
-    """
-
+    """Decorator. Adds parameters to the decorated function/method."""
     def set_parameters(func):
         @functools.wraps(func)
         def func_wrapper(cls, *args, **opts):
@@ -149,10 +146,8 @@ class QCTests:
 
     @classmethod
     @qctest_additional_data_size(number_of_historical=4)
-    def flatness_test(cls, data: QCInput, **opts) -> List[int]:
-        """
-        Consecutive data with variance above 0.04 (sigma = 0.2) are flagged as bad
-        """
+    def flatness_test(cls, data: QCInput, max_variance) -> List[int]:
+        """This test flags 'flat' data as bad. If the variance is below max_variance flag = -1"""
         flag = np.zeros(len(data.values), dtype=np.int)
         is_valid = np.ones(len(data.values), dtype=np.bool)
         size = QCTests.flatness_test.number_of_historical
@@ -160,10 +155,27 @@ class QCTests:
         if len(data) < size:
             size = len(data) - 1
         is_flat = [False] * size + \
-                  [data[-size + i: i].var() < opts['max_variance'] for i in range(size, len(data))]
+                  [data[-size + i: i].var() < max_variance for i in range(size, len(data))]
         flag[is_valid] = 1
         is_valid &= np.array(is_flat)
         flag[is_valid] = -1
+        # noinspection PyTypeChecker
+        return flag.tolist()
+
+    @classmethod
+    @qctest_additional_data_size(number_of_historical=3)
+    def bounded_variance_test(cls, qc_input: QCInput, max_variance: float) -> List[int]:
+        """Consecutive data with variance above max_variance are flagged as bad."""
+
+        variance_window_size = QCTests.bounded_variance_test.number_of_historical
+        data = np.array(qc_input.values)[:, 1].astype(float)
+        flag = np.array([0 if i < variance_window_size else 1 for i in range(len(data))])
+        if len(data) < variance_window_size:
+            return flag.tolist()
+
+        variance_array = [data[i - variance_window_size: i].var() for i in range(variance_window_size, len(data))]
+        variance_too_large = [False] * variance_window_size + [var > max_variance for var in variance_array]
+        flag[variance_too_large] = -1
         # noinspection PyTypeChecker
         return flag.tolist()
 
