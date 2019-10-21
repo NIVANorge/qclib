@@ -80,6 +80,17 @@ class Tests(unittest.TestCase):
             QC.execute(qclib.QC.init(platform_code), QCInput(values=[(datetime(2018, 1, 1), 1)], locations=None),
                        measurement_name="salinity", tests=['non_existing_test'])
 
+    def test_large_variance_test(self):
+        time_stamp = datetime(2018, 4, 10, 17, 45)
+
+        values = [(time_stamp + timedelta(seconds=i), i) for i in range(0, 15)]
+        flags = QCTests.bounded_variance_test(QCInput(values=values, locations=None), .6)
+        assert flags == [0 if i < 3 else -1 for i in range(0, 15)]
+
+        values = [(time_stamp + timedelta(seconds=i), 1) for i in range(0, 15)]
+        flags = QCTests.bounded_variance_test(QCInput(values=values, locations=None), .6)
+        assert flags == [0 if i < 3 else 1 for i in range(0, 15)]
+
     def test_execution_time_with_toy_data(self):
         data = make_toy_data(1500)
         tests = ["local_range_test", "global_range_test", "argo_spike_test", "frozen_test"]
