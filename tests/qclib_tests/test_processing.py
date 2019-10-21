@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime, timedelta
 import numpy as np
 from qclib.utils.navigation import velocity, KNOT2MPS, velocity_from_location_list
-from tests.testdata import velocity_test_data
+from qclib_tests.testdata import velocity_test_data
 
 
 base_time = datetime.strptime('2017-01-12 14:08:06', '%Y-%m-%d %H:%M:%S')

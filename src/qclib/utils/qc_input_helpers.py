@@ -1,5 +1,5 @@
 from typing import Dict, List
-from .qc_input import QCInput
+from qclib.utils.qc_input import QCInput
 
 
 def remove_nans(data: QCInput) -> QCInput:

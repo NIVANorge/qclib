@@ -97,3 +97,4 @@ spike_thresholds = {'temperature': 6, 'salinity': 0.9, 'oxygen': 50}  # Surface 
 flatness_max_variance = 0.04
 # knots
 global_range_velocity_ferrybox = {'min': 0, 'max': 25}
+velocity_max_variance = 0.5

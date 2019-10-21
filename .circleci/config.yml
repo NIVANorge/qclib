@@ -6,7 +6,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/python:3.6.1
+      - image: circleci/python:3.7.4
 
 
 
@@ -38,7 +38,7 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            python setup.py test
+            pytest
 
       - store_artifacts:
           path: test-reports
@@ -46,7 +46,7 @@ jobs:
 
   publish:
     docker:
-      - image: circleci/python:3.6.1
+      - image: circleci/python:3.7.4
 
     working_directory: ~/repo
     steps:
