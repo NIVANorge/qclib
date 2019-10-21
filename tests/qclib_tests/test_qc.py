@@ -2,11 +2,10 @@ import csv
 import os
 import time
 import unittest
-import pandas as pd
 from datetime import datetime, timedelta
 
 import qclib.utils.Thresholds
-from qclib import QC
+import qclib.QC as QC
 from qclib.utils.qc_input import QCInput
 from qclib.PlatformQC import PlatformQC
 from qclib.QCTests import QCTests

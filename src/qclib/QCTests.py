@@ -9,16 +9,13 @@ from typing import List
 
 import numpy as np
 
-from .utils.qc_input import QCInput
-from .utils.qctests_helpers import is_inside_geo_region
-from .utils.validate_input import validate_data_for_argo_spike_test, validate_data_for_frozen_test
+from qclib.utils.qc_input import QCInput
+from qclib.utils.qctests_helpers import is_inside_geo_region
+from qclib.utils.validate_input import validate_data_for_argo_spike_test, validate_data_for_frozen_test
 
 
 def qctest_additional_data_size(number_of_historical=0, number_of_future=0):
-    """
-    Decorator. Adds parameters to the decorated function/method.
-    """
-
+    """Decorator. Adds parameters to the decorated function/method."""
     def set_parameters(func):
         @functools.wraps(func)
         def func_wrapper(cls, *args, **opts):

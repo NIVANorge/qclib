@@ -1,8 +1,8 @@
 import numpy as np
 from typing import Dict, List, Optional
-from .QCTests import QCTests
-from .utils import Thresholds
-from .utils.qc_input import QCInput
+from qclib.QCTests import QCTests
+from qclib.utils import Thresholds
+from qclib.utils.qc_input import QCInput
 import copy
 
 common_tests = {
