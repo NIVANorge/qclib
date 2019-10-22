@@ -16,16 +16,22 @@ def validate_data_for_argo_spike_test(data: QCInput) -> List[bool]:
     return [is_valid(values, i) for i in range(0, len(data.values))]
 
 
-def validate_data_for_frozen_test(data: QCInput, size) -> List[bool]:
+def initial_flags_for_historical_test(qc_input: QCInput, historical_size: int,
+                                      allowed_frequency_difference: float = 2.1) -> np.ndarray:
+    """When a test requires a number of historical points these should be reasonable close in time, also the points that
+    don't have enough historical points should be marked as cannot run (qc=0)"""
 
-    def is_valid(val, index):
-        if index < size:
-            return False
-        else:
-            val_diff = np.diff(np.array(val[-size + index: index+1])[:, 0])
-            return all(val_diff < 2.1 * np.median(val_diff))
+    time_stamps = np.array(qc_input.values)[:, 0]
+    flags = np.zeros(len(time_stamps), dtype=np.int)
 
-    return [is_valid(data.values, i) for i in range(0, len(data.values))]
+    # Instantiate the flags as (qc=1) if it is possible to run the test, otherwise leave as (qc=0)
+    time_diff_arrays = [np.diff(np.array(time_stamps[i - historical_size: i + 1]))
+                        for i in range(historical_size, len(time_stamps))]
+    timestamps_are_consecutive = [all(time_diffs < allowed_frequency_difference * np.median(time_diffs))
+                                  for time_diffs in time_diff_arrays]
+    flags[[False] * historical_size + timestamps_are_consecutive] = 1
+
+    return flags
 
 
 def assert_is_sorted(data: QCInput):
