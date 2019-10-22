@@ -80,7 +80,6 @@ class QCTests:
         if 'area' in opts and 'months' in opts:
             assert len(data.values) == len(data.locations), "Invalid geographical coordinates:" \
                                                             "Location and values list have different length."
-
         flag = np.zeros(len(data.values), dtype=np.int)
         is_valid = np.ones(len(data.values), dtype=np.bool)
         values = np.array(data.values)

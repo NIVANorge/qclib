@@ -65,7 +65,9 @@ Description:
         * lon : corresponding array of longitudes   
         
    
-        
+Temperature thresholds for Baltic Sea are based on http://www.helcom.fi/baltic-sea-trends/environment-fact-sheets/hydrography/development-of-sea-surface-temperature-in-the-baltic-sea/      
+
+
 ![Areas for Local Range Test](../figs/Local_range_test_areas.png) 
 
 
