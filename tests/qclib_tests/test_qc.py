@@ -83,6 +83,10 @@ class Tests(unittest.TestCase):
     def test_large_variance_test(self):
         time_stamp = datetime(2018, 4, 10, 17, 45)
 
+        values = [(time_stamp + timedelta(seconds=i), i) for i in range(0, 2)]
+        flags = QCTests.bounded_variance_test(QCInput(values=values, locations=None), .6)
+        assert flags == [0 for _ in range(0, 2)]
+
         values = [(time_stamp + timedelta(seconds=i), i) for i in range(0, 15)]
         flags = QCTests.bounded_variance_test(QCInput(values=values, locations=None), .6)
         assert flags == [0 if i < 3 else -1 for i in range(0, 15)]
@@ -139,6 +143,16 @@ class Tests(unittest.TestCase):
 
         flags = QCTests.pump_history_test(QCInput(values=values, locations=None))
         assert flags == [-1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1]
+
+    def test_pump_history_test_with_too_little_values(self):
+        values = [(datetime(2019, 1, 1) + timedelta(seconds=i), i) for i in range(0, 4)]
+        flags = QCTests.pump_history_test(QCInput(values=values, locations=None))
+        assert flags == [-1, -1, -1, -1]
+
+    def test_frozen_test_with_too_little_values(self):
+        values = [(datetime(2019, 1, 1) + timedelta(seconds=i), i) for i in range(0, 2)]
+        flags = QCTests.frozen_test(QCInput(values=values, locations=None))
+        assert flags == [0, 0]
 
     def test_pump_history_test_should_handle_nones(self):
         time_stamp = datetime(2018, 4, 10, 17, 45)
