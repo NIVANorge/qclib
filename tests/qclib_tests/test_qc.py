@@ -75,7 +75,7 @@ class Tests(unittest.TestCase):
         assert flags["local_range_test"] == ref_local_range_test, "Local range test failed"
         assert final_flag == ref_final_flag, "Final flag calculation failed"
 
-    def test_warning_on_undefined_qc_test(self):
+    def test_error_on_undefined_qc_test(self):
         with pytest.raises(Exception):
             QC.execute(qclib.QC.init(platform_code), QCInput(values=[(datetime(2018, 1, 1), 1)], locations=None),
                        measurement_name="salinity", tests=['non_existing_test'])
@@ -90,6 +90,10 @@ class Tests(unittest.TestCase):
         values = [(time_stamp + timedelta(seconds=i), 1) for i in range(0, 15)]
         flags = QCTests.bounded_variance_test(QCInput(values=values, locations=None), .6)
         assert flags == [0 if i < 3 else 1 for i in range(0, 15)]
+
+        del values[10:13]
+        flags = QCTests.bounded_variance_test(QCInput(values=values, locations=None), .6)
+        assert flags == [0 if i < 3 or i > 9 else 1 for i in range(0, 12)]
 
     def test_execution_time_with_toy_data(self):
         data = make_toy_data(1500)

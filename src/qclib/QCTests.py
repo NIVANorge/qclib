@@ -11,7 +11,7 @@ import numpy as np
 
 from qclib.utils.qc_input import QCInput
 from qclib.utils.qctests_helpers import is_inside_geo_region
-from qclib.utils.validate_input import validate_data_for_argo_spike_test, validate_data_for_frozen_test
+from qclib.utils.validate_input import validate_data_for_argo_spike_test, initial_flags_for_historical_test
 
 
 def qctest_additional_data_size(number_of_historical=0, number_of_future=0):
@@ -122,27 +122,19 @@ class QCTests:
 
     @classmethod
     @qctest_additional_data_size(number_of_historical=4)
-    def frozen_test(cls, data: QCInput) -> List[int]:
-        """
-        Consecutive data with exactly the same value are flagged as bad
-        """
-        flag = np.zeros(len(data.values), dtype=np.int)
-        is_valid = np.ones(len(data.values), dtype=np.bool)
+    def frozen_test(cls, qc_input: QCInput) -> List[int]:
+        """Consecutive data with exactly the same value are flagged as bad"""
         size_historical = QCTests.frozen_test.number_of_historical
-        is_valid &= validate_data_for_frozen_test(data, size_historical)
-        # is_valid is an array with boolean describing whether current point has valid historical and future points.
-        flag[is_valid] = 1
-        data_diff = np.diff(np.array(data.values)[:, 1].astype(float))
-        if len(data.values) < size_historical:
-            size_historical = len(data.values) - 1
-        is_frozen = [True] * size_historical + \
-                    [all(data_diff[-size_historical + i: i] == 0.0) for i in range(size_historical, len(data.values))]
+        flag_array = initial_flags_for_historical_test(qc_input, size_historical, 2.1)
 
-        is_valid &= np.array(is_frozen)
-        flag[is_valid] = -1
+        if len(qc_input.values) < size_historical:
+            return list(flag_array.tolist())
+        data_diff = np.diff(np.array(qc_input.values)[:, 1].astype(float))
 
-        # noinspection PyTypeChecker
-        return flag.tolist()
+        sensor_has_been_frozen = [all(data_diff[-size_historical + i: i] == 0.0)
+                                  for i in range(size_historical, len(qc_input.values))]
+        flag_array[[False] * size_historical + sensor_has_been_frozen] = -1
+        return list(flag_array.tolist())
 
     @classmethod
     @qctest_additional_data_size(number_of_historical=4)
@@ -166,41 +158,40 @@ class QCTests:
     @qctest_additional_data_size(number_of_historical=3)
     def bounded_variance_test(cls, qc_input: QCInput, max_variance: float) -> List[int]:
         """Consecutive data with variance above max_variance are flagged as bad."""
+        size_historical = QCTests.bounded_variance_test.number_of_historical
+        flag_array = initial_flags_for_historical_test(qc_input, size_historical, 2.1)
 
-        variance_window_size = QCTests.bounded_variance_test.number_of_historical
-        data = np.array(qc_input.values)[:, 1].astype(float)
-        flag = np.array([0 if i < variance_window_size else 1 for i in range(len(data))])
-        if len(data) < variance_window_size:
-            return flag.tolist()
+        values = np.array(qc_input.values)[:, 1].astype(float)
+        if len(values) < size_historical:
+            return list(flag_array.tolist())
 
-        variance_array = [data[i - variance_window_size: i].var() for i in range(variance_window_size, len(data))]
-        variance_too_large = [False] * variance_window_size + [var > max_variance for var in variance_array]
-        flag[variance_too_large] = -1
-        # noinspection PyTypeChecker
-        return flag.tolist()
+        variance_array = [values[i - size_historical: i].var() for i in range(size_historical, len(values))]
+        variance_too_large = [False] * size_historical + [var > max_variance for var in variance_array]
+        flag_array[variance_too_large] = -1
+        return list(flag_array.tolist())
 
     @classmethod
     @qctest_additional_data_size(number_of_historical=9)
-    def pump_history_test(cls, data: QCInput) -> List[int]:
+    def pump_history_test(cls, qc_input: QCInput) -> List[int]:
         """
         Pump is on for at least 10 minutes, which is equivalent to 10 consecutive points
         with sampling interval 60s
         """
-        flag = np.negative(np.ones(len(data.values), dtype=np.int))
-        is_valid = np.ones(len(data.values), dtype=np.bool)
         size_historical = QCTests.pump_history_test.number_of_historical
-        is_valid &= validate_data_for_frozen_test(data, size_historical)
-        # is_valid is an array with boolean describing whether current point has valid historical and future points.
-        flag[is_valid] = 1
-        temp = np.array(data.values)[:, 1]
-        temp[temp==None] = 0
-        pump_values = temp.astype(int)
-        if len(pump_values) < size_historical:
-            assert all(flag == -1)
-            return flag.tolist()
-        is_frozen = [True] * size_historical + \
-                    [any(pump_values[-size_historical + i: i+1] == 0) for i in range(size_historical, len(pump_values))]
-        is_valid &= np.array(is_frozen)
-        flag[is_valid] = -1
-        # noinspection PyTypeChecker
-        return flag.tolist()
+        flag_array = initial_flags_for_historical_test(qc_input, size_historical, 2.1)
+
+        # For the pump history test, if we can't run the test the data counts as invalid.
+        flag_array[flag_array==0] = -1
+
+        if len(qc_input.values) < size_historical:
+            return list(flag_array.tolist())
+
+        pump_values = np.array(qc_input.values)[:, 1]
+        pump_values[pump_values==None] = 0
+        pump_values = pump_values.astype(int)
+
+        pump_has_been_turned_off = [any(pump_values[-size_historical + i: i+1] == 0)
+                                    for i in range(size_historical, len(qc_input.values))]
+        flag_array[[False] * size_historical + pump_has_been_turned_off] = -1
+
+        return list(flag_array.tolist())
