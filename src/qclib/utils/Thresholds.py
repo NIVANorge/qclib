@@ -22,8 +22,9 @@ SW_Shelf = {'lat': (25, 50, 50, 25),
 NorthSea = {'lat': (51, 60.0, 60., 51.),
             'lon': (-3., -3., 10, 10)}
 
+# This is a visualization of the arctic: https://drive.google.com/open?id=1rhhIpTLR7J06_6qzP3a3i1sbP6td_og5&usp=sharing
 Arctic = {'lat': (89, 60,  60, 62, 66.0, 66.0, 60, 60, 89),
-          'lon': (-180,-180,10, 10, 20, 30, 30, 180,180,)}
+          'lon': (-180, -180, 10, 10, 20, 30, 30, 180, 180,)}
 
 Iberic = {'lat': (30.0, 48.0, 48.0, 42.0, 40.0, 30.0),
           'lon': (-30.0, -30.0, 0.0, 0.0, -5.5, -5.5)}
@@ -69,7 +70,7 @@ local_range_chla_fluorescence = [
     {'min': -0.1, 'max': 8.0, 'area': NorthSea, 'months': [7, 8]},
     {'min': -0.1, 'max': 12.0, 'area': NorthSea, 'months': [9, 10, 11, 12]},
 
-    {'min': 0.5, 'max': 25.0, 'area': Baltic, 'months': [1, 2, 11, 11, 12]},
+    {'min': 0.5, 'max': 25.0, 'area': Baltic, 'months': [1, 2, 10, 11, 12]},
     {'min': 1.5, 'max': 77.6, 'area': Baltic, 'months': [3, 4, 5]},
     {'min': 0.5, 'max': 36.8, 'area': Baltic, 'months': [6, 7, 8, 9]},
 
