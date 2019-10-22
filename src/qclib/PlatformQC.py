@@ -80,6 +80,7 @@ class PlatformQC(QCTests):
     def applyQC(self, qc_input: QCInput, measurement_name: str, tests: List[str]) -> Dict[str, List[int]]:
         """
         """
+        
         flags = {}
         if measurement_name not in self.qc_tests:
             logging.debug(f"'{measurement_name}' is not defined in qc_tests, using default tests instead")
