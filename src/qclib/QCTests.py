@@ -125,10 +125,12 @@ class QCTests:
     def frozen_test(cls, qc_input: QCInput) -> List[int]:
         """Consecutive data with exactly the same value are flagged as bad"""
         size_historical = QCTests.frozen_test.number_of_historical
-        flag_array = initial_flags_for_historical_test(qc_input, size_historical, 2.1)
 
         if len(qc_input.values) < size_historical:
-            return list(flag_array.tolist())
+            return [0 for _ in range(len(qc_input.values))]
+
+        flag_array = initial_flags_for_historical_test(qc_input, size_historical, 2.1)
+
         data_diff = np.diff(np.array(qc_input.values)[:, 1].astype(float))
 
         sensor_has_been_frozen = [all(data_diff[-size_historical + i: i] == 0.0)
@@ -159,11 +161,12 @@ class QCTests:
     def bounded_variance_test(cls, qc_input: QCInput, max_variance: float) -> List[int]:
         """Consecutive data with variance above max_variance are flagged as bad."""
         size_historical = QCTests.bounded_variance_test.number_of_historical
-        flag_array = initial_flags_for_historical_test(qc_input, size_historical, 2.1)
-
         values = np.array(qc_input.values)[:, 1].astype(float)
+
         if len(values) < size_historical:
-            return list(flag_array.tolist())
+            return [0 for _ in range(len(values))]
+
+        flag_array = initial_flags_for_historical_test(qc_input, size_historical, 2.1)
 
         variance_array = [values[i - size_historical: i].var() for i in range(size_historical, len(values))]
         variance_too_large = [False] * size_historical + [var > max_variance for var in variance_array]
@@ -178,13 +181,13 @@ class QCTests:
         with sampling interval 60s
         """
         size_historical = QCTests.pump_history_test.number_of_historical
-        flag_array = initial_flags_for_historical_test(qc_input, size_historical, 2.1)
-
-        # For the pump history test, if we can't run the test the data counts as invalid.
-        flag_array[flag_array==0] = -1
 
         if len(qc_input.values) < size_historical:
-            return list(flag_array.tolist())
+            return [-1 for _ in range(len(qc_input.values))]
+
+        flag_array = initial_flags_for_historical_test(qc_input, size_historical, 2.1)
+        # For the pump history test, if we can't run the test the data counts as invalid.
+        flag_array[flag_array==0] = -1
 
         pump_values = np.array(qc_input.values)[:, 1]
         pump_values[pump_values==None] = 0
