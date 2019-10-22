@@ -47,7 +47,8 @@ def make_toy_data_with_nan(size):
 class Tests(unittest.TestCase):
 
     def test_qc_logic(self):
-        filename = os.path.join(ORIGIN_DIR, "ferrybox_data.csv")
+        #filename = os.path.join(ORIGIN_DIR, "ferrybox_data.csv")
+        filename = os.path.join(ORIGIN_DIR, "ferrybox_data_shifted.csv")        
         input_data = read_testdata(filename)
 
         values = [(datetime.strptime(item[0].split('.')[0], '%Y-%m-%dT%H:%M:%S'), float(item[1])) for item in
@@ -71,6 +72,10 @@ class Tests(unittest.TestCase):
 
         assert flags["frozen_test"] == ref_frozen_test, "Frozen test failed"
         assert flags["global_range_test"] == ref_global_range_test, "Global range test failed"
+
+        print (flags["argo_spike_test"] )
+        print (ref_argo_spike_test)
+
         assert flags["argo_spike_test"] == ref_argo_spike_test, "Argo spike test failed"
         assert flags["local_range_test"] == ref_local_range_test, "Local range test failed"
         assert final_flag == ref_final_flag, "Final flag calculation failed"
