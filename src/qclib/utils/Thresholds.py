@@ -5,11 +5,13 @@ Provides package access to Global variables
 
 Source 1 = http://archimer.ifremer.fr/doc/00251/36232/ 
 """
+# here Baltic polygone includes Skagerrak and Kattegat
+# therefore, it may contain water masses from 
+# the North Sea and corresponding TS
+#TODO: split into subregiona, define ranges.  
+
 Baltic = {'lat': (53.5, 62.0, 66.0, 66.0, 53.5),
           'lon': (10.0, 10.0, 20.0, 30.0, 30.0)}
-
-Baltic_Kattegat = {'lat': (53.5, 60.0, 60.0,53.5),
-                   'lon': (10.0, 10.0, 15.0,15.0)} 
 
 NW_Shelf = {'lat': (50, 60, 60, 50),
             'lon': (-20, -20, 10, 10)}
@@ -87,13 +89,13 @@ local_range_oxygen = [
 local_range_temperature = [
     {'min': -2.0, 'max': 24.0, 'area': NW_Shelf, 'months': all_months},
     {'min': -2.0, 'max': 30.0, 'area': SW_Shelf, 'months': all_months},
-    {'min': -2.0, 'max': 24.0, 'area': Baltic, 'months': all_months},   
+    {'min': -2.0, 'max': 30.0, 'area': Baltic, 'months': all_months},   
     {'min': -2.0, 'max': 24.0, 'area': Arctic, 'months': all_months},
 ]
 
 local_range_salinity = [
     {'min': 0.0, 'max': 37.0, 'area': NW_Shelf, 'months': all_months},
-    {'min': 0.0, 'max': 35.5, 'area': Baltic_Kattegat, 'months': all_months},   
+    {'min': 0.0, 'max': 35.5, 'area': Baltic, 'months': all_months},   
     {'min': 0.0, 'max': 38.0, 'area': SW_Shelf, 'months': all_months},
     {'min': 2.0, 'max': 40.0, 'area': Arctic, 'months': all_months},
 ]
