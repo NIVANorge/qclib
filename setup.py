@@ -62,7 +62,7 @@ setup(
     install_requires=[
         'pandas>=0.24,<1.0',
         'numpy>=1.16,<2.0',
-        'pydantic>=0.21,<1.0',
+        'pydantic>=1.0,<2.0',
         'matplotlib>=3.0,<4.0'
     ],
     extras_require={
