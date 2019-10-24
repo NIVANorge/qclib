@@ -104,5 +104,6 @@ local_range_salinity = [
 spike_thresholds = {'temperature': 6, 'salinity': 0.9, 'oxygen': 50}  # Surface only oxygen in micromol/kg
 flatness_max_variance = 0.04
 # knots
-global_range_velocity_ferrybox = {'min': 0.1, 'max': 25}
+# min threshold 0.5 covers 0.0001 in lon and lat for 1 min sampling
+global_range_velocity_ferrybox = {'min': 0.5, 'max': 25}
 velocity_max_variance = 0.5
