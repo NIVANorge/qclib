@@ -69,10 +69,11 @@ local_range_chla_fluorescence = [
     {'min': -0.1, 'max': 14.0, 'area': NorthSea, 'months': [1, 2, 3, 4, 5, 6]},
     {'min': -0.1, 'max': 8.0, 'area': NorthSea, 'months': [7, 8]},
     {'min': -0.1, 'max': 12.0, 'area': NorthSea, 'months': [9, 10, 11, 12]},
-
-    {'min': 0.5, 'max': 25.0, 'area': Baltic, 'months': [1, 2, 10, 11, 12]},
-    {'min': 1.5, 'max': 77.6, 'area': Baltic, 'months': [3, 4, 5]},
-    {'min': 0.5, 'max': 36.8, 'area': Baltic, 'months': [6, 7, 8, 9]},
+    # The definition of the baltic region does not match source 1 and invalidates good values in skattegate
+    # TODO: fix the baltic region and split it up into it's document sub regions as described in source 1
+    # {'min': 0.5, 'max': 25.0, 'area': Baltic, 'months': [1, 2, 10, 11, 12]},
+    # {'min': 1.5, 'max': 77.6, 'area': Baltic, 'months': [3, 4, 5]},
+    # {'min': 0.5, 'max': 36.8, 'area': Baltic, 'months': [6, 7, 8, 9]},
 
     {'min': -0.1, 'max': 20.0, 'area': NW_Shelf,
      'months': [1, 2, 3, 4, 5, 6, 7, 8, 9]},
