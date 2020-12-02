@@ -60,7 +60,7 @@ setup(
     packages=find_packages(where="src"),
     package_dir={'': 'src'},
     install_requires=[
-        'pandas>=0.24,<1.0',
+        'pandas>=1.1,<2.0',
         'numpy>=1.16,<2.0',
         'pydantic>=1.0,<2.0',
         'matplotlib>=3.0,<4.0'
