@@ -117,7 +117,6 @@ class PlatformQC(QCTests):
         flags_have_nones = np.any(list_of_flags_lists_T == None, axis=1)
 
         overall_flag = np.ones(len(list_of_flags_lists_T))
-        overall_flag[flags_have_zeroes] = 0
         overall_flag[flags_have_negative_one] = -1
         overall_flag[flags_have_nones] = None
 
