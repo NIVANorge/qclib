@@ -104,7 +104,10 @@ class PlatformQC(QCTests):
     def get_overall_flag(flags: Dict[str, List[int]], *extra_flag_lists: Optional[List[int]]) -> List[int]:
         # check if None values appear consistently for all flags for a given measurement
         list_of_flags_lists = list(flags.values())
-        verify_if_any_none_all_none(list_of_flags_lists)
+        if len(list_of_flags_lists) > 0:
+            verify_if_any_none_all_none(list_of_flags_lists)
+            
+        # TODO: add assert that at least one list with flags should be not empty 
 
         for extra_flag_list in extra_flag_lists:
             if extra_flag_list is not None:
@@ -112,11 +115,12 @@ class PlatformQC(QCTests):
                 list_of_flags_lists.append(extra_flag_list)
         list_of_flags_lists_T = np.array(list_of_flags_lists).T
 
-        flags_have_zeroes = np.any(list_of_flags_lists_T == 0, axis=1)
+        flags_all_zeroes = np.all(list_of_flags_lists_T == 0, axis=1)
         flags_have_negative_one = np.any(list_of_flags_lists_T == -1, axis=1)
         flags_have_nones = np.any(list_of_flags_lists_T == None, axis=1)
 
         overall_flag = np.ones(len(list_of_flags_lists_T))
+
         overall_flag[flags_have_negative_one] = -1
         overall_flag[flags_have_nones] = None
 
