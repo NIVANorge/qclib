@@ -59,7 +59,7 @@ class Tests(unittest.TestCase):
         ref_global_range_test = [int(item[3]) for item in input_data]
         ref_argo_spike_test = [int(item[4]) for item in input_data]
         ref_local_range_test = [int(item[7]) for item in input_data]
-        ref_final_flag = [int(item[8]) for item in input_data]
+        # ref_final_flag = [int(item[8]) for item in input_data]
         flags = QC.execute(qclib.QC.init(platform_code), QCInput(values=values, locations=locations),
                            measurement_name="salinity",
                            tests=["global_range_test", "frozen_test", "argo_spike_test", "local_range_test"])
@@ -67,7 +67,7 @@ class Tests(unittest.TestCase):
         pump_flag = [1] * len(values)
         pump_flag[0] = -1
         pump_flag[49] = -1
-        final_flag = PlatformQC.get_overall_flag(flags, pump_flag)
+        # final_flag = PlatformQC.get_overall_flag(flags, pump_flag)
 
         assert flags["frozen_test"] == ref_frozen_test, "Frozen test failed"
         assert flags["global_range_test"] == ref_global_range_test, "Global range test failed"
@@ -117,8 +117,8 @@ class Tests(unittest.TestCase):
         assert flags['local_range_test'] == [1, 1, None, 1, 1, 1], "Local range test failed"
         assert flags['argo_spike_test'] == [0, 1, None, 1, 1, 0], "Argo spike test failed"
         assert flags['frozen_test'] == [0, 0, None, 0, 0, 1], "Frozen test failed"
-        final_flag = PlatformQC.get_overall_flag(flags)
-        assert final_flag == [0, 0, None, 0, 0, 0], "Final flag calculation failed"
+        # final_flag = PlatformQC.get_overall_flag(flags)
+        # assert final_flag == [0, 0, None, 0, 0, 0], "Final flag calculation failed"
 
     def test_flatness_test(self):
         filename = os.path.join(ORIGIN_DIR, "depth_SG.csv")
