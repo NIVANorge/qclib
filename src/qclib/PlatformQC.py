@@ -1,7 +1,7 @@
 import copy
 import numpy as np
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union, Any
 import warnings
 
 from qclib.QCTests import QCTests
@@ -80,7 +80,7 @@ class PlatformQC(QCTests):
     def applyQC(self, qc_input: QCInput, measurement_name: str, tests: List[str]) -> Dict[str, List[int]]:
         """
         """
-        
+
         flags = {}
         if measurement_name not in self.qc_tests:
             logging.debug(f"'{measurement_name}' is not defined in qc_tests, using default tests instead")
@@ -102,20 +102,28 @@ class PlatformQC(QCTests):
 
     @staticmethod
     def get_overall_flag(flags: Dict[str, List[int]], *extra_flag_lists: Optional[List[int]]) -> List[int]:
-        # check if None values appear consistently for all flags for a given measurement
-        list_of_flags_lists = list(flags.values())
-        if len(list_of_flags_lists) > 0:
-            verify_if_any_none_all_none(list_of_flags_lists)
-            
-        # TODO: add assert that at least one list with flags should be not empty 
+        """
+        Current function calculates overall flags for the list of values for one parameter
+        # Overall Flag can be calculated from different combinations of QC flags :
+        # 1. flags related to the given variable + gsp flags + pump status flags
+        # 2. gsp flags + pump status flags
+        # 3. only gsp flags (for parameters not affected by pump status)
+        """
+        if not flags:
+            # If flags dict is empty
+            list_of_flags_lists: Union[List[Any], Any] = []
+        else:
+            list_of_flags_lists = list(flags.values())
+            if len(list_of_flags_lists) > 0:
+                verify_if_any_none_all_none(list_of_flags_lists)
 
+        # TODO: add assert that at least one list with flags should be not empty
         for extra_flag_list in extra_flag_lists:
             if extra_flag_list is not None:
-                assert len(extra_flag_list) == len(list_of_flags_lists[0])
                 list_of_flags_lists.append(extra_flag_list)
         list_of_flags_lists_T = np.array(list_of_flags_lists).T
 
-        flags_all_zeroes = np.all(list_of_flags_lists_T == 0, axis=1)
+        # flags_all_zeroes = np.all(list_of_flags_lists_T == 0, axis=1)
         flags_have_negative_one = np.any(list_of_flags_lists_T == -1, axis=1)
         flags_have_nones = np.any(list_of_flags_lists_T == None, axis=1)
 
