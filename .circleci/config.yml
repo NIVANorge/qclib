@@ -52,8 +52,15 @@ jobs:
     steps:
       - checkout
       - run:
-          name: publish_package
-          command: ./publish_package.sh
+          name: create packages
+          command: python setup.py sdist bdist_wheel
+      - run:
+          name: upload to pypi
+          command: |
+            set -o nounset
+            pip install --user twine
+            PATH=/home/circleci/.local/bin:$PATH
+            twine upload -u ${PYPI_USERNAME} -p ${PYPI_PASSWORD} dist/*
 
 workflows:
   version: 2
