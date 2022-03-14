@@ -6,7 +6,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/python:3.7.4
+      - image: circleci/python:3.9.9
 
 
 
@@ -46,7 +46,7 @@ jobs:
 
   publish:
     docker:
-      - image: circleci/python:3.7.4
+      - image: circleci/python:3.9.9
 
     working_directory: ~/repo
     steps:
