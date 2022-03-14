@@ -43,17 +43,16 @@ setup(
         #   0 - Alpha
         #   1 - Beta
         #   2 - Production/Stable
-        'Development Status :: 0 - Alpha',
+        'Development Status :: 4 - Beta',
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
-        'Topic :: Data Access :: Time Series',
+        # 'Topic :: Data Access :: Time Series',
 
         # Pick your license as you wish (should match "license" above)
-        'License :: Owned by NIVA http://www.niva.no/',
+        'License :: OSI Approved :: MIT License',
         
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3',
     ],
 
     keywords='data quality tests',
