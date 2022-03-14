@@ -70,6 +70,7 @@ workflows:
       - publish:
           requires:
             - build
+          context: pypi secrets
           filters:
             branches:
               only:
