@@ -1,3 +1,11 @@
+# Installing
+
+Install from https://pypi.org/:
+```
+pip install nivacloud-qclib
+```
+
+
 # Standalone module containing quality tests
 
 Input to the libary is a qcinput stucture which contains two lists:

@@ -22,7 +22,7 @@ def initial_flags_for_historical_test(qc_input: QCInput, historical_size: int,
     don't have enough historical points should be marked as cannot run (qc=0)"""
 
     time_stamps = np.array(qc_input.values)[:, 0]
-    flags = np.zeros(len(time_stamps), dtype=np.int)
+    flags = np.zeros(len(time_stamps), dtype=int)
 
     # Instantiate the flags as (qc=1) if it is possible to run the test, otherwise leave as (qc=0)
     time_diff_arrays = [np.diff(np.array(time_stamps[i - historical_size: i + 1]))

@@ -45,8 +45,8 @@ class QCTests:
           threshold: threshold for consecutive double 3-values differences
         """
 
-        flag = np.zeros(len(data.values), dtype=np.int)
-        is_valid = np.ones(len(data.values), dtype=np.bool)
+        flag = np.zeros(len(data.values), dtype=int)
+        is_valid = np.ones(len(data.values), dtype=bool)
         is_valid &= validate_data_for_argo_spike_test(data)
 
         # is_valid is an array of booleans describing whether current point has valid historical and future points.
@@ -80,8 +80,8 @@ class QCTests:
         if 'area' in opts and 'months' in opts:
             assert len(data.values) == len(data.locations), "Invalid geographical coordinates:" \
                                                             "Location and values list have different length."
-        flag = np.zeros(len(data.values), dtype=np.int)
-        is_valid = np.ones(len(data.values), dtype=np.bool)
+        flag = np.zeros(len(data.values), dtype=int)
+        is_valid = np.ones(len(data.values), dtype=bool)
         values = np.array(data.values)
 
         if 'months' in opts:
@@ -141,8 +141,8 @@ class QCTests:
     @qctest_additional_data_size(number_of_historical=4)
     def flatness_test(cls, data: QCInput, max_variance) -> List[int]:
         """This test flags 'flat' data as bad. If the variance is below max_variance flag = -1"""
-        flag = np.zeros(len(data.values), dtype=np.int)
-        is_valid = np.ones(len(data.values), dtype=np.bool)
+        flag = np.zeros(len(data.values), dtype=int)
+        is_valid = np.ones(len(data.values), dtype=bool)
         size = QCTests.flatness_test.number_of_historical
         data = np.array(data.values)[:, 1].astype(float)
         if len(data) < size:

@@ -186,6 +186,17 @@ class Tests(unittest.TestCase):
         assert flags["pump_history_test"] == [-1, None, -1, None, -1, None, -1, None, -1, None, -1, None, -1, None, -1,
                                               None, -1, None, 1, None, 1, None, 1, None, 1], "pump_history_test_failed"
 
+    def test_overall_flag(self):
+        """Tests final flag when gps and frozen_tests are both -1"""
+        flags = {'frozen_test': [-1, -1, -1],
+                 'ARGO_SPIKE_TEST': [1, 1, 1],
+                 'LOCAL_RANGE_TEST': [0, 0, 0]}
+
+
+        extra_flags = [-1, -1, -1]
+        final_flag = PlatformQC.get_overall_flag(flags, extra_flags)
+        assert final_flag == [-1, -1, -1], final_flag
+
 
 if __name__ == '__main__':
     unittest.main()
