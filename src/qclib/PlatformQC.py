@@ -109,7 +109,6 @@ class PlatformQC(QCTests):
         # 2. gsp flags + pump status flags
         # 3. only gsp flags (for parameters not affected by pump status)
         """
-        logging.info('get overall flag')
         if not flags:
             # If flags dict is empty
             list_of_flags_lists: Union[List[Any], Any] = []
