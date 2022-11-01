@@ -72,7 +72,7 @@ class PlatformQC(QCTests):
         transposed_flags = np.array(flags).T
         flag_0 = np.all(transposed_flags == 0, axis=1)
         flag_1 = np.any(transposed_flags == -1, axis=1)
-        combined_flag = np.ones(len(transposed_flags), dtype=np.int)
+        combined_flag = np.ones(len(transposed_flags), dtype=int)
         combined_flag[flag_1] = -1
         combined_flag[flag_0] = 0
         return combined_flag.tolist()
@@ -109,6 +109,7 @@ class PlatformQC(QCTests):
         # 2. gsp flags + pump status flags
         # 3. only gsp flags (for parameters not affected by pump status)
         """
+        logging.info('get overall flag')
         if not flags:
             # If flags dict is empty
             list_of_flags_lists: Union[List[Any], Any] = []
@@ -121,18 +122,23 @@ class PlatformQC(QCTests):
         for extra_flag_list in extra_flag_lists:
             if extra_flag_list is not None:
                 list_of_flags_lists.append(extra_flag_list)
+
         list_of_flags_lists_T = np.array(list_of_flags_lists).T
+        if list_of_flags_lists_T.ndim > 1:
+            # flags_all_zeroes = np.all(list_of_flags_lists_T == 0, axis=1)
+            flags_have_negative_one = np.any(list_of_flags_lists_T == -1, axis=1)
+            logging.debug(f"'{flags_have_negative_one, list_of_flags_lists_T}' is not defined in qc_tests, using "
+                          f"default tests instead")
+            flags_have_nones = np.any(list_of_flags_lists_T == None, axis=1)
 
-        # flags_all_zeroes = np.all(list_of_flags_lists_T == 0, axis=1)
-        flags_have_negative_one = np.any(list_of_flags_lists_T == -1, axis=1)
-        flags_have_nones = np.any(list_of_flags_lists_T == None, axis=1)
+            overall_flag = np.ones(len(list_of_flags_lists_T))
 
-        overall_flag = np.ones(len(list_of_flags_lists_T))
+            overall_flag[flags_have_negative_one] = -1
+            overall_flag[flags_have_nones] = None
 
-        overall_flag[flags_have_negative_one] = -1
-        overall_flag[flags_have_nones] = None
-
-        final_flag = [flag if flag in [-1, 0, 1] else None for flag in overall_flag.tolist()]
+            final_flag = [flag if flag in [-1, 0, 1] else None for flag in overall_flag.tolist()]
+        else:
+            final_flag = list_of_flags_lists
         return final_flag
 
     @classmethod
